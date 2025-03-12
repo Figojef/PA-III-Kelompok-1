@@ -1,13 +1,16 @@
 import express from "express"
 import authRouter from './routes/authRouter.js'
-import productRouter from './routes/productRouter.js'
-import orderRouter from './routes/orderRouter.js'
+// import productRouter from './routes/productRouter.js'
+// import orderRouter from './routes/orderRouter.js'
 import dotenv from "dotenv"
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js"
-import cookieParser from "cookie-parser"
+import cookieParser  from "cookie-parser"
 import helmet from "helmet"
 import ExpressMongoSanitize from "express-mongo-sanitize"
 import { v2 as cloudinary } from 'cloudinary';
+import lapanganRouter from './routes/lapanganRouter.js'
+import jadwalRouter from './routes/jadwalRouter.js'
+import pemesananRouter from './routes/pemesananRouter.js'
 
 
 const app = express()
@@ -31,10 +34,14 @@ app.use(cookieParser())
 app.use(express.static('./public'))
 
 
+
 dotenv.config()
 
 
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/lapangan', lapanganRouter)
+app.use('/api/v1/jadwal', jadwalRouter)
+app.use('/api/v1/pemesanan', pemesananRouter)
 
 
 app.use(notFound)
