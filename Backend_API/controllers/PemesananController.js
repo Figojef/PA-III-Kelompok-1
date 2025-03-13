@@ -35,14 +35,14 @@ export const createPemesanan = asyncHandler(async (req, res) => {
 
 // 2. Mendapatkan Semua Pemesanan
 export const getAllPemesanan = asyncHandler(async (req, res) => {
-    const pemesanan = await Pemesanan.find().populate("user_id", "nama email").populate("jadwal_dipesan");
+    const pemesanan = await Pemesanan.find().populate("user_id", "name").populate("jadwal_dipesan");
     res.status(200).json(pemesanan);
 });
 
 // 3. Mendapatkan Detail Pemesanan
 export const getPemesananById = asyncHandler(async (req, res) => {
     const pemesanan = await Pemesanan.findById(req.params.id)
-        .populate("user_id", "nama email")
+        .populate("user_id", "name")
         .populate("jadwal_dipesan");
 
     if (!pemesanan) {

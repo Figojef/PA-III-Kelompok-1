@@ -11,6 +11,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import lapanganRouter from './routes/lapanganRouter.js'
 import jadwalRouter from './routes/jadwalRouter.js'
 import pemesananRouter from './routes/pemesananRouter.js'
+import transaksiRouter from './routes/transaksiRouter.js'
 
 
 const app = express()
@@ -42,6 +43,8 @@ app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/lapangan', lapanganRouter)
 app.use('/api/v1/jadwal', jadwalRouter)
 app.use('/api/v1/pemesanan', pemesananRouter)
+app.use('/api/v1/transaksi', transaksiRouter)
+
 
 
 app.use(notFound)
