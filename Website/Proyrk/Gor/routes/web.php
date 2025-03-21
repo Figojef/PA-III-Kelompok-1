@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LapanganController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/registrasi', function () {
+    return view('registrasi');
+});
+
+Route::get('/login', function () {
+    return view('login');
+});
+
 Route::get('/', function () {
-    return view('welcome');
+    return view('beranda');
 });

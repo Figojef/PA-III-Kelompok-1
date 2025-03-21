@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ramos Badminton Center</title>
@@ -18,8 +24,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background-color: #f8f5e8;
+            padding: 10px;
+            background-color: #222F37;
         }
         .navbar ul {
             display: flex;
@@ -30,14 +36,32 @@
         }
         .navbar ul li a {
             text-decoration: none;
-            color: black;
-            font-weight: bold;
+            color: white;
+            font-size: 20px;
+        }
+
+        .carousel-item img {
+            height: 1000px;
+            object-fit: cover;
+            position: relative;
         }
         .hero {
             position: relative;
             text-align: center;
             color: white;
         }
+        .card-container {
+            top: 85%; /* Sesuaikan agar card turun sedikit */
+            left: 50%;
+            transform: translate(0%, -25%);
+            display: flex;  
+        }
+
+        .card {
+            width: 300px; /* Sesuaikan ukuran */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
         .hero img {
             width: 100%;
             /* height: auto; */
@@ -144,7 +168,7 @@
 
 
         .footer {
-            background-color: #0A3873;
+            background-color: #222F37;
             color: white;
             padding: 20px;
             display: flex;
@@ -173,48 +197,100 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <img width="50px" height="50px" src="logo.png" alt="Badminton Logo">
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <img src="{{ asset('storage/Logo.png') }}" width="90" height="90" class="d-inline-block align-top me-3" alt="Logo">
+            <label style="font-size:35px; font-weight: bold;">Ramos Badminton Center</label>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+    <li class="nav-item"><a class="nav-link" href="#"><b>Beranda</b></a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Tentang</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Jadwal</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Reservasi</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Event</a></li>
 
-        <h2 class="ok">Ramos Badminton Center</h2>
-        <ul>
-            <li><a href="#">Beranda</a></li>
-            <li><a href="#">Jadwal</a></li>
-            <li><a href="#">Reservasi</a></li>
-            <li><a href="#"><div class="user-icon">&#128100;</div></a></li>
-        </ul>
-    </nav>
-    
-    <section class="hero">
-        <img src="image.png" alt="Lapangan Badminton">
-        <a href="#" class="button">Lihat Jadwal</a>
-    </section>
-    
-    <section class="features">
-        <div class="feature-box">
-            <div class="title">
-                <img src="a1.png" alt="Makanan">
-                <h3>Makanan & Minuman</h3>
-            </div>
-            <p>Menyediakan makanan dan minuman</p>
+    @if(session()->has('jwt'))
+        <!-- Jika sudah login, tampilkan ikon user -->
+        <li class="nav-item">
+            <a class="nav-link" href="#"><i class="fas fa-user"></i></a>
+        </li>
+    @else
+        <!-- Jika belum login, tampilkan tombol login -->
+        <li class="nav-item">
+            <a class="nav-link btn btn-primary text-white px-3 py-1" href="/login">Login</a>
+        </li>
+    @endif
+</ul>
+
         </div>
-        <div class="feature-box">
-            <div class="title">
-                <img src="a2.png" alt="Peralatan">
-                <h3>Peralatan</h3>
-            </div>
-            <p>Menyediakan booking untuk raket dan shuttlecock</p>
+    </div>
+</nav>
+
+<div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="{{ asset('storage/Lapangan.jpg') }}" class="d-block w-100" alt="gambar">
+    </div>
+    <div class="carousel-item">
+      <img src="{{ asset('storage/Depan2.jpg') }}" class="d-block w-100" alt="...">
+    </div>
+    <div class="carousel-item">
+      <img src="..." class="d-block w-100" alt="...">
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+<center>
+<div class="row card-container">
+    <div class="col">
+        <div class="card" style="width: 18rem;">
+            <img src="..." class="card-img-top" alt="">
+                <div class="card-body">
+                    <h5 class="card-title">Makanan dan Minuman</h5>
+                    <p class="card-text">Menyediakan makanan dan minuman</p>
+
+                </div>
         </div>
-        <div class="feature-box">
-            <div class="title">
-                <img src="a3.png" alt="Kenyamanan">
-                <h3>Kenyamanan</h3>
+    </div>
+    <div class="col-5">
+        <div class="card" style="width: 18rem;">
+            <img src="..." class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
             </div>
-            <p>Mengutamakan kenyamanan penyewa</p>
         </div>
-    </section>
+    <div class="col">
+        <div class="card" style="width: 18rem;">
+            <img src="..." class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br><br>
     
-    <center>
         <section style="margin-top: -70px;" class="description">
             <h2>Deskripsi</h2><br><br>
             <p>2 Lapangan Badminton di Sitoluama, Laguboti, Sumatera Utara.</p><br>
@@ -249,5 +325,6 @@
             <img width="100px" height="100px" src="logo.png" alt="Badminton Logo">
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

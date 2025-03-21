@@ -11,25 +11,25 @@ const signToken = id => {
 }
 
 const createSendResToken = (user, statusCode, res) => {
-    const token = signToken(user._id)
-    const isDev = process.env.NODE_ENV === 'development' ? false : true
+    const token = signToken(user._id);
+    const isDev = process.env.NODE_ENV === 'development' ? false : true;
 
     const cookieOption = {
-        expire : new Date(
-            Date.now() + 6 * 24 * 60 * 60 * 1000 
-        ),
-        httpOnly : true,
-        security : isDev
-    }
+        expires: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+        secure: isDev
+    };
 
-    res.cookie('jwt', token, cookieOption)
- 
-    user.password = undefined
-    
+    res.cookie('jwt', token, cookieOption);
+
+    user.password = undefined;
+
     res.status(statusCode).json({
-        data : user
-    })
-}
+        jwt: token, // Tambahkan token di respons JSON
+        user: user
+    });
+};
+
 
 export const registerUser = asyncHandler(async (req, res) => {
     const isOwner = (await User.countDocuments()) === 0
@@ -57,13 +57,13 @@ export const loginUser = asyncHandler(async(req, res) => {
         throw new Error("Anda belum logout")
     }
 
-    if(!req.body.email || !req.body.password){
+    if(!req.body.name || !req.body.password){
         res.status(400)
-        throw new Error('Email atau password tidak boleh kosong')
+        throw new Error('Username atau password tidak boleh kosong')
     }
 
     const userData = await User.findOne({
-        email : req.body.email
+        name : req.body.name
     })
 
     if(userData && (await userData.comparePassword(req.body.password))){

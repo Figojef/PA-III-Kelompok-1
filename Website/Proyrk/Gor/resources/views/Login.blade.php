@@ -2,6 +2,9 @@
 <HTML lang="en">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <head>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
         <title>Login</title>
         <style>
             body {
@@ -125,56 +128,53 @@
         </style>
     </head>
     <body>
-        <div>
-            <nav class="navbar">
-                <div class="logo">
-                    <img src="logo.png" alt="Logo">
-                    <span>RAMOS BADMINTON CENTER</span>
-                </div>
-                <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
-                <div class="menu" id="menu">
-                    <a href="#">BERANDA</a>
-                    <a href="#">JADWAL</a>
-                    <a href="#">RESERVASI</a>
-                </div>
-                <div class="user-icon">&#128100;</div>
-            </nav>
-        
-            <script>
-                function toggleMenu() {
-                    const menu = document.getElementById('menu');
-                    menu.classList.toggle('active');
-                }
-            </script>
-        </div>
-
         <center style="margin-top: 150px;">
-        <div>
-            <label style="font-weight: 550;font-size: 30px;">Masuk</label><br>
-            <input type="text" name="nama" id="" placeholder="nama pengguna" class="Login" style="border-radius: 3px 3px 3px 3px;"><br>
-            <input type="password" name="password" id="" placeholder="password" class="Login" style="border-radius: 3px 3px 3px 3px;"><br>
-            <a href="booking.html">
+        <form id="loginForm" method="post">
+            @csrf
+            <div>
+                <label style="font-weight: 550;font-size: 30px;">Masuk</label><br>
+                     <input type="text" name="name" id="name" placeholder="nama pengguna" class="Login" style="border-radius: 3px 3px 3px 3px;" required><br>
+                    <input type="password" name="password" id="password" placeholder="password" class="Login" style="border-radius: 3px 3px 3px 3px;" required><br>
                  <button type="submit" class="Login" style="color: white; font-weight: bold; background-color: #608AC2;">Masuk</button><br><br>
-            </a>
             <a href="" style="margin-right: 180px; text-decoration: none;">Lupa Password?</a><br><br>
             <p style="font-size: 25px;">Belum punya akun?
-            <a href="Registrasi.html" style="text-decoration: none;">Daftar yuk!</a></p>
-        </div>
+            <a href="{{ url('/') }}" style="text-decoration: none;">Daftar yuk!</a>
+            </div>
+         </form">
     </center>
+
+    <script>
+document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    
+    console.log("Form submitted!"); // Cek apakah event listener bekerja
+
+    const name = document.getElementById("name").value;
+    const password = document.getElementById("password").value;
+
+    console.log("Sending request to API...");
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, password}),
+        });
+
+        const data = await response.json();
+        console.log("Response received:", data);
+
+        if (response.ok) {
+            alert("Login berhasil!");
+            window.location.href = "/"
+        } else {
+            alert("Error: " + (data.message || "Gagal login"));
+        }
+    } catch (error) {
+        console.error("Fetch error:", error);
+        alert("Terjadi kesalahan, cek console untuk detail.");
+    }
+});
+</script>
     </body>
-    <footer>
-        <footer class="footer">
-            <div class="contact">
-                <div><img src="phone-icon.png" alt="Phone"> +62 124 819 026</div>
-                <div><img src="email-icon.png" alt="Email"> info@ramosbadminton.com</div>
-                <div><img src="location-icon.png" alt="Location"> Jl. Sitoluama 2, Laguboti</div>
-            </div>
-            <div class="logo">
-                <img src="logo.png" alt="Badminton Logo">
-            </div>
-    </footer>
 </HTML>

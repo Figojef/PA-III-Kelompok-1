@@ -7,8 +7,7 @@ import { protectedMiddleware } from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 
-// post /api/v1/auth/register
-router.post('/register', registerUser)
+router.post("/register", registerUser);
 
 // post /api/v1/auth/login
 router.post('/login', loginUser)
@@ -21,4 +20,4 @@ router.get('/logout', protectedMiddleware, logoutUser)
 router.get('/getuser', protectedMiddleware, getCurrentUser)
 
 
-export default router
+export default router;

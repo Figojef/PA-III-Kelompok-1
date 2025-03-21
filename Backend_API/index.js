@@ -1,8 +1,8 @@
+import dotenv from "dotenv"
 import express from "express"
 import authRouter from './routes/authRouter.js'
 // import productRouter from './routes/productRouter.js'
 // import orderRouter from './routes/orderRouter.js'
-import dotenv from "dotenv"
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js"
 import cookieParser  from "cookie-parser"
 import helmet from "helmet"
@@ -13,6 +13,7 @@ import jadwalRouter from './routes/jadwalRouter.js'
 import pemesananRouter from './routes/pemesananRouter.js'
 import transaksiRouter from './routes/transaksiRouter.js'
 
+dotenv.config()
 
 const app = express()
 const port = 3000
@@ -35,8 +36,6 @@ app.use(cookieParser())
 app.use(express.static('./public'))
 
 
-
-dotenv.config()
 
 
 app.use('/api/v1/auth', authRouter)
@@ -113,25 +112,35 @@ const uri = process.env.DATABASE;
 
 async function connectToDatabase() {
   try {
-    // Menghubungkan ke MongoDB Atlas menggunakan Mongoose
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // Pastikan variabel uri sudah terdefinisi
+    if (!uri) {
+      throw new Error("MongoDB URI is not defined. Set it in your environment variables.");
+    }
+
+    // Menghubungkan ke MongoDB Atlas tanpa opsi yang deprecated
+    await mongoose.connect(uri);
     console.log("Connected to MongoDB Atlas!");
 
-    // Memastikan koneksi berhasil dengan melakukan ping
-    const admin = mongoose.connection.db.admin();
-    await admin.ping();
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // Mengecek status koneksi Mongoose
+    const dbStatus = mongoose.connection.readyState;
+    if (dbStatus === 1) {
+      console.log("Mongoose connection is established.");
+    } else {
+      console.log("Mongoose connection is not yet fully established.");
+    }
   } catch (error) {
     console.error("Error connecting to MongoDB Atlas:", error);
     process.exit(1); // Keluar dari aplikasi jika koneksi gagal
   }
 }
 
-connectToDatabase(); // Jalankan fungsi koneksi
+// Panggil fungsi koneksi
+connectToDatabase();
 
+console.log("Registered Routes:", app._router.stack
+  .filter(r => r.route)
+  .map(r => r.route.path)
+);
 
 app.listen(port, () => console.log(`Server up and run at ${port} port`))
 
