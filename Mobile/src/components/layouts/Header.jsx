@@ -32,17 +32,35 @@
 // export default Header;
 
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, StatusBar, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../slices/todoSlice';
+import { BE_MAIN_URL } from '../../../url';
+import axios from 'axios';
 
 
 const Header = () => {
 
   const dispatch = useDispatch()
 
-  const handleLogout = () => dispatch(logout())
+  // const handleLogout = () => dispatch(logout())
+  // Fungsi logout dengan Axios
+  const handleLogout = async () => {
+    try {
+      // Mengirim request logout ke backend
+      const response = await axios.get(`${BE_MAIN_URL}/auth/logout`, { withCredentials: true });
+
+      // Jika logout berhasil, dispatch logout pada Redux
+      dispatch(logout());
+
+      // Menampilkan pesan berhasil logout
+      Alert.alert('Logout', response.data.message, [{ text: 'OK' }]);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Terjadi kesalahan saat logout.', [{ text: 'OK' }]);
+    }
+  };
 
   return (
     <View style={styles.header}>

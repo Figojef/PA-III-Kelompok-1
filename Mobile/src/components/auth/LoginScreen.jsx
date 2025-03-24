@@ -1,31 +1,43 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  Image,
-  Text,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
-import { enterLogin } from '../../slices/todoSlice';
+import { StyleSheet, SafeAreaView, View, Image, Text, TouchableOpacity, TextInput } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios'; // For API calls
+import { enterLogin } from '../../slices/todoSlice';
+import { BE_MAIN_URL } from '../../../url';
+
 
 
 export default function LoginScreen() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const [form, setForm] = useState({
     email: '',
     password: '',
   });
+  
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const dispatch = useDispatch()
+  const handleEnter = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${BE_MAIN_URL}/auth/login`, form, {
+        withCredentials: true, // To include cookies
+      });
 
-  const handleEnter = () => {
-    dispatch(enterLogin())
-  }
+      // Assuming the backend sends the user data back
+      if (response.data) {
+        dispatch(enterLogin({user : response.data})); // Update Redux state to indicate logged in
+        navigation.replace('TabNavigator'); // Navigate to TabNavigator
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#e8ecf4' }}>
@@ -35,21 +47,17 @@ export default function LoginScreen() {
             alt="App Logo"
             resizeMode="contain"
             style={styles.headerImg}
-            source={{ uri: 'https://assets.withfra.me/SignIn.2.png' }} />
-
+            source={{ uri: 'https://assets.withfra.me/SignIn.2.png' }}
+          />
           <Text style={styles.title}>
             Sign in to <Text style={{ color: '#075eec' }}>RamosApp</Text>
           </Text>
-
-          <Text style={styles.subtitle}>
-            Get access to your bookings and more
-          </Text>
+          <Text style={styles.subtitle}>Get access to your bookings and more</Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.input}>
             <Text style={styles.inputLabel}>Email address</Text>
-
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
@@ -59,12 +67,12 @@ export default function LoginScreen() {
               placeholder="andi@example.com"
               placeholderTextColor="#6b7280"
               style={styles.inputControl}
-              value={form.email} />
+              value={form.email}
+            />
           </View>
 
           <View style={styles.input}>
             <Text style={styles.inputLabel}>Password</Text>
-
             <TextInput
               autoCorrect={false}
               clearButtonMode="while-editing"
@@ -73,43 +81,30 @@ export default function LoginScreen() {
               placeholderTextColor="#6b7280"
               style={styles.inputControl}
               secureTextEntry={true}
-              value={form.password} />
+              value={form.password}
+            />
           </View>
 
+          {errorMessage ? <Text style={{ color: 'red' }}>{errorMessage}</Text> : null}
+
           <View style={styles.formAction}>
-            <TouchableOpacity
-              onPress={() => {
-                // handle onPress
-                handleEnter()
-              }}>
+            <TouchableOpacity onPress={handleEnter}>
               <View style={styles.btn}>
                 <Text style={styles.btnText}>Sign in</Text>
               </View>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            onPress={() => {
-              // handle link
-            }}>
-            <Text style={styles.formLink}>Forgot password?</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
-      <TouchableOpacity
-        onPress={() => {
-          // handle link
-          navigation.navigate('register')
-        }}>
-        {/* <Text style={styles.formFooter}>
-          Don't have an account?{' '}
-          <Text style={{ textDecorationLine: 'underline' }}>Sign up</Text>
-        </Text> */}
+      <TouchableOpacity onPress={() => navigation.navigate('register')}>
+        {/* Add link for Register */}
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {

@@ -4,10 +4,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../layouts/Header';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { BE_MAIN_URL } from '../../../url';
+
 
 const Home = () => {
 
   const navigation = useNavigation()
+  const dispatch = useDispatch()
+  const testD = useSelector(state => state.todo1.testD)
+
+
 
   return (
     <View style={styles.rootContainer}>
@@ -57,6 +64,9 @@ const Home = () => {
             <Text style={styles.aboutText}>
               Selamat datang di Ramos Badminton Center. Kami menyediakan lapangan profesional untuk para penggemar bulutangkis.
             </Text>
+          </View>
+          <View>
+            <Text></Text>
           </View>
         </ScrollView>
       </SafeAreaView>

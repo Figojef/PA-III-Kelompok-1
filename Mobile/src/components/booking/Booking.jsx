@@ -1,15 +1,31 @@
 import { View, Text, StyleSheet, ScrollView, Button, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../layouts/Header'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'; // Expo sudah mendukung Ionicons
-
+import axios from 'axios'
+import { BE_MAIN_URL } from '../../../url'
 
 
 export default function Booking() {
 
   const navigation = useNavigation()
+  const [lapanganData, setLapanganData] = useState([]);  // State untuk menyimpan data lapangan
+
+
+  useEffect(() => {
+    // Mengambil data lapangan dari API
+    axios.get(`${BE_MAIN_URL}/lapangan`)
+      .then(response => {
+        setLapanganData(response.data.data);  // Menyimpan data lapangan ke dalam state
+        console.log(lapanganData)
+      })
+      .catch(error => {
+        console.error("Error fetching lapangan data:", error);  // Menangani error jika ada
+      });
+  }, []);  // Hook useEffect untuk menjalankan sekali saat komponen di-crender
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -17,9 +33,8 @@ export default function Booking() {
       <Header/>
         <ScrollView style={styles.container}>
 
-      
+    
       <Image source={require('../../../assets/arena.png')} style={styles.image} /> Pastikan path gambar benar
-
       <View style={styles.infoContainer}>
         <Text style={styles.title}>Terminal Sport</Text>
         <Text style={styles.subtitle}>Belum ada ulasan</Text>
@@ -39,15 +54,31 @@ export default function Booking() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Pilih Lapangan</Text>
-        {[1, 2].map((item) => (
-          <TouchableOpacity key={item} style={styles.card} onPress={() => navigation.navigate('SelectSchedule')}>
-            <Image source={require('../../../assets/lapangan1.png')} style={styles.cardImage} /> Pastikan path gambar benar
-            <TouchableOpacity style={styles.cardContent} onPress={() => navigation.navigate('SelectSchedule')}>
-              <Text style={styles.cardTitle}>Badminton {item}</Text>
-              <Text style={styles.cardText}>Type Indoor, Rumput Sintetis, 6.1 x 13.4m</Text>
+        {
+          lapanganData ? 
+          lapanganData.map((item, ind) => (
+            <TouchableOpacity key={ind} style={styles.card} onPress={() => navigation.navigate('SelectSchedule', {lapangan : `Yard ${item.name}`, lapangan2 : item })}>
+              <Image source={require('../../../assets/lapangan1.png')} style={styles.cardImage} /> Pastikan path gambar benar
+              <TouchableOpacity style={styles.cardContent} onPress={() => navigation.navigate('SelectSchedule', {lapangan : `Yard ${item.name}`, lapangan2 : item })}>
+                <Text style={styles.cardTitle}>{item.name}</Text>
+                <Text style={styles.cardText}>{item.deskripsi}</Text>
+              </TouchableOpacity>
             </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
+          ))
+          :
+            <Text>
+              Lapangan tidak ditemukan
+            </Text>
+          //             [1, 2].map((item) => (
+          //   <TouchableOpacity key={item} style={styles.card} onPress={() => navigation.navigate('SelectSchedule')}>
+          //     <Image source={require('../../../assets/lapangan1.png')} style={styles.cardImage} /> Pastikan path gambar benar
+          //     <TouchableOpacity style={styles.cardContent} onPress={() => navigation.navigate('SelectSchedule')}>
+          //       <Text style={styles.cardTitle}>Badminton {item}</Text>
+          //       <Text style={styles.cardText}>Type Indoor, Rumput Sintetis, 6.1 x 13.4m</Text>
+          //     </TouchableOpacity>
+          //   </TouchableOpacity>
+          // ))
+        }
       </View>
 
       <View style={styles.section}>

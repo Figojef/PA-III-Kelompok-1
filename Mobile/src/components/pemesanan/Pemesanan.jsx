@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const Pemesanan = () => {
     const navigation = useNavigation()
-
+    
   return (
     <SafeAreaView style={{ flex: 1 }}> {/* Pastikan SafeAreaView mengisi seluruh layar */}
       <Header />
@@ -19,6 +19,19 @@ const Pemesanan = () => {
         </View>
 
         {/* Order Card */}
+        {/* <TouchableOpacity onPress={() => navigation.navigate('StatusPemesanan')} style={styles.orderCard}>
+          <Text style={styles.transactionId}>Transaction ID: INV-287210-42</Text>
+          <Text style={styles.field}>Lapangan 2</Text>
+          <Text style={styles.date}>Senin, 03 Maret 2025</Text>
+          <Text style={styles.time}>20:00 - 21:00</Text>
+          <Text style={styles.time}>21:00 - 22:00</Text>
+          <View style={styles.footer}>
+            <Text style={styles.total}>Jumlah Pesanan: <Text style={styles.bold}>2</Text></Text>
+            <TouchableOpacity style={styles.statusButton}>
+              <Text style={styles.statusText}>Menunggu</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={() => navigation.navigate('StatusPemesanan')} style={styles.orderCard}>
           <Text style={styles.transactionId}>Transaction ID: INV-287210-42</Text>
           <Text style={styles.field}>Lapangan 2</Text>

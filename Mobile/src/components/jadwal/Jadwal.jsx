@@ -1,210 +1,162 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Platform, Alert, SafeAreaView, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import axios from 'axios';
+import { BE_MAIN_URL } from '../../../url';
 import Header from '../layouts/Header';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Helper function to format dates
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-};
+export default function Jadwal() {
+  const [lapanganData, setLapanganData] = useState([]);  // State untuk menyimpan data lapangan
+  const [selectedLapangan, setSelectedLapangan] = useState('');  // State untuk lapangan yang dipilih
+  const [selectedDate, setSelectedDate] = useState(new Date()); // State untuk menyimpan tanggal yang dipilih
+  const [showDatePicker, setShowDatePicker] = useState(false);  // State untuk menampilkan/menyembunyikan Date Picker
+  const [jadwalData, setJadwalData] = useState([]);  // State untuk menyimpan data jadwal yang dipilih
+  const [jadwalError, setJadwalError] = useState(false);  // State untuk menandakan error pengambilan data jadwal
 
-// Generate times between 08:00 and 23:00 with 1-hour intervals
-const generateTimes = () => {
-  const times = [];
-  for (let hour = 8; hour <= 23; hour++) {
-    const start = `${hour}:00`;
-    const end = `${hour + 1}:00`;
-    times.push(`${start} - ${end}`);
-  }
-  return times;
-};
+  useEffect(() => {
+    // Mengambil data lapangan dari API
+    axios.get(`${BE_MAIN_URL}/lapangan`)
+      .then(response => {
+        setLapanganData(response.data.data);  // Menyimpan data lapangan ke dalam state
+      })
+      .catch(error => {
+        console.error("Error fetching lapangan data:", error);  // Menangani error jika ada
+      });
+  }, []);  // Hook useEffect untuk menjalankan sekali saat komponen di-render
 
-// Function to generate the schedule for a given start date
-const generateScheduleForWeek = (startDate) => {
-  const schedule = [];
-  const currentDate = new Date(startDate);
-  currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // Set to Sunday
+  // Mengambil jadwal berdasarkan lapangan yang dipilih dan tanggal yang dipilih
+  useEffect(() => {
+    if (selectedLapangan && selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];  // Format tanggal: YYYY-MM-DD
+      axios.get(`${BE_MAIN_URL}/jadwal/tanggal?tanggal=${formattedDate}&lapangan=${selectedLapangan}`)
+        .then(response => {
+          setJadwalData(response.data);  // Menyimpan data jadwal ke dalam state
+          setJadwalError(false);  // Mengatur error ke false jika data berhasil diambil
+        })
+        .catch(error => {
+          setJadwalData([]);  // Mengosongkan data jadwal
+          setJadwalError(true);  // Mengatur status error menjadi true
+        });
+    }
+  }, [selectedLapangan, selectedDate]);  // Hook useEffect untuk menjalankan ketika lapangan atau tanggal yang dipilih berubah
 
-  for (let i = 0; i < 7; i++) {
-    const day = new Date(currentDate);
-    day.setDate(currentDate.getDate() + i);
-    schedule.push({ day: formatDate(day), times: generateTimes() });
-  }
-  return schedule;
-};
-
-const Jadwal = () => {
-  const [selectedCourt, setSelectedCourt] = useState('Lapangan 1');
-  const [activeTab, setActiveTab] = useState('Daily');
-  const [startDate, setStartDate] = useState(new Date());
-
-  const schedules = generateScheduleForWeek(startDate);
-
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 6);
-
-  const navigateWeek = (direction) => {
-    const newStartDate = new Date(startDate);
-    newStartDate.setDate(startDate.getDate() + direction * 7);
-    setStartDate(newStartDate);
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || selectedDate;
+    setShowDatePicker(Platform.OS === 'ios' ? true : false); // Menyembunyikan picker di Android setelah memilih
+    setSelectedDate(currentDate);
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor : '#f8f8f8' }}>
-      <Header />
-      <FlatList style={{padding:16}}
-        data={[{ key: 'header' }, ...schedules]}  // Added header as an item in FlatList
-        keyExtractor={(item, index) => item.key || item.day}
-        renderItem={({ item }) => {
-          if (item.key === 'header') {
-            return (
-              <View style={styles.container}>
-                <Text style={styles.title}>Jadwal Bermain</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f8f8' }}>
+      <Header /> {/* Komponen Header yang sudah ada */}
+      <View style={styles.container}>
+        <Text style={styles.title}>Jadwal</Text>
 
-                {/* Pilihan Lapangan */}
-                <Picker
-                  selectedValue={selectedCourt}
-                  onValueChange={(itemValue) => setSelectedCourt(itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Lapangan 1" value="Lapangan 1" />
-                  <Picker.Item label="Lapangan 2" value="Lapangan 2" />
-                </Picker>
+        {/* Picker untuk memilih lapangan */}
+        <Picker
+          selectedValue={selectedLapangan}
+          onValueChange={(itemValue) => setSelectedLapangan(itemValue)} // Mengubah nilai lapangan yang dipilih
+        >
+          <Picker.Item label="Pilih Lapangan" value="" />
+          {lapanganData.map(lapangan => (
+            <Picker.Item
+              key={lapangan._id}
+              label={lapangan.name}   // Menampilkan nama lapangan sebagai label
+              value={lapangan._id}    // Menyimpan _id lapangan sebagai value
+            />
+          ))}
+        </Picker>
 
-                {/* Tab Navigation */}
-                <View style={styles.tabContainer}>
-                  {['Daily', 'Weekly', 'Monthly'].map((tab) => (
-                    <TouchableOpacity
-                      key={tab}
-                      style={[styles.tabButton, activeTab === tab && styles.activeTab]}
-                      onPress={() => setActiveTab(tab)}
-                    >
-                      <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
-                    </TouchableOpacity>
-                  ))}
+        {/* Tanggal Picker */}
+        <View style={styles.datePickerContainer}>
+          <Text>Pilih Tanggal: {selectedDate.toISOString().split('T')[0]}</Text>
+
+          {/* Button untuk membuka date picker */}
+          <Text style={styles.datePickerButton} onPress={() => setShowDatePicker(true)}>
+            Pilih Tanggal
+          </Text>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}  // Mengubah nilai tanggal yang dipilih
+            />
+          )}
+        </View>
+
+        {/* Menampilkan Jadwal */}
+        <View style={styles.jadwalContainer}>
+          {jadwalError ? (
+            <Text style={styles.noJadwalText}>Jadwal Tidak Tersedia</Text>
+          ) : (
+            jadwalData.length > 0 ? (
+              jadwalData.map((jadwal) => (
+                <View key={jadwal._id} style={styles.jadwalItem}>
+                  <Text style={styles.jadwalText}>
+                    {jadwal.lapangan.name} - Jam {jadwal.jam}:00
+                  </Text>
+                  <View style={[styles.statusCircle, {
+                    backgroundColor: jadwal.status === 'Tersedia' ? 'green' : 'red'
+                  }]} />
+                  <Text style={styles.statusText}>
+                    {jadwal.status === 'Tersedia' ? 'Tersedia' : 'Tidak Tersedia'}
+                  </Text>
                 </View>
-
-                {/* Navigasi Mingguan */}
-                <Text style={styles.dateRange}>{formatDate(startDate)} - {formatDate(endDate)}</Text>
-
-                <View style={styles.navContainer}>
-                  <TouchableOpacity style={styles.navButton} onPress={() => navigateWeek(-1)}>
-                    <Ionicons name="chevron-back" size={24} color="white" />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.navButton} onPress={() => navigateWeek(1)}>
-                    <Ionicons name="chevron-forward" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            );
-          } else {
-            return (
-              <View style={styles.scheduleContainer}>
-                <View style={styles.scheduleHeader}>
-                  <Text style={styles.day}>{item.day}</Text>
-                </View>
-                {item.times.map((time, index) => (
-                  <View key={index} style={styles.timeSlot}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.time}>{time}</Text>
-                  </View>
-                ))}
-              </View>
-            );
-          }
-        }}
-      />
+              ))
+            ) : (
+              <Text style={styles.noJadwalText}>Jadwal Tidak Ditemukan</Text>
+            )
+          )}
+        </View>
+      </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f8f8f8',
+    padding: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  picker: {
-    backgroundColor: '#e0e0e0',
-    marginBottom: 20,
+  datePickerContainer: {
+    marginVertical: 16,
   },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
+  datePickerButton: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+    marginTop: 8,
   },
-  tabButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginRight: 10,
-    backgroundColor: '#ddd',
+  jadwalContainer: {
+    marginTop: 20,
   },
-  activeTab: {
-    backgroundColor: '#001F3F',
-  },
-  tabText: {
-    color: 'black',
-  },
-  activeTabText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  navContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  navButton: {
-    backgroundColor: '#001F3F',
-    padding: 10,
-    borderRadius: 5,
-    margin: 5,
-  },
-  dateRange: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  scheduleContainer: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  scheduleHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  day: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  timeSlot: {
+  jadwalItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 5,
+    marginBottom: 12,
   },
-  dot: {
-    color: 'green',
+  jadwalText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  statusCircle: {
+    width: 15,
+    height: 15,
+    borderRadius: 50,
     marginRight: 10,
   },
-  time: {
+  statusText: {
     fontSize: 16,
+  },
+  noJadwalText: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
   },
 });
-
-export default Jadwal;

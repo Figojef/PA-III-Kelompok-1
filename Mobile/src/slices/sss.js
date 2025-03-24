@@ -6,9 +6,7 @@ const initialState = {
     { id: 2, name: 'b2', completed: false },
   ],
   testD : 'init',
-  login : false,
-  user : null,
-  keranjangJadwal : []
+  login : true
 };
 
 export const todoSlice = createSlice({
@@ -48,47 +46,14 @@ export const todoSlice = createSlice({
       state.testD = d
     },
     enterLogin : (state, action) => {
-      const {user} = action.payload
-      state.user = user
       state.login = true
     },
     logout : (state, action) => {
-      state.user = null
       state.login = false
-    },
-    toggleSelectJadwal: (state, action) => {
-      const slot = action.payload; // Ambil slot dari payload action
-
-      let exist = false; // Ubah const menjadi let agar bisa dimodifikasi
-      
-      state.keranjangJadwal.forEach(item => {
-        if (item._id === slot._id) {
-          exist = true; // Tandai jika sudah ada
-          return; // Langsung keluar dari loop jika ditemukan
-        }
-      });
-
-      console.log(exist)
-      if(!exist){
-        state.keranjangJadwal = [...state.keranjangJadwal, slot]; // Tambahkan slot baru
-        exist = false
-      }else if (exist){
-        state.keranjangJadwal = state.keranjangJadwal.filter(item => item._id !== slot._id)
-        exist = false
-      }
-    },
-    removeSelectedJadwal : (state, action) => {
-      state.keranjangJadwal = []
-    },
-    removeSelectedJadwalById : (state, action) => {
-       const {_id} = action.payload
-       state.keranjangJadwal = state.keranjangJadwal.filter(jadwal => jadwal._id !== _id)
     }
   },
 });
 
 // Ekspor actions dan reducer
-export const { add, remove, toggleCompleted, removeAll, 
-  testAddD, enterLogin, logout, toggleSelectJadwal,
-  removeSelectedJadwal, removeSelectedJadwalById } = todoSlice.actions;
+export const { add, remove, toggleCompleted, removeAll, testAddD, enterLogin, logout } = todoSlice.actions;
 export default todoSlice.reducer;

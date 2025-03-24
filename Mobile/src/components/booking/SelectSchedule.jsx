@@ -1,44 +1,78 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Expo sudah mendukung Ionicons
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import { BE_MAIN_URL } from '../../../url';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleSelectJadwal, removeSelectedJadwal } from '../../slices/todoSlice';
 
-const dates = [
-  '04 Mar Sel', '05 Mar Rab', '06 Mar Kam', '07 Mar Jum', '08 Mar Sab', '09 Mar Min', '10 Mar Sen'
-];
-
-// const courts = ['Badminton 1', 'Badminton 2', 'Badminton 3'];
-const courts = ['Badminton 1'];
-
-const timeSlots = [];
-
-for (let i = 8; i <= 24; i++) {
-  let hour = i < 10 ? `0${i}` : `${i}`;
-  let price = i < 17 ? '60K' : '70K'; // Set price based on time
-  let available = i !== 19 && i !== 20; // Mark certain hours as unavailable (19:00, 20:00)
-  
-  timeSlots.push({ time: `${hour}:00`, price: price, available: available });
-}
-
-const SelectSchedule = () => {
+const SelectSchedule = ({ route }) => {
   const navigation = useNavigation();
+  const { lapangan, lapangan2 } = route.params;
+  const daysOfWeek = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
-  const [selectedDate, setSelectedDate] = useState(dates[0]);
-  const [selectedCourt, setSelectedCourt] = useState(courts[0]);
-  const [selectedTimes, setSelectedTimes] = useState([]); // Changed to an array for multiple selections
+  // Fungsi untuk menghasilkan daftar tanggal dinamis
+  function generateDates() {
+    const today = new Date();
+    const result = [];
 
-  const handleToggleTimeSlot = (time) => {
-    setSelectedTimes((prevSelectedTimes) => {
-      if (prevSelectedTimes.includes(time)) {
-        return prevSelectedTimes.filter((selectedTime) => selectedTime !== time); // Remove if already selected
-      } else {
-        return [...prevSelectedTimes, time]; // Add if not selected
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);  // Tambah i hari dari hari ini
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');  // Tambahkan leading zero pada bulan
+      const day = String(date.getDate()).padStart(2, '0');  // Tambahkan leading zero pada tanggal
+
+      const dayOfWeek = daysOfWeek[date.getDay()]; // Mendapatkan nama hari sesuai dengan index
+      const formattedDate = `${year}-${month}-${day} ${dayOfWeek}`;
+      result.push(formattedDate);
+    }
+
+    return result;
+  }
+
+  const dates2 = generateDates();
+
+  const [selectedDate, setSelectedDate] = useState(dates2[0]);
+  const [selectedCourt, setSelectedCourt] = useState(lapangan);
+  const [jadwalItems, setJadwalItems] = useState([]);
+  const c1 = "2025-06-20 Min";
+
+  useEffect(() => {
+    const fetchJadwal = async () => {
+      if (selectedDate) {
+        try {
+          console.log(selectedDate.split(" ")[0] + ' dan ' + c1.split(" ")[0])
+          const response = await axios.get(
+            `${BE_MAIN_URL}/jadwal/tanggal?tanggal=${selectedDate.split(" ")[0]}&lapangan=${lapangan2._id}`
+          );
+          
+          setJadwalItems(response.data);
+        } catch (error) {
+          // console.log(`Tidak ditemukan jadwal`);
+          // console.log(response.data)
+          // console.log(response.data)
+          setJadwalItems(null);
+        }
       }
-    });
+    };
+
+    fetchJadwal();
+  }, [selectedDate]);
+
+  const dispatch = useDispatch();
+  const keranjangJadwal = useSelector((state) => state.todo1.keranjangJadwal);
+
+  // Function to handle the click on a timeslot
+  const handleToggleTimeSlot = (slot) => {
+    dispatch(toggleSelectJadwal(slot)); // Dispatch the action to update the Redux state
   };
 
+  console.log(keranjangJadwal)
+
   return (
-    
     <View style={styles.container}>
       {/* Header */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.header}>
@@ -46,14 +80,15 @@ const SelectSchedule = () => {
       </TouchableOpacity>
 
       <Text style={{ marginTop: 10, marginBottom: 20, fontWeight: 'bold' }}>Tanggal</Text>
+
       {/* Tanggal */}
-      <View style={{ height: 80 }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateScroll}>
-          {dates.map((date) => (
+      <View style={{ height: 90 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.dateScroll]}>
+          {dates2.map((date) => (
             <TouchableOpacity
               key={date}
               onPress={() => setSelectedDate(date)}
-              style={[styles.dateItem, selectedDate === date && styles.dateSelected]}>
+              style={[styles.dateItem, selectedDate === date && styles.dateSelected, { justifyContent: "center" }]}>
               <Text style={selectedDate === date ? styles.dateTextSelected : styles.dateText}>
                 {date}
               </Text>
@@ -62,50 +97,72 @@ const SelectSchedule = () => {
         </ScrollView>
       </View>
 
-      {/* Pilih Lapangan */}
-      <View style={styles.courtContainer}>
-        {courts.map((court) => (
-          <TouchableOpacity
-            key={court}
-            onPress={() => setSelectedCourt(court)}
-            style={[styles.courtItem, selectedCourt === court && styles.courtSelected]}>
-            <Text style={selectedCourt === court ? styles.courtTextSelected : styles.courtText}>
-              {court}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <TouchableOpacity
+        style={[styles.courtItem, styles.courtSelected, { width: 300, alignItems: "center", alignSelf: "center", marginBottom: 30 }]}>
+        <Text style={styles.courtTextSelected}>
+          {lapangan2.name}
+        </Text>
+      </TouchableOpacity>
 
-      {/* Jam */}
-      <View style={styles.timeContainer}>
-        {timeSlots.map((slot) => (
-          <TouchableOpacity
-            key={slot.time}
-            disabled={!slot.available}
-            onPress={() => handleToggleTimeSlot(slot.time)} // Toggle selection
-            style={[
-              styles.timeSlot,
-              !slot.available ? styles.unavailable : selectedTimes.includes(slot.time) && styles.selected,
-            ]}>
-            <Text style={styles.timeText}>{slot.time}</Text>
-            <Text style={styles.priceText}>{slot.price}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {jadwalItems ? (
+        <View style={styles.timeContainer}>
+{jadwalItems.map((slot, ind) => {
+  // Cek apakah slot ada di keranjangJadwal (cart)
+  // const isSelected = keranjangJadwal.some((item) => item.time === slot.time);
+    let exist = false
+    keranjangJadwal.forEach(item => {
+      if (item._id === slot._id) {
+        exist = true; // Tandai jika sudah ada
+        return; // Langsung keluar dari loop jika ditemukan
+      }
+    });
+    // if(exist){
+    //   console.log('ada di cart')
+    // }else{
+    //   console.log('belum ada di cart')
+    // }
+  return (
+    <TouchableOpacity
+      key={ind}
+      disabled={slot.status !== "Tersedia"}  // Disable jika status bukan "Tersedia"
+      onPress={() => handleToggleTimeSlot(slot)} // Toggle selection
+      style={[
+        styles.timeSlot,
+        // isSelected && styles.selected,  // Apply selected style jika slot ada di keranjangJadwal
+        {backgroundColor : exist ? "#28a745" : "#ddd"},
+        slot.status !== 'Tersedia' && styles.unavailable,  // Beri style jika tidak tersedia
+      ]}
+    >
+      <Text style={styles.timeText}>{slot.jam}</Text>
+      <Text style={styles.priceText}>{slot.harga}</Text>
+    </TouchableOpacity>
+  );
+})}
+
+        </View>
+      ) : (
+        <View style={styles.timeContainer}>
+          <Text style={{ fontSize: 30 }}>Jadwal tidak ditemukan</Text>
+        </View>
+      )}
 
       {/* Reset & Legend */}
       <View style={styles.legendContainer}>
-        <TouchableOpacity style={styles.resetButton} onPress={() => setSelectedTimes([])}>
+        <TouchableOpacity style={styles.resetButton} onPress={() => dispatch(removeSelectedJadwal())}>
           <Text style={styles.resetText}>Reset</Text>
         </TouchableOpacity>
         <Text style={styles.legendText}>⬜ Tersedia   🟢 Dipilih   🔴 Tidak Tersedia</Text>
       </View>
 
       {/* Tombol Keranjang & Lanjutkan */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('DetailPembayaran')}>
+      <View style={[styles.buttonContainer, {alignContent : "center"}]}>
+        {
+          keranjangJadwal.length === 0 ? <Text style={{color : "red", fontSize : 30}}>Silahkan pilih jadwal</Text> 
+          :
+          <TouchableOpacity style={styles.nextButton} onPress={() => navigation.navigate('DetailPembayaran')}>
           <Text style={styles.buttonText}>Lanjutkan</Text>
         </TouchableOpacity>
+        }
       </View>
     </View>
   );

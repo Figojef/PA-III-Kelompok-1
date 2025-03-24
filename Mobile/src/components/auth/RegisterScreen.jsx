@@ -10,18 +10,39 @@ import {
 } from 'react-native';
 import { enterLogin } from '../../slices/todoSlice';
 import { useDispatch } from 'react-redux';
+import axios from 'axios';
+import { BE_MAIN_URL } from '../../../url';
 
-export default function RegisterScreen() {
+export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({
     email: '',
     password: '',
+    name: '',
   });
 
-  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleEnter = () => {
-    dispatch(enterLogin())
-  }
+  const dispatch = useDispatch();
+
+  const handleEnter = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${BE_MAIN_URL}/auth/register`, form, {
+        withCredentials: true, // To include cookies
+      });
+
+      // Assuming the backend sends the user data back
+      if (response.data) {
+        dispatch(enterLogin({ user: response.data })); // Update Redux state to indicate logged in
+        navigation.replace('TabNavigator'); // Navigate to TabNavigator
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#e8ecf4' }}>
@@ -34,7 +55,7 @@ export default function RegisterScreen() {
             source={{ uri: 'https://assets.withfra.me/SignIn.2.png' }} />
 
           <Text style={styles.title}>
-           Sign Up to <Text style={{ color: '#075eec' }}>RamosApp</Text>
+            Sign Up to <Text style={{ color: '#075eec' }}>RamosApp</Text>
           </Text>
 
           <Text style={styles.subtitle}>
@@ -43,20 +64,20 @@ export default function RegisterScreen() {
         </View>
 
         <View style={styles.form}>
+          {errorMessage ? <Text style={{ color: 'red' }}>{errorMessage}</Text> : null}
 
-        <View style={styles.input}>
+          <View style={styles.input}>
             <Text style={styles.inputLabel}>Username</Text>
 
             <TextInput
               autoCapitalize="none"
               autoCorrect={false}
               clearButtonMode="while-editing"
-              keyboardType="email-address"
-              onChangeText={email => setForm({ ...form, email })}
+              onChangeText={name => setForm({ ...form, name })}
               placeholder="Example20"
               placeholderTextColor="#6b7280"
               style={styles.inputControl}
-              value={form.email} />
+              value={form.name} />
           </View>
 
           <View style={styles.input}>
@@ -92,7 +113,7 @@ export default function RegisterScreen() {
             <TouchableOpacity
               onPress={() => {
                 // handle onPress
-                handleEnter()
+                handleEnter();
               }}>
               <View style={styles.btn}>
                 <Text style={styles.btnText}>Sign Up</Text>
@@ -104,12 +125,10 @@ export default function RegisterScreen() {
             onPress={() => {
               // handle link
             }}>
-            <Text style={styles.formLink}>Forgot password?</Text>
+            {/* <Text style={styles.formLink}>Forgot password?</Text> */}
           </TouchableOpacity>
         </View>
       </View>
-
-
     </SafeAreaView>
   );
 }
@@ -139,8 +158,8 @@ const styles = StyleSheet.create({
     marginVertical: 36,
   },
   headerImg: {
-    width: 80,
-    height: 80,
+    width: 30,
+    height: 30,
     alignSelf: 'center',
     marginBottom: 36,
   },

@@ -2,15 +2,81 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Expo already supports Ionicons
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeSelectedJadwalById } from '../../slices/todoSlice';
+import axios from 'axios';
+import { BE_MAIN_URL } from '../../../url';
 
 const DetailPembayaran = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch()
+
+
   const [modalVisible, setModalVisible] = useState(false); // state to control modal visibility
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+
+
+    const getUser = useSelector(state => state.todo1.user)
+    const user = getUser.data
+  
+  const keranjangJadwal = useSelector(state => state.todo1.keranjangJadwal)
+
 
   const handlePaymentMethodSelect = (method) => {
     setSelectedPaymentMethod(method);
     setModalVisible(false); // close the modal after selection
+  };
+
+  console.log(selectedPaymentMethod)
+
+  let totalHarga = 0;
+  keranjangJadwal.forEach((item) => {
+    totalHarga = totalHarga + item.harga
+  })
+
+  const handleRemoveJadwalById = (_id) => {
+    dispatch(removeSelectedJadwalById({_id}))
+  }
+
+  const handleBayar = async () => {
+    try {
+      // Siapkan data untuk pemesanan baru
+      const pemesananData = {
+        user_id: user._id,  // User ID dari user yang sedang login
+        jadwal_dipesan: keranjangJadwal.map((item) => item.id),  // Ambil ID jadwal dari keranjang
+        total_harga: totalHarga  // Total harga sebagai string
+      };
+  
+      // Kirim request untuk membuat pemesanan
+      const pemesananResponse = await axios.post(`${BE_MAIN_URL}/pemesanan`, pemesananData);
+  
+      if (pemesananResponse.status === 201) {
+        console.log('Pemesanan berhasil dibuat:', pemesananResponse.data);
+  
+        // Setelah pemesanan berhasil, buat transaksi baru
+        const transaksiData = {
+          pemesanan_id: pemesananResponse.data.data._id,  // Ambil ID pemesanan yang baru dibuat
+          metode_pembayaran: 'bayar_langsung',  // Misalnya menggunakan transfer bank
+          status_pembayaran: 'menunggu',  // Status pembayaran menunggu
+          tanggal: ""  // Tanggal transaksi saat ini
+        };
+  
+        // Kirim request untuk membuat transaksi
+        const transaksiResponse = await axios.post(`${BE_MAIN_URL}/transaksi`, transaksiData);
+  
+        if (transaksiResponse.status === 201) {
+          console.log('Transaksi berhasil dibuat:', transaksiResponse.data);
+          // Tindakan selanjutnya setelah transaksi berhasil dibuat, seperti redirect ke halaman pembayaran atau status
+
+        } else {
+          console.error('Gagal membuat transaksi:', transaksiResponse.data);
+        }
+      } else {
+        console.error('Gagal membuat pemesanan:', pemesananResponse.data);
+      }
+    } catch (error) {
+      console.error('Terjadi kesalahan:', error);
+    }
   };
 
   return (
@@ -22,17 +88,17 @@ const DetailPembayaran = () => {
       </TouchableOpacity>
 
       {/* Notifikasi Waktu */}
-      <View style={styles.notification}>
+      {/* <View style={styles.notification}>
         <Text style={styles.notificationText}>
           Silakan periksa detail transaksi anda dan lanjutkan pembayaran anda dalam{' '}
           <Text style={styles.timer}>1:20</Text>
         </Text>
-      </View>
+      </View> */}
 
       <ScrollView style={styles.content}>
         {/* Detail Pesanan */}
         <Text style={styles.sectionTitle}>Ramos Badminton Center</Text>
-        <View style={styles.orderItem}>
+        {/* <View style={styles.orderItem}>
           <View>
             <Text style={styles.orderText}>🏸 Lapangan 2</Text>
             <Text style={styles.orderDetail}>Senin, 03 Maret 2025, 20:00 - 21:00</Text>
@@ -47,14 +113,31 @@ const DetailPembayaran = () => {
           </View>
           <Text style={styles.price}>Rp 70.000</Text>
           <Ionicons name="trash-outline" size={20} color="red" />
-        </View>
+        </View> */}
+        {
+          keranjangJadwal.map((item, ind) =>  <View style={styles.orderItem}>
+            <View key={ind}>
+              <Text style={styles.orderText}>🏸 {item.lapangan.name}</Text>
+              <Text style={styles.orderDetail}>{item.tanggal}, jam {item.jam}</Text>
+            </View>
+            <Text style={styles.price}>Rp {item.harga}</Text>
+            <TouchableOpacity>
+              {
+                keranjangJadwal.length < 2 ? false :  <Ionicons name="trash-outline" size={20} color="red" onPress={() => handleRemoveJadwalById(item._id)}/>
 
+              }
+            </TouchableOpacity>
+          </View>)
+        }
+      
         {/* Ringkasan Pesanan */}
         <View style={styles.summaryContainer}>
           <Text style={styles.sectionTitle}>Ringkasan Pesanan</Text>
           <View style={styles.summaryRow}>
             <Text>Total Harga</Text>
-            <Text>Rp 140.000</Text>
+            {/* <Text>Rp 140.000</Text> */}
+            <Text>Rp {totalHarga}</Text>
+
           </View>
           <View style={styles.summaryRow}>
             <Text>Promo</Text>
@@ -66,7 +149,7 @@ const DetailPembayaran = () => {
           </View>
           <View style={styles.summaryTotal}>
             <Text>Total Pembayaran</Text>
-            <Text>Rp 140.000</Text>
+            <Text>Rp {totalHarga}</Text>
           </View>
         </View>
 
@@ -89,8 +172,8 @@ const DetailPembayaran = () => {
       {/* Footer Pembayaran */}
       <View style={styles.footer}>
         <Text style={styles.totalText}>Total Pembayaran</Text>
-        <Text style={styles.totalAmount}>Rp 140.000</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('BankTransfer')} style={styles.payButton}>
+        <Text style={styles.totalAmount}>Rp {totalHarga}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Cash')} style={styles.payButton}>
           <Text style={styles.payButtonText}>Bayar</Text>
         </TouchableOpacity>
       </View>

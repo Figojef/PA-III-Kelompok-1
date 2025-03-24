@@ -10,6 +10,7 @@ import { useState } from "react"
 import { useSelector } from "react-redux"
 import RegisterScreen from "../auth/RegisterScreen"
 import Pemesanan from "../pemesanan/Pemesanan"
+import Test2 from "../test/Test2"
 
 
 const Stack = createStackNavigator()
@@ -24,7 +25,6 @@ const TabNavigator = () => {
         login ? 
         <>
         <Tab.Navigator
-
         >
             <Tab.Screen
                 name = "Home"
@@ -106,6 +106,16 @@ const TabNavigator = () => {
                     headerShown : false
                 }}
             />
+            {/* <Tab.Screen
+                name="test2"
+                component={Test2}
+                options={{
+                    tabBarIcon : ({color, size}) => (
+                        <Ionicons name="cart" color={color} size={size}/>
+                    ),
+                    headerShown : false
+                }}
+            /> */}
         </Tab.Navigator>
     </>
     )
