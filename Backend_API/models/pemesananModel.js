@@ -10,7 +10,7 @@ const pemesananSchema = new Schema({
         required: true
     },
     total_harga: {
-        type: String,
+        type: Number,
         required: [true]
     },
     jadwal_dipesan: [
@@ -19,7 +19,6 @@ const pemesananSchema = new Schema({
             ref: "Jadwal"
         }
     ],
-
     status_pemesanan: {
         type: String,
         enum: ["Sedang Dipesan", "Berhasil", "Dibatalkan"],

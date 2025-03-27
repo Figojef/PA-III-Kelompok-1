@@ -27,6 +27,7 @@ export const createTransaksi = asyncHandler(async (req, res) => {
 export const getAllTransaksi = asyncHandler(async (req, res) => {
     const transaksi = await Transaksi.find().populate("pemesanan_id");
     res.json(transaksi);
+    // res.send('ookokokokok')
 });
 
 // Mendapatkan transaksi berdasarkan ID

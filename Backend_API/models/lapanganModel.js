@@ -8,11 +8,11 @@ const lapanganSchema = new Schema({
         required : [true, "Nama lapangan harus diisi"],
         unique : [true, "Nama lapangan sudah ada"]
     },
-    description : {
+    deskripsi : {
         type : String,
         required : [true, 'Deskripsi lapangan harus diisi']
     },
-    image : {
+    gambar : {
         type : String,
         default : null
     },

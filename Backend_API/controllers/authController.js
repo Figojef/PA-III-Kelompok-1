@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import jwt from "jsonwebtoken"
 import asyncHandler from "../middleware/asyncHandler.js";
 
+
 const signToken = id => {
     return jwt.sign({id}, process.env.JWT_SECRET, 
     {
@@ -11,31 +12,37 @@ const signToken = id => {
 }
 
 const createSendResToken = (user, statusCode, res) => {
-    const token = signToken(user._id);
-    const isDev = process.env.NODE_ENV === 'development' ? false : true;
+    const token = signToken(user._id)
+    const isDev = process.env.NODE_ENV === 'development' ? false : true
 
     const cookieOption = {
-        expires: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-        secure: isDev
-    };
+        expire : new Date(
+            Date.now() + 6 * 24 * 60 * 60 * 1000 
+        ),
+        httpOnly : true,
+        security : isDev
+    }
 
-    res.cookie('jwt', token, cookieOption);
-
-    user.password = undefined;
-
+    res.cookie('jwt', token, cookieOption)
+ 
+    user.password = undefined
+    
     res.status(statusCode).json({
-        jwt: token, // Tambahkan token di respons JSON
-        user: user
-    });
-};
-
+        data : user
+    })
+}
 
 export const registerUser = asyncHandler(async (req, res) => {
     const isOwner = (await User.countDocuments()) === 0
 
     const role = isOwner ? 'admin' : 'pelanggan'
     
+
+    if(!req.body.email || !req.body.password){
+        res.status(400)
+        throw new Error('Email atau password tidak boleh kosong')
+    }
+
     const createUser = await User.create({
         name : req.body.name,
         email : req.body.email,
@@ -50,20 +57,20 @@ export const registerUser = asyncHandler(async (req, res) => {
 
 export const loginUser = asyncHandler(async(req, res) => {
 
-    const token = req.cookies.jwt
+    // const token = req.cookies.jwt
 
-    if(token){
-        res.status(400)
-        throw new Error("Anda belum logout")
-    }
+    // if(token){
+    //     res.status(400)
+    //     throw new Error("Anda belum logout")
+    // }
 
-    if(!req.body.name || !req.body.password){
+    if(!req.body.email || !req.body.password){
         res.status(400)
-        throw new Error('Username atau password tidak boleh kosong')
+        throw new Error('Email atau password tidak boleh kosong')
     }
 
     const userData = await User.findOne({
-        name : req.body.name
+        email : req.body.email
     })
 
     if(userData && (await userData.comparePassword(req.body.password))){

@@ -1,6 +1,6 @@
 import { query } from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
-// import Product from "../models/productModel.js";
+import Product from "../models/productModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier"
 import Lapangan from "../models/lapanganModel.js";
@@ -30,36 +30,138 @@ export const AllJadwal = asyncHandler(async (req, res) => {
     });
   });
 
-  // CreateJadwal function with validation
-export const CreateJadwal = asyncHandler(async (req, res) => {
-  const { lapangan, jam, tanggal, harga, status } = req.body;
 
-  // Check if the schedule already exists for the same lapangan, jam, and tanggal
-  const existingJadwal = await Jadwal.findOne({ lapangan, jam, tanggal });
-
-  if (existingJadwal) {
-    return res.status(400).json({
-      message: "Jadwal sudah ada untuk lapangan ini pada jam dan tanggal tersebut.",
+  // Fungsi untuk menangani request asinkron
+  export const CreateJadwal = asyncHandler(async (req, res) => {
+    const { lapangan, jam, tanggal, harga, status } = req.body;
+  
+    // Validasi jika lapangan, jam, tanggal, dan harga sudah ada
+    if (!lapangan || !jam || !tanggal || !harga) {
+      res.status(400).json({ message: "Semua field harus diisi" });
+      return;
+    }
+  
+    // Mengecek apakah jadwal dengan kombinasi lapangan, tanggal, dan jam sudah ada
+    const existingJadwal = await Jadwal.findOne({
+      lapangan,
+      tanggal,
+      jam,
     });
-  }
-
-  // Create the new jadwal
-  const newJadwal = new Jadwal({
-    lapangan,
-    jam,
-    tanggal,
-    harga,
-    status: status || "Tersedia", // Default to "Tersedia" if not provided
+  
+    if (existingJadwal) {
+      return res.status(400).json({
+        message: `Jadwal dengan jam ${jam} pada lapangan ${lapangan} dan tanggal ${tanggal} sudah ada.`,
+      });
+    }
+  
+    // Membuat objek Jadwal baru
+    const newJadwal = new Jadwal({
+      lapangan,
+      jam,
+      tanggal,
+      harga,
+      status: status || "Tersedia", // Status default "Tersedia" jika tidak diisi
+    });
+  
+    // Menyimpan jadwal baru ke database
+    const savedJadwal = await newJadwal.save();
+  
+    // Mengirimkan response jika berhasil
+    res.status(201).json({
+      message: "Jadwal berhasil dibuat",
+      data: savedJadwal,
+    });
   });
+  
 
-  await newJadwal.save();
 
-  // Respond with the newly created jadwal
-  res.status(201).json({
-    message: "Jadwal berhasil dibuat",
-    jadwal: newJadwal,
-  });
-});
+  // export const CreateJadwal = asyncHandler(async (req, res) => {
+
+  //   const { lapangan, jam, tanggal, harga, status } = req.body;
+
+  //   // Validate if lapangan is provided
+  //   if (!lapangan || !jam || !tanggal || !harga) {
+  //     res.status(400).json({ message: "All fields are required" });
+  //     return;
+  //   }
+  
+  //   // Create the new Jadwal document
+  //   const newJadwal = new Jadwal({
+  //     lapangan,
+  //     jam,
+  //     tanggal,
+  //     harga,
+  //     status: status || "Trersedia", // Default status to "Tersedia" if not provided
+  //   });
+  
+  //   // Save the new Jadwal to the database
+  //   const savedJadwal = await newJadwal.save();
+  
+  //   // Respond with the created Jadwal
+  //   res.status(201).json({
+  //     message: "Jadwal created successfully",
+  //     data: savedJadwal,
+  //   });
+  //   // const { lapangan, jam, tanggal, harga, status } = req.body;
+  
+  //   // // Validate if lapangan is provided
+  //   // if (!lapangan || !jam || !tanggal || !harga) {
+  //   //   res.status(400).json({ message: "All fields are required" });
+  //   //   return;
+  //   // }
+  
+  //   // // Create the new Jadwal document
+  //   // const newJadwal = new Jadwal({
+  //   //   lapangan,
+  //   //   jam,
+  //   //   tanggal,
+  //   //   harga,
+  //   //   status: status || "Tersedia", // Default status to "Tersedia" if not provided
+  //   // });
+  
+  //   // // Save the new Jadwal to the database
+  //   // const savedJadwal = await newJadwal.save();
+  
+  //   // // Respond with the created Jadwal
+  //   // res.status(201).json({
+  //   //   message: "Jadwal created successfully",
+  //   //   data: savedJadwal,
+  //   // });
+  //   // res.status(201).json({
+  //   //   youtData : req.body
+  //   // })
+  // });
+
+  // CreateJadwal function with validation
+// export const CreateJadwal = asyncHandler(async (req, res) => {
+//   const { lapangan, jam, tanggal, harga, status } = req.body;
+
+//   // Check if the schedule already exists for the same lapangan, jam, and tanggal
+//   const existingJadwal = await Jadwal.findOne({ lapangan, jam, tanggal });
+
+//   if (existingJadwal) {
+//     return res.status(400).json({
+//       message: "Jadwal sudah ada untuk lapangan ini pada jam dan tanggal tersebut.",
+//     });
+//   }
+
+//   // Create the new jadwal
+//   const newJadwal = new Jadwal({
+//     lapangan,
+//     jam,
+//     tanggal,
+//     harga,
+//     status: status || "Tersedia", // Default to "Tersedia" if not provided
+//   });
+
+//   await newJadwal.save();
+
+//   // Respond with the newly created jadwal
+//   res.status(201).json({
+//     message: "Jadwal berhasil dibuat",
+//     jadwal: newJadwal,
+//   });
+// });
   // export const CreateJadwal = asyncHandler(async (req, res) => {
   //   // Mendapatkan data dari body request
   //   const { lapangan, jam, tanggal, harga, status } = req.body;

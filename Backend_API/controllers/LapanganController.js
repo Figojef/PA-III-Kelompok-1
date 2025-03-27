@@ -1,6 +1,6 @@
 import { query } from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
-// import Product from "../models/productModel.js";
+import Product from "../models/productModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier"
 import Lapangan from "../models/lapanganModel.js";
@@ -100,15 +100,15 @@ export const updateLapangan = asyncHandler(async (req, res) => {
 })
 
 
-// export const deleteProduct = asyncHandler(async(req,res) => {
-//     // res.send("Delete Product")
-//     const paramId = req.params.id
-//     const deleteProduct = await Product.findByIdAndDelete(paramId)
+export const deleteProduct = asyncHandler(async(req,res) => {
+    // res.send("Delete Product")
+    const paramId = req.params.id
+    const deleteProduct = await Product.findByIdAndDelete(paramId)
 
-//     return res.status(200).json({
-//         message : "Berhasil hapus produk"
-//     })
-// })
+    return res.status(200).json({
+        message : "Berhasil hapus produk"
+    })
+})
 
 
 export const fileUpload = asyncHandler(async(req, res) => {
