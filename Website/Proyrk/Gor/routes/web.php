@@ -3,17 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LapanganController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
 Route::get('/registrasi', function () {
     return view('registrasi');
 });
@@ -24,4 +13,23 @@ Route::get('/login', function () {
 
 Route::get('/', function () {
     return view('beranda');
+});
+
+// Route untuk menampilkan halaman jadwal dengan data dari database
+Route::get('/jadwal', [LapanganController::class, 'index']);
+
+Route::get('/admin', function () {
+    return view('admin');
+});
+
+Route::get('/reservasi', function () {
+    return view('reservasi');
+});
+
+Route::get('/reservasi', function () {
+    return view('reservasi');
+});
+
+Route::get('/tentang', function () {
+    return view('tentang');
 });

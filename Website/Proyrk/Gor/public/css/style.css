@@ -1,0 +1,77 @@
+.header-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 2px solid #ffffff; 
+}
+
+.carousel-inner img {
+    width: 100%; 
+    height: 500px; 
+    object-fit: cover; 
+}
+
+.card-baru {
+    margin-top: -40px;
+}
+
+.card img {
+    width: 100%;
+    max-width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.card-content {
+    display: flex;
+    align-items: center;
+}
+
+.card-text-section {
+    flex: 3;
+    padding-left: 15px;
+}
+
+.line {
+    width: 100px;
+    /* Panjang garis */
+    height: 3px;
+    /* Ketebalan garis */
+    background-color: black;
+    /* Warna garis */
+}
+
+.event-container {
+    display: flex;
+    justify-content: center; /* Menjadikan card berada di tengah */
+    gap: 30px; /* Memberikan jarak antar card */
+    flex-wrap: wrap; /* Agar responsif */
+}
+
+.event-card {
+    width: 280px; /* Ukuran maksimal card */
+    border: 2px solid black;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.event-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.event-card img {
+    width: 100%;
+    height: 100%; /* Pastikan gambar mengisi card */
+    object-fit: cover;
+    border-radius: 0; /* Agar tetap persegi */
+}
+
+
+
+
+
+   

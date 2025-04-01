@@ -1,6 +1,6 @@
 import { query } from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
-import Product from "../models/productModel.js";
+// import Product from "../models/productModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier"
 import Lapangan from "../models/lapanganModel.js";
@@ -71,7 +71,7 @@ export const detailLapangan = asyncHandler(async (req, res) => {
     const dataLapangan = await Lapangan.findById(paramId)
 
     if(!dataLapangan){
-        res.status(404)
+        res.status(404) 
         throw new Error("Id tidak ditemukan")
     }
 

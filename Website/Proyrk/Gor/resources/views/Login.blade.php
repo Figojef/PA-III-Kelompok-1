@@ -2,13 +2,14 @@
 <HTML lang="en">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <head>
-    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
-    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    
 
         <title>Login</title>
         <style>
             body {
-                background-color: #F3F3E0;
+                background-color: #222F37;
                 font-family: Arial, sans-serif;
             }
 
@@ -20,6 +21,9 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+        }
+        .card {
+            background-color: #FDFDD7;
         }
         .footer .contact {
             display: flex;
@@ -47,11 +51,14 @@
             }
         }
             .Login {
-                width: 300px;
-                height: 40px;
+                width: 400px;
+                height: 60px;
                 font-size: 16px;
-                padding: 5px 10 10;
+                padding: 10px 10 10;
                 margin: 40px 0 0 0;
+                border-radius: 10px 10px 10px 10px;
+                border-width: 1px;
+
             }
 
             .navbar {
@@ -131,20 +138,23 @@
         <center style="margin-top: 150px;">
         <form id="loginForm" method="post">
             @csrf
-            <div>
-                <label style="font-weight: 550;font-size: 30px;">Masuk</label><br>
-                     <input type="text" name="name" id="name" placeholder="nama pengguna" class="Login" style="border-radius: 3px 3px 3px 3px;" required><br>
-                    <input type="password" name="password" id="password" placeholder="password" class="Login" style="border-radius: 3px 3px 3px 3px;" required><br>
-                 <button type="submit" class="Login" style="color: white; font-weight: bold; background-color: #608AC2;">Masuk</button><br><br>
-            <a href="" style="margin-right: 180px; text-decoration: none;">Lupa Password?</a><br><br>
-            <p style="font-size: 25px;">Belum punya akun?
-            <a href="{{ url('/') }}" style="text-decoration: none;">Daftar yuk!</a>
+            <div class="card" style="width: 30rem;  margin-bottom: 100px;border-radius: 20px 20px 20px 20px;">
+                <center>  
+                    <img width="100px" height="100px" src="{{ asset('storage/Logo.png') }}" style="margin-top: 5%;" alt="Badminton Logo"><br>
+                        <label style="font-size:20px; font-weight:bold; padding-top:5%;">Ramos Badminton</label><br>
+                            <input type="text" name="name" id="name" placeholder="Nama Pengguna" class="Login" style="background-color: rgba(255, 255, 255, 0.5); padding-left: 20px;" required><br>
+                            <input type="password" name="password" id="password" placeholder="Kata Sandi" class="Login" style="background-color: rgba(255, 255, 255, 0.5);padding-left: 20px;" required><br>
+                            <button type="submit" class="Login" style="color: #FDFDD7; font-weight: bold; background-color: #222F37;">Masuk</button><br><br>
+                            <a href="" style="text-decoration: none; color: #222F37;font-size:15px; font-weight:bold;" >Lupa Kata Sandi?</a><br><br>
+                            <p style="font-size: 20px;">Belum punya akun?
+                            <a href="{{ url('/') }}" style="text-decoration: none;">Daftar yuk!</a>
+                </center>
             </div>
          </form">
     </center>
 
     <script>
-document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault();
     
     console.log("Form submitted!"); // Cek apakah event listener bekerja
@@ -176,5 +186,10 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     }
 });
 </script>
+
+    
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </body>
 </HTML>
