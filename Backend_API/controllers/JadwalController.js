@@ -72,6 +72,21 @@ export const AllJadwal = asyncHandler(async (req, res) => {
     });
   });
   
+  export const JadwalByTanggal = async (req, res) => {
+    try {
+      const { tanggal } = req.params;
+      const jadwal = await Jadwal.find({ tanggal: tanggal });
+  
+      if (jadwal.length === 0) {
+        return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
+      }
+  
+      res.status(200).json(jadwal);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    }
+  };
 
 
   // export const CreateJadwal = asyncHandler(async (req, res) => {

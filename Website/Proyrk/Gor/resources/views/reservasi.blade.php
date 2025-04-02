@@ -98,7 +98,7 @@ function renderjadwal(jadwalData) {
         
         const lapanganDiv = document.createElement("div");
         lapanganDiv.classList.add("lapangan-container");
-        lapanganDiv.innerHTML = `<h3>${lapangan}</h3>`;  // Tampilkan nama lapangan
+        lapanganDiv.innerHTML = `<h3>Lapangan: ${lapangan}</h3>`;  // Tampilkan nama lapangan
 
         // Buat tabel untuk menampilkan jadwal
         const table = document.createElement("table");

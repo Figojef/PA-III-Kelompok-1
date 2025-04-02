@@ -8,6 +8,7 @@ import cookieParser  from "cookie-parser"
 import helmet from "helmet"
 import ExpressMongoSanitize from "express-mongo-sanitize"
 import { v2 as cloudinary } from 'cloudinary';
+import cors from "cors";
 import lapanganRouter from './routes/lapanganRouter.js'
 import jadwalRouter from './routes/jadwalRouter.js'
 import pemesananRouter from './routes/pemesananRouter.js'
@@ -35,15 +36,18 @@ app.use(express.urlencoded({extended : true}))  // memasukkan inputan di urlenco
 app.use(cookieParser())
 app.use(express.static('./public'))
 
-
+app.use(cors({
+  origin: 'http://127.0.0.1:8000', // Laravel
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/lapangan', lapanganRouter)
-app.use('/api/v1/jadwal', jadwalRouter)
 app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
-
+app.use('/api/v1/jadwal', jadwalRouter)
 
 
 app.use(notFound)

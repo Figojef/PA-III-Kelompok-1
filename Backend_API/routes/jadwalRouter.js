@@ -1,6 +1,6 @@
 import express from "express";
 import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
-import { AllJadwal, CreateJadwal, DetailJadwal, UpdateJadwal, DeleteJadwal } from "../controllers/JadwalController.js";
+import { AllJadwal, CreateJadwal, DetailJadwal, UpdateJadwal, DeleteJadwal, JadwalByTanggal } from "../controllers/JadwalController.js";
 
 const router = express.Router();
 
@@ -18,5 +18,8 @@ router.put("/:id", protectedMiddleware, adminMiddleware, UpdateJadwal);
 
 // Menghapus jadwal berdasarkan ID (hanya admin)
 router.delete("/:id", protectedMiddleware, adminMiddleware, DeleteJadwal);
+
+// Mendapatkan jadwal berdasarkan tanggal
+router.get("/tanggal/:tanggal", JadwalByTanggal);
 
 export default router;
