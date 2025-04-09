@@ -53,7 +53,7 @@ export const todoSlice = createSlice({
       state.login = true
     },
     logout : (state, action) => {
-      state.user = null
+      // state.user = null
       state.login = false
     },
     toggleSelectJadwal: (state, action) => {
@@ -83,7 +83,7 @@ export const todoSlice = createSlice({
     removeSelectedJadwalById : (state, action) => {
        const {_id} = action.payload
        state.keranjangJadwal = state.keranjangJadwal.filter(jadwal => jadwal._id !== _id)
-    }
+    },
   },
 });
 

@@ -1,11 +1,44 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Using Ionicons for ChevronLeft and other Icons
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const StatusPemesanan = () => {
 
   const navigation = useNavigation()
+
+  const route = useRoute()
+
+  const {pemesanan} = route.params;
+
+
+  function formatJam(jam) {
+    // Pastikan jam adalah tipe numerik
+    jam = parseInt(jam, 10);
+  
+    // Menambahkan 0 di depan angka jika jam kurang dari 10
+    let jamAwal = jam < 10 ? '0' + jam + ':00' : jam + ':00';
+  
+    // Menambahkan satu jam ke jam awal (penjumlahan dilakukan setelah memastikan tipe data numerik)
+    let jamAkhir = jam + 1;
+  
+    // Jika jam akhir mencapai 24, reset menjadi 00
+    if (jamAkhir === 24) {
+      jamAkhir = 0;
+    }
+  
+    // Menambahkan 0 di depan angka jika jam akhir kurang dari 10
+    let jamAkhirFormatted = jamAkhir < 10 ? '0' + jamAkhir + ':00' : jamAkhir + ':00';
+  
+    // Mengembalikan format yang diinginkan
+    return jamAwal + ' - ' + jamAkhirFormatted;
+  }
+  
+  
+  
+
+
+  console.log(pemesanan)
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -15,18 +48,44 @@ const StatusPemesanan = () => {
         <Text style={styles.headerText}>Pesanan</Text>
       </TouchableOpacity>
 
-      {/* Status */}
-      <View style={styles.status}>
-        <Text style={styles.statusText}>Menunggu</Text>
-      </View>
+      {/* Status #fef2c0*/}
+      {/* <View style={[styles.status, 
+        {backgroundColor: 'green'}]}>
+        <Text style={styles.statusText}>{pemesanan.transaksi[0].status_pembayaran}</Text>
+      </View> */}
+
+      {pemesanan.transaksi[0].status_pembayaran == "menunggu" ? 
+              <View style={[styles.status, 
+                {backgroundColor: '#fef2c0'}]}>
+                <Text style={[styles.statusText, {color: '#9c6f00'}]}>{pemesanan.transaksi[0].status_pembayaran}</Text>
+              </View>
+              :
+              <View style={[styles.status, 
+                {backgroundColor: 'green'}]}>
+                <Text style={[styles.statusText, {color: 'white'}]}>{pemesanan.transaksi[0].status_pembayaran} dibayar</Text>
+              </View>
+      }
 
       {/* Payment Info */}
       <View style={styles.paymentInfoContainer}>
-        <Text style={styles.paymentInfoHeader}>Payment ID #INV-250304-EFAAKINMR-35</Text>
-        <Text style={styles.paymentInfoSubHeader}>Terminal Sport • Badminton</Text>
+        <Text style={styles.paymentInfoHeader}>Transaction ID : {pemesanan.transaksi[0]._id}</Text>
+        {/* <Text style={styles.paymentInfoSubHeader}>Terminal Sport • Badminton</Text> */}
+        <Text style={styles.paymentInfoSubHeader}>GOR Badminton</Text>
+
         <View style={styles.paymentDetails}>
           <Ionicons name="card" size={24} color="black" />
+          {/* <Text>Bank Transfer Manual</Text> */}
+
+         {
+          pemesanan.transaksi[0].metode_pembayaran == "bayar_langsung" ?
+          <Text>Bayar Langsung Ke Tempat</Text>
+          :
+          pemesanan.transaksi[0].metode_pembayaran == "transfer_bank" ?
           <Text>Bank Transfer Manual</Text>
+          :
+          pemesanan.transaksi[0].metode_pembayaran
+         }
+
         </View>
         <View style={styles.timer}>
           <Text>Selesaikan pembayaran anda dalam</Text>
@@ -38,7 +97,7 @@ const StatusPemesanan = () => {
       </View>
 
       {/* Booking Details */}
-      <View style={styles.bookingDetailsContainer}>
+      {/* <View style={styles.bookingDetailsContainer}>
         <View style={styles.bookingItem}>
           <Text style={styles.bookingItemTitle}>Badminton 1</Text>
           <Text style={styles.bookingItemTime}>Selasa, 04 Maret 2025 | 17:00 - 18:00</Text>
@@ -49,6 +108,18 @@ const StatusPemesanan = () => {
           <Text style={styles.bookingItemTime}>Selasa, 04 Maret 2025 | 18:00 - 19:00</Text>
           <Text style={styles.bookingItemPrice}>Rp 70.000</Text>
         </View>
+      </View> */}
+
+
+    <View style={styles.bookingDetailsContainer}>
+            {pemesanan.jadwal_dipesan.map((jadwal, index) => (
+            <View key={index} style={styles.bookingItem}>
+            <Text style={styles.bookingItemTitle}>{jadwal.lapangan.name}</Text>
+            <Text style={styles.bookingItemTime}>{jadwal.tanggal} | {formatJam(jadwal.jam)}</Text>
+            {console.log(formatJam(jadwal.jam))}
+            <Text style={styles.bookingItemPrice}>Rp{jadwal.harga}</Text>
+            </View>
+            ))}
       </View>
 
       {/* Order Summary */}
@@ -56,15 +127,26 @@ const StatusPemesanan = () => {
         <Text style={styles.orderSummaryTitle}>Order Summary</Text>
         <View style={styles.summaryItem}>
           <Text>Metode Pembayaran</Text>
-          <Text style={styles.summaryItemValue}>Bank Transfer Manual</Text>
+          {/* <Text style={styles.summaryItemValue}>Bank Transfer Manual</Text> */}
+          <Text style={styles.summaryItemValue}>
+          {
+          pemesanan.transaksi[0].metode_pembayaran == "bayar_langsung" ?
+          <Text>Bayar Langsung Ke Tempat</Text>
+          :
+          pemesanan.transaksi[0].metode_pembayaran == "transfer_bank" ?
+          <Text>Bank Transfer Manual</Text>
+          :
+          pemesanan.transaksi[0].metode_pembayaran
+         }
+          </Text>
         </View>
-        <View style={styles.summaryItem}>
+        {/* <View style={styles.summaryItem}>
           <Text>Status Pemesanan</Text>
           <Text style={styles.summaryItemValue}>LUNAS</Text>
-        </View>
+        </View> */}
         <View style={styles.summaryItem}>
           <Text>Total Harga</Text>
-          <Text style={styles.summaryItemValue}>Rp 140.000</Text>
+          <Text style={styles.summaryItemValue}>Rp {pemesanan.total_harga}</Text>
         </View>
         <View style={styles.summaryItem}>
           <Text>Promo</Text>
@@ -76,19 +158,38 @@ const StatusPemesanan = () => {
         </View>
         <View style={styles.totalPrice}>
           <Text>Total Pembayaran</Text>
-          <Text>Rp 140.000</Text>
+          <Text>Rp.{pemesanan.total_harga}</Text>
         </View>
       </View>
 
       {/* Action Buttons */}
+      {pemesanan.transaksi[0].status_pembayaran == "menunggu" ? 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.buttonCancel}>
           <Text style={styles.buttonText}>Batalkan</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('BankTransfer')} style={styles.buttonPay}>
+        {/* <TouchableOpacity onPress={() => navigation.navigate('BankTransfer')} style={styles.buttonPay}>
+          <Text style={styles.buttonText}>Bayar</Text>
+        </TouchableOpacity> */}
+        {
+          pemesanan.transaksi[0].metode_pembayaran == "bayar_langsung" ?
+          <TouchableOpacity onPress={() => navigation.navigate('Cash', {totalHarga : pemesanan.total_harga})} style={styles.buttonPay}>
           <Text style={styles.buttonText}>Bayar</Text>
         </TouchableOpacity>
+          :
+          pemesanan.transaksi[0].metode_pembayaran == "transfer_bank" ?
+          <TouchableOpacity onPress={() => navigation.navigate('BankTransfer')} style={styles.buttonPay}>
+          <Text style={styles.buttonText}>Bayar</Text>
+          </TouchableOpacity>
+          :
+          <TouchableOpacity onPress={() => navigation.navigate('BankTransfer')} style={styles.buttonPay}>
+          <Text style={styles.buttonText}>Bayar</Text>
+          </TouchableOpacity>
+         }
       </View>
+    :
+     <View></View>
+    }
     </ScrollView>
   );
 };
@@ -110,14 +211,12 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   status: {
-    backgroundColor: '#fef2c0',
     padding: 8,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 16,
   },
   statusText: {
-    color: '#9c6f00',
     fontWeight: '600',
   },
   paymentInfoContainer: {

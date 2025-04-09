@@ -1,16 +1,19 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const Cash = () => {
     const navigation = useNavigation()
+    const route = useRoute()
+
+    const {totalHarga2} = route.params
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('TabNavigator')} style={styles.headerTitle}>
+        <TouchableOpacity onPress={() => navigation.navigate('TabNavigator', {screen : 'Pemesanan'})} style={styles.headerTitle}>
         <Icon name="arrow-back" size={24} />
             <Text style={{fontWeight : "bold", fontSize : 18, marginLeft : 10}}>
             Cash
@@ -27,7 +30,7 @@ const Cash = () => {
 
       {/* Manual Transfer */}
       <Text style={styles.sectionTitle}>Bayar Di Tempat</Text>
-      <Text style={styles.label}>Nomor Rekening</Text>
+      {/* <Text style={styles.label}>Nomor Rekening</Text> */}
       {/* <View style={styles.accountContainer}>
         <View>
           <Text style={styles.accountNumber}>5626567921</Text>
@@ -40,7 +43,7 @@ const Cash = () => {
 
       {/* Total Pembayaran */}
       <Text style={styles.totalPaymentLabel}>Total Pembayaran</Text>
-      <Text style={styles.totalPayment}>Rp 140.000</Text>
+      <Text style={styles.totalPayment}>Rp.{totalHarga2} </Text>
 
       {/* Buttons Container */}
       <View style={styles.buttonsContainer}>

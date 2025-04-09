@@ -44,23 +44,25 @@ const SelectSchedule = ({ route }) => {
     const fetchJadwal = async () => {
       if (selectedDate) {
         try {
-          console.log(selectedDate.split(" ")[0] + ' dan ' + c1.split(" ")[0])
+          console.log(selectedDate.split(" ") [0] + ' dan ' + c1.split(" ")[0])
           const response = await axios.get(
             `${BE_MAIN_URL}/jadwal/tanggal?tanggal=${selectedDate.split(" ")[0]}&lapangan=${lapangan2._id}`
           );
           
-          setJadwalItems(response.data);
+          // Mengurutkan jadwal berdasarkan jam
+          const sortedJadwal = response.data.sort((a, b) => a.jam - b.jam);
+  
+          setJadwalItems(sortedJadwal);
         } catch (error) {
-          // console.log(`Tidak ditemukan jadwal`);
-          // console.log(response.data)
-          // console.log(response.data)
+          // console.log(`Tidak ditemukan jadwal`); 
           setJadwalItems(null);
         }
       }
     };
-
+  
     fetchJadwal();
   }, [selectedDate]);
+  
 
   const dispatch = useDispatch();
   const keranjangJadwal = useSelector((state) => state.todo1.keranjangJadwal);
@@ -116,11 +118,7 @@ const SelectSchedule = ({ route }) => {
         return; // Langsung keluar dari loop jika ditemukan
       }
     });
-    // if(exist){
-    //   console.log('ada di cart')
-    // }else{
-    //   console.log('belum ada di cart')
-    // }
+
   return (
     <TouchableOpacity
       key={ind}

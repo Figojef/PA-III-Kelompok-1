@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   StyleSheet,
-  SafeAreaView,
+  ScrollView,
   View,
   Image,
   Text,
@@ -18,6 +18,7 @@ export default function RegisterScreen({ navigation }) {
     email: '',
     password: '',
     name: '',
+    nomor_whatsapp
   });
 
   const [loading, setLoading] = useState(false);
@@ -45,7 +46,11 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#e8ecf4' }}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      style={{ backgroundColor: '#e8ecf4' }}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <Image
@@ -67,7 +72,7 @@ export default function RegisterScreen({ navigation }) {
           {errorMessage ? <Text style={{ color: 'red' }}>{errorMessage}</Text> : null}
 
           <View style={styles.input}>
-            <Text style={styles.inputLabel}>Username</Text>
+            <Text style={styles.inputLabel}>Nama Lengkap : </Text>
 
             <TextInput
               autoCapitalize="none"
@@ -94,6 +99,20 @@ export default function RegisterScreen({ navigation }) {
               style={styles.inputControl}
               value={form.email} />
           </View>
+          
+          <View style={styles.input}>
+            <Text style={styles.inputLabel}>Nama Whatsapp : </Text>
+
+            <TextInput
+              autoCapitalize="none"
+              autoCorrect={false}
+              clearButtonMode="while-editing"
+              onChangeText={name => setForm({ ...form, nomor_whatsapp })}
+              placeholder="621234567890"
+              placeholderTextColor="#6b7280"
+              style={styles.inputControl}
+              value={form.name} />
+          </View>
 
           <View style={styles.input}>
             <Text style={styles.inputLabel}>Password</Text>
@@ -112,7 +131,6 @@ export default function RegisterScreen({ navigation }) {
           <View style={styles.formAction}>
             <TouchableOpacity
               onPress={() => {
-                // handle onPress
                 handleEnter();
               }}>
               <View style={styles.btn}>
@@ -124,20 +142,16 @@ export default function RegisterScreen({ navigation }) {
           <TouchableOpacity
             onPress={() => {
               // handle link
-            }}>
-            {/* <Text style={styles.formLink}>Forgot password?</Text> */}
-          </TouchableOpacity>
+            }} />
         </View>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
     padding: 24,
   },
   title: {

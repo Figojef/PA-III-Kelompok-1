@@ -76,9 +76,9 @@ const Header = () => {
         <Text style={styles.title}>Ramos Badminton</Text>
       </View>
       <View style={styles.iconContainer}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => handleLogout()}>
+        {/* <TouchableOpacity style={styles.iconButton} onPress={() => handleLogout()}>
           <Ionicons name="log-out-outline" size={24} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity style={styles.iconButton}>
           <Ionicons name="menu-outline" size={28} color="black" />
         </TouchableOpacity>

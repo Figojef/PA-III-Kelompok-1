@@ -50,7 +50,7 @@ const Home = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.card}>
+          <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('Test4')}>
             <Ionicons name="people-outline" size={24} style={styles.icon} />
             <View>
               <Text style={styles.cardTitle}>Temukan Partner Bermain</Text>

@@ -1,4 +1,4 @@
-export const BE_MAIN_URL = "http://192.168.43.9:3000/api/v1"
+export const BE_MAIN_URL = "http://192.168.59.9:3000/api/v1"
 
 // http://192.168.130.9:3000/api/v1
 

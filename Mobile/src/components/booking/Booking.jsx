@@ -29,7 +29,6 @@ export default function Booking() {
 
   return (
     <SafeAreaView style={styles.container}>
-
       <Header/>
         <ScrollView style={styles.container}>
 

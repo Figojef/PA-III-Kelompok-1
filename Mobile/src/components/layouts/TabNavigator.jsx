@@ -11,6 +11,7 @@ import { useSelector } from "react-redux"
 import RegisterScreen from "../auth/RegisterScreen"
 import Pemesanan from "../pemesanan/Pemesanan"
 import Test2 from "../test/Test2"
+import Mabar from "../mabar/Mabar"
 
 
 const Stack = createStackNavigator()
@@ -63,6 +64,17 @@ const TabNavigator = () => {
                     tabBarIcon : ({color, size}) => (
                         <Ionicons name = 'cart-outline' size={size} color={color}/>
                     ),
+                    headerShown : false
+                }}
+            />
+            <Tab.Screen
+                name = "Mabar"
+                component = {Mabar}
+                options = {{
+                    tabBarIcon : ({color, size}) => (
+                        <Ionicons name = 'people-outline' size={size} color={color}/>
+                    ),
+                    // game-controller-outline
                     headerShown : false
                 }}
             />

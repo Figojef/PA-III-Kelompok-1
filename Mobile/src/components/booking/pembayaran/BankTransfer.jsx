@@ -10,7 +10,7 @@ const BankTransfer = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerTitle}>
+        <TouchableOpacity onPress={() => navigation.navigate('TabNavigator', {screen : 'Pemesanan'})} style={styles.headerTitle}>
         <Icon name="arrow-back" size={24} />
             <Text style={{fontWeight : "bold", fontSize : 18, marginLeft : 10}}>
             Bank Transfer

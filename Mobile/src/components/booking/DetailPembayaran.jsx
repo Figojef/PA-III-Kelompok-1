@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Expo already supports Ionicons
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeSelectedJadwalById } from '../../slices/todoSlice';
+import { removeSelectedJadwalById, removeSelectedJadwal } from '../../slices/todoSlice';
 import axios from 'axios';
 import { BE_MAIN_URL } from '../../../url';
 
 const DetailPembayaran = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch()
-
 
   const [modalVisible, setModalVisible] = useState(false); // state to control modal visibility
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
@@ -21,7 +20,6 @@ const DetailPembayaran = () => {
   
   const keranjangJadwal = useSelector(state => state.todo1.keranjangJadwal)
 
-
   const handlePaymentMethodSelect = (method) => {
     setSelectedPaymentMethod(method);
     setModalVisible(false); // close the modal after selection
@@ -30,56 +28,63 @@ const DetailPembayaran = () => {
   console.log(selectedPaymentMethod)
 
   let totalHarga = 0;
+
+
+  keranjangJadwal.length >= 1 ?
   keranjangJadwal.forEach((item) => {
     totalHarga = totalHarga + item.harga
   })
+  :
+  totalHarga = 0
+
+  console.log(totalHarga)
 
   const handleRemoveJadwalById = (_id) => {
     dispatch(removeSelectedJadwalById({_id}))
   }
 
-  const handleBayar = async () => {
-    try {
-      // Siapkan data untuk pemesanan baru
-      const pemesananData = {
-        user_id: user._id,  // User ID dari user yang sedang login
-        jadwal_dipesan: keranjangJadwal.map((item) => item.id),  // Ambil ID jadwal dari keranjang
-        total_harga: totalHarga  // Total harga sebagai string
-      };
-  
-      // Kirim request untuk membuat pemesanan
-      const pemesananResponse = await axios.post(`${BE_MAIN_URL}/pemesanan`, pemesananData);
-  
-      if (pemesananResponse.status === 201) {
-        console.log('Pemesanan berhasil dibuat:', pemesananResponse.data);
-  
-        // Setelah pemesanan berhasil, buat transaksi baru
-        const transaksiData = {
-          pemesanan_id: pemesananResponse.data.data._id,  // Ambil ID pemesanan yang baru dibuat
-          metode_pembayaran: 'bayar_langsung',  // Misalnya menggunakan transfer bank
-          status_pembayaran: 'menunggu',  // Status pembayaran menunggu
-          tanggal: ""  // Tanggal transaksi saat ini
-        };
-  
-        // Kirim request untuk membuat transaksi
-        const transaksiResponse = await axios.post(`${BE_MAIN_URL}/transaksi`, transaksiData);
-  
-        if (transaksiResponse.status === 201) {
-          console.log('Transaksi berhasil dibuat:', transaksiResponse.data);
-          // Tindakan selanjutnya setelah transaksi berhasil dibuat, seperti redirect ke halaman pembayaran atau status
 
-        } else {
-          console.error('Gagal membuat transaksi:', transaksiResponse.data);
-        }
-      } else {
-        console.error('Gagal membuat pemesanan:', pemesananResponse.data);
+  const handleOrder = async () => {
+    try {
+      // Prepare data for the requests
+      const user_id = user._id;
+      const jadwal_dipesan = keranjangJadwal.map((item) => item._id);
+      const metode_pembayaran = selectedPaymentMethod;
+      if(metode_pembayaran == ""){
+        alert('Pilih metode pembayaran')
+        return
+      }
+      // console.log('oke')
+
+      const response = await axios.post(`${BE_MAIN_URL}/pemesanan`, {
+        user_id,
+        jadwal_dipesan,
+        total_harga: totalHarga,
+        metode_pembayaran
+      });
+      
+
+      if (response.status === 201) {
+        // Successfully created the order and transaction
+        const totalHarga2 = totalHarga
+        dispatch(removeSelectedJadwal()); // Clear the selected jadwal
+        console.log(response.data.info)
+        navigation.navigate('Cash', {totalHarga2}); // Navigate to Cash screen
       }
     } catch (error) {
-      console.error('Terjadi kesalahan:', error);
+      console.log(0)
+      console.error("Error while creating order:", error);
+      // You can show an alert or some other feedback to the user
     }
   };
 
+  const user_id = user._id;
+  const jadwal_dipesan = keranjangJadwal.map((item) => item._id);
+  const metode_pembayaran = selectedPaymentMethod;
+
+
   return (
+    
     <View style={styles.container}>
       {/* Header */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.header}>
@@ -87,33 +92,13 @@ const DetailPembayaran = () => {
         <Text style={styles.headerTitle}>Detail Pembayaran</Text>
       </TouchableOpacity>
 
-      {/* Notifikasi Waktu */}
-      {/* <View style={styles.notification}>
-        <Text style={styles.notificationText}>
-          Silakan periksa detail transaksi anda dan lanjutkan pembayaran anda dalam{' '}
-          <Text style={styles.timer}>1:20</Text>
-        </Text>
-      </View> */}
+      {/* <TouchableOpacity onPress={handleOrder}>
+        <Text>ssssssssssssssssssssssssssssssssssssssssssssssss</Text>
+      </TouchableOpacity> */}
 
       <ScrollView style={styles.content}>
         {/* Detail Pesanan */}
         <Text style={styles.sectionTitle}>Ramos Badminton Center</Text>
-        {/* <View style={styles.orderItem}>
-          <View>
-            <Text style={styles.orderText}>🏸 Lapangan 2</Text>
-            <Text style={styles.orderDetail}>Senin, 03 Maret 2025, 20:00 - 21:00</Text>
-          </View>
-          <Text style={styles.price}>Rp 70.000</Text>
-          <Ionicons name="trash-outline" size={20} color="red" />
-        </View>
-        <View style={styles.orderItem}>
-          <View>
-            <Text style={styles.orderText}>🏸 Lapangan 2</Text>
-            <Text style={styles.orderDetail}>Senin, 03 Maret 2025, 21:00 - 22:00</Text>
-          </View>
-          <Text style={styles.price}>Rp 70.000</Text>
-          <Ionicons name="trash-outline" size={20} color="red" />
-        </View> */}
         {
           keranjangJadwal.map((item, ind) =>  <View style={styles.orderItem}>
             <View key={ind}>
@@ -173,8 +158,8 @@ const DetailPembayaran = () => {
       <View style={styles.footer}>
         <Text style={styles.totalText}>Total Pembayaran</Text>
         <Text style={styles.totalAmount}>Rp {totalHarga}</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Cash')} style={styles.payButton}>
-          <Text style={styles.payButtonText}>Bayar</Text>
+        <TouchableOpacity onPress={handleOrder} style={styles.payButton}>
+          <Text style={styles.payButtonText}>Bayars</Text>
         </TouchableOpacity>
       </View>
 
@@ -190,13 +175,13 @@ const DetailPembayaran = () => {
             <Text style={styles.modalTitle}>Pilih Metode Pembayaran</Text>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={() => handlePaymentMethodSelect('Cash (Bayar di Tempat)')}
+              onPress={() => handlePaymentMethodSelect('bayar_langsung')}
             >
               <Text style={styles.modalButtonText}>Cash (Bayar di Tempat)</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.modalButton}
-              onPress={() => handlePaymentMethodSelect('Bank Transfer Manual')}
+              onPress={() => handlePaymentMethodSelect('transfer_bank')}
             >
               <Text style={styles.modalButtonText}>Bank Transfer Manual</Text>
             </TouchableOpacity>
