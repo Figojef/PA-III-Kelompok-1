@@ -4,7 +4,8 @@ import {
     getAllPemesanan, 
     getPemesananById, 
     updatePemesananStatus, 
-    deletePemesanan 
+    deletePemesanan,
+    getPemesananByUserId
 } from "../controllers/PemesananController.js";
 import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
 
@@ -15,6 +16,9 @@ router.post("/", protectedMiddleware, createPemesanan);
 
 // Mendapatkan semua pemesanan
 router.get("/", getAllPemesanan);
+
+// Mendapatkan detail pemesanan berdasarkan ID
+router.get("/user/:user_id", protectedMiddleware, getPemesananByUserId);
 
 // Mendapatkan detail pemesanan berdasarkan ID
 router.get("/:id", protectedMiddleware, getPemesananById);

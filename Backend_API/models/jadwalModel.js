@@ -24,7 +24,7 @@ const jadwalSchema = new Schema({
     type: String,
     enum: ["Tersedia", "Tidak Tersedia"],
     default: "Tersedia",
-  },
+  }
 });
 
 // Membuat composite index yang menggabungkan lapangan, tanggal, dan jam

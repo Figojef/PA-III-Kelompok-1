@@ -1,5 +1,4 @@
 import express from "express";
-import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js"
 import { 
     createTransaksi, 
     getAllTransaksi, 
@@ -7,6 +6,9 @@ import {
     updateTransaksi, 
     deleteTransaksi 
 } from "../controllers/TransaksiController.js";
+
+import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
+
 
 const router = express.Router();
 

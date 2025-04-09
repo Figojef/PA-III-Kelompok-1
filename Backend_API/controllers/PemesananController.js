@@ -9,6 +9,9 @@ import Transaksi from "../models/transaksiModel.js";
 export const createPemesanan = asyncHandler(async (req, res) => {
     const { user_id, jadwal_dipesan, total_harga, metode_pembayaran } = req.body;
 
+    // res.json({
+    //     info : req.body
+    // })
     // Cek apakah user ada
     const user = await User.findById(user_id);
     if (!user) {
@@ -183,13 +186,65 @@ export const deletePemesanan = asyncHandler(async (req, res) => {
 export const getPemesananByUserId = asyncHandler(async (req, res) => {
     const { user_id } = req.params; // Mengambil user_id dari parameter URL
     
-    // Mencari pemesanan berdasarkan user_id
-    const pemesanan = await Pemesanan.find({ user_id }).populate("user_id", "name").populate("jadwal_dipesan");
+    // Step 1: Get pemesanan (bookings) based on user_id
+    const pemesanan = await Pemesanan.find({ user_id })
+        .populate("user_id", "name")
+        .populate({
+            path: "jadwal_dipesan",
+            populate: {
+                path: "lapangan", // Populate lapangan field inside Jadwal
+                select: "name", // Only select the name field from Lapangan
+            }
+        });
 
     if (!pemesanan || pemesanan.length === 0) {
         return res.status(404).json({ message: "Pemesanan tidak ditemukan untuk user_id ini." });
     }
 
-    res.status(200).json(pemesanan);
+    // Step 2: Get related transaksi (transactions) based on pemesanan_id
+    const transaksi = await Transaksi.find({
+        pemesanan_id: { $in: pemesanan.map(p => p._id) } // Fetch transactions that match the pemesanan_id
+    }).select("metode_pembayaran status_pembayaran tanggal pemesanan_id");
+
+    // Step 3: Combine pemesanan and transaksi data
+    // Adding transaksi data to each pemesanan
+    const pemesananWithTransaksi = pemesanan.map(p => {
+        const relatedTransaksi = transaksi.filter(t => t.pemesanan_id.toString() === p._id.toString());
+        return {
+            ...p.toObject(), // Convert Mongoose document to plain object
+            transaksi: relatedTransaksi
+        };
+    });
+
+    res.status(200).json(pemesananWithTransaksi);
 });
+// export const getPemesananByUserId = asyncHandler(async (req, res) => {
+//     const { user_id } = req.params; // Mengambil user_id dari parameter URL
+    
+//     // Mencari pemesanan berdasarkan user_id
+//     // const pemesanan = await Pemesanan.find({ user_id }).populate("user_id", "name").populate("jadwal_dipesan", "lapangan");
+    
+//     // Mencari pemesanan berdasarkan user_id dan populasi user_id dan jadwal_dipesan, serta lapangan di dalam jadwal_dipesan
+//     const pemesanan = await Pemesanan.find({ user_id })
+//     .populate("user_id", "name")
+//     .populate({
+//         path: "jadwal_dipesan",
+//         populate: {
+//             path: "lapangan", // Populate lapangan field inside Jadwal
+//             select: "name", // Only select the name field from Lapangan
+//         }
+//     })
+//     .populate({
+//         path: "transaksi", // Populate the transaksi field to get the associated Transaksi
+//         model: "Transaksi", // Ensure that it populates the correct model
+//         select: "metode_pembayaran status_pembayaran tanggal", // Select the fields you need from Transaksi
+//     });
+
+
+//     if (!pemesanan || pemesanan.length === 0) {
+//         return res.status(404).json({ message: "Pemesanan tidak ditemukan untuk user_id ini." });
+//     }
+
+//     res.status(200).json(pemesanan);
+// });
 

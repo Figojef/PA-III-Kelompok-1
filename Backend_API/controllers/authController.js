@@ -6,7 +6,8 @@ import asyncHandler from "../middleware/asyncHandler.js";
 const signToken = id => {
     return jwt.sign({id}, process.env.JWT_SECRET, 
     {
-        expiresIn : '6d',
+        // expiresIn : '6d',
+        expiresIn : '500d',
     }        
     )
 }
@@ -28,7 +29,8 @@ const createSendResToken = (user, statusCode, res) => {
     user.password = undefined
     
     res.status(statusCode).json({
-        data : user
+        data : user,
+        jwt: token // Kembalikan JWT di dalam respons JSON
     })
 }
 
@@ -37,17 +39,28 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     const role = isOwner ? 'admin' : 'pelanggan'
     
-
-    if(!req.body.email || !req.body.password){
+    
+    if(!req.body.email || !req.body.password || !req.body.nomor_whatsapp){
         res.status(400)
-        throw new Error('Email atau password tidak boleh kosong')
+        throw new Error('Email, password, dan nomor whatsapp tidak boleh kosong')
+    }
+
+    let nomor_whatsapp = req.body.nomor_whatsapp
+
+    if(nomor_whatsapp[0] == 0){
+        nomor_whatsapp = nomor_whatsapp.slice(1)
     }
 
     const createUser = await User.create({
         name : req.body.name,
         email : req.body.email,
+        nomor_whatsapp,
         password : req.body.password,
         role : role
+    })
+
+    res.status(201).json({
+        info : req.body
     })
 
     createSendResToken(createUser, 201, res)

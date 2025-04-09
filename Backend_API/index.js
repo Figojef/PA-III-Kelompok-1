@@ -1,20 +1,23 @@
-import dotenv from "dotenv"
 import express from "express"
+
+// Router
 import authRouter from './routes/authRouter.js'
-// import productRouter from './routes/productRouter.js'
-// import orderRouter from './routes/orderRouter.js'
-import { notFound, errorHandler } from "./middleware/errorMiddleware.js"
-import cookieParser  from "cookie-parser"
-import helmet from "helmet"
-import ExpressMongoSanitize from "express-mongo-sanitize"
-import { v2 as cloudinary } from 'cloudinary';
-import cors from "cors";
+import productRouter from './routes/productRouter.js'
 import lapanganRouter from './routes/lapanganRouter.js'
+import orderRouter from './routes/orderRouter.js'
 import jadwalRouter from './routes/jadwalRouter.js'
 import pemesananRouter from './routes/pemesananRouter.js'
 import transaksiRouter from './routes/transaksiRouter.js'
+import mabarRouter from './routes/mabarRouter.js'
 
-dotenv.config()
+
+import dotenv from "dotenv"
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js"
+import cookieParser from "cookie-parser"
+import helmet from "helmet"
+import ExpressMongoSanitize from "express-mongo-sanitize"
+import { v2 as cloudinary } from 'cloudinary';
+
 
 const app = express()
 const port = 3000
@@ -36,78 +39,55 @@ app.use(express.urlencoded({extended : true}))  // memasukkan inputan di urlenco
 app.use(cookieParser())
 app.use(express.static('./public'))
 
-app.use(cors({
-  origin: 'http://127.0.0.1:8000', // Laravel
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+
+dotenv.config()
 
 
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/product', productRouter)
 app.use('/api/v1/lapangan', lapanganRouter)
+app.use('/api/v1/order', orderRouter) 
+app.use('/api/v1/jadwal', jadwalRouter)
 app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
-app.use('/api/v1/jadwal', jadwalRouter)
+app.use('/api/v1/mabar', mabarRouter)
+
 
 
 app.use(notFound)
 app.use(errorHandler)
 
 
-// const { MongoClient, ServerApiVersion } = require('mongodb');
-
-// import { MongoClient, ServerApiVersion } from "mongodb"
-
-// const uri = "mongodb+srv://benyaminsibarani2406:JIgP6ldWjJuxYIWh@cluster0.qpoml.mongodb.net/Ecommerce_MERN?retryWrites=true&w=majority&appName=Cluster0";
-
-// // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-// const client = new MongoClient(uri, {
-//   serverApi: {
-//     version: ServerApiVersion.v1,
-//     strict: true,
-//     deprecationErrors: true,
-//   }
-// });
-
-// async function run() {
-//   try {
-//     // Connect the client to the server	(optional starting in v4.7)
-//     await client.connect();
-//     // Send a ping to confirm a successful connection
-//     await client.db("admin").command({ ping: 1 });
-//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-//   } finally {
-//     // Ensures that the client will close when you finish/error
-//     await client.close();
-//   }
-// }
-// run().catch(console.dir);
-
 // import mongoose from "mongoose";
 
 // // Gantilah dengan URI Atlas Anda
-// const uri = process.env.DATABASE
+// const uri = process.env.DATABASE;
 
-// async function run() {
+// async function connectToDatabase() {
 //   try {
 //     // Menghubungkan ke MongoDB Atlas menggunakan Mongoose
-//     await mongoose.connect(uri);
+//     await mongoose.connect(uri, {
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//       serverSelectionTimeoutMS: 30000, // Timeout 30 detik
+//       socketTimeoutMS: 45000, // Timeout socket 45 detik
+//     });
 //     console.log("Connected to MongoDB Atlas!");
 
 //     // Memastikan koneksi berhasil dengan melakukan ping
-//     const admin = mongoose.connection.db.admin(); 
+//     const admin = mongoose.connection.db.admin();
 //     await admin.ping();
 //     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-
 //   } catch (error) {
 //     console.error("Error connecting to MongoDB Atlas:", error);
-//   } finally {
-//     // Menutup koneksi setelah operasi selesai
-//     await mongoose.disconnect();
+//     process.exit(1); // Keluar dari aplikasi jika koneksi gagal
 //   }
 // }
 
-// run().catch(console.dir);
+// connectToDatabase(); // Jalankan fungsi koneksi
+
+// // Jalankan server
+// app.listen(port, () => console.log(`Server up and running at port ${port}`));
 
 import mongoose from "mongoose";
 
@@ -116,35 +96,25 @@ const uri = process.env.DATABASE;
 
 async function connectToDatabase() {
   try {
-    // Pastikan variabel uri sudah terdefinisi
-    if (!uri) {
-      throw new Error("MongoDB URI is not defined. Set it in your environment variables.");
-    }
-
-    // Menghubungkan ke MongoDB Atlas tanpa opsi yang deprecated
-    await mongoose.connect(uri);
+    // Menghubungkan ke MongoDB Atlas menggunakan Mongoose
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log("Connected to MongoDB Atlas!");
 
-    // Mengecek status koneksi Mongoose
-    const dbStatus = mongoose.connection.readyState;
-    if (dbStatus === 1) {
-      console.log("Mongoose connection is established.");
-    } else {
-      console.log("Mongoose connection is not yet fully established.");
-    }
+    // Memastikan koneksi berhasil dengan melakukan ping
+    const admin = mongoose.connection.db.admin();
+    await admin.ping();
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
     console.error("Error connecting to MongoDB Atlas:", error);
     process.exit(1); // Keluar dari aplikasi jika koneksi gagal
   }
 }
 
-// Panggil fungsi koneksi
-connectToDatabase();
+connectToDatabase(); // Jalankan fungsi koneksi
 
-console.log("Registered Routes:", app._router.stack
-  .filter(r => r.route)
-  .map(r => r.route.path)
-);
 
 app.listen(port, () => console.log(`Server up and run at ${port} port`))
 

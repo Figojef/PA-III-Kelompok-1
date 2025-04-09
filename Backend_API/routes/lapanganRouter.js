@@ -11,6 +11,7 @@ router.post('/', protectedMiddleware, adminMiddleware, CreateLapangan)
 
 router.get('/', AllLapangan)
 
+
 router.get('/:id', protectedMiddleware, detailLapangan)
 
 router.put('/:id', protectedMiddleware, adminMiddleware, updateLapangan)    

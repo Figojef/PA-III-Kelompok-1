@@ -1,25 +1,41 @@
 import express from "express";
 import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
-import { AllJadwal, CreateJadwal, DetailJadwal, UpdateJadwal, DeleteJadwal, JadwalByTanggal } from "../controllers/JadwalController.js";
+import { 
+  AllJadwal, 
+  CreateJadwal, 
+  DetailJadwal, 
+  UpdateJadwal, 
+  DeleteJadwal, 
+  JadwalByDateAndLapangan,
+  JadwalByLapangan,
+  JadwalRutinHarian
+} from "../controllers/JadwalController.js";
 
 const router = express.Router();
 
-// Membuat jadwal baru (hanya admin yang bisa)
-router.post("/", CreateJadwal);
+// Route for getting all jadwal
+router.get('/', AllJadwal);
 
-// Mendapatkan semua jadwal (hanya user yang login)
-router.get("/", protectedMiddleware, AllJadwal);
 
-// Mendapatkan detail jadwal berdasarkan ID
-router.get("/:id", protectedMiddleware, DetailJadwal);
+router.get('/tanggal', JadwalByDateAndLapangan);
 
-// Mengupdate jadwal berdasarkan ID (hanya admin)
-router.put("/:id", protectedMiddleware, adminMiddleware, UpdateJadwal);
+router.get('/lapangan/:lapanganId', JadwalByLapangan);
 
-// Menghapus jadwal berdasarkan ID (hanya admin)
-router.delete("/:id", protectedMiddleware, adminMiddleware, DeleteJadwal);
 
-// Mendapatkan jadwal berdasarkan tanggal
-router.get("/tanggal/:tanggal", JadwalByTanggal);
+
+// Route for creating a jadwal
+router.post('/', CreateJadwal);
+
+router.post('/jadwal-harian', JadwalRutinHarian);
+
+
+// Route for getting a specific jadwal by its ID
+router.get('/:id', DetailJadwal);
+
+// Route for updating a specific jadwal by its ID
+router.put('/:id', UpdateJadwal);
+
+// Route for deleting a specific jadwal by its ID
+router.delete('/:id', DeleteJadwal);
 
 export default router;

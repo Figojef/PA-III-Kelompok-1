@@ -3,25 +3,21 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import Product from "../models/productModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier"
-import Lapangan from "../models/lapanganModel.js";
 
-export const CreateLapangan = asyncHandler(async(req,res) => {
-    // res.send("Create Lapangan")
-    const newLapangan = await Lapangan.create(req.body)
+export const CreateProduct = asyncHandler(async(req,res) => {
+    // res.send("Create Product")
+    const newProduct = await Product.create(req.body)
 
     res.status(201).json({
-        message : "Berhasil tambah lapangan",
-        data : newLapangan
+        message : "Berhasil tambah produk",
+        data : newProduct
     })
 })
 
-
-export const AllLapangan = asyncHandler(async(req,res) => {
-    // res.send("All Lapangan")
+export const AllProduct = asyncHandler(async(req,res) => {
+    // res.send("All Product")
     // const data = await Product.find()
-
     const queryObj = {...req.query}
-
     const excludeField = ["page", "limit", "name"]
 
     excludeField.forEach(element => delete queryObj[element])
@@ -31,14 +27,14 @@ export const AllLapangan = asyncHandler(async(req,res) => {
     let query
 
     if(req.query.name){
-        query =  Lapangan.find({
+        query =  Product.find({
             name : {$regex : req.query.name, $options : 'i'}
         })
     }else{
-        query = Lapangan.find(queryObj)
+        query = Product.find(queryObj)
     }
     
-    // let query = Lapangan.find(queryObj)
+    // let query = Product.find(queryObj)
 
     // // Pagination
     const page = req.query.page * 1 || 1
@@ -47,58 +43,60 @@ export const AllLapangan = asyncHandler(async(req,res) => {
 
     query = query.skip(skipData).limit(limitData)
 
-    const countLapangan = await Lapangan.countDocuments()
+    const countProduct = await Product.countDocuments()
 
     if(req.query.page){
-        if(skipData >= countLapangan){
+        if(skipData >= countProduct){
             res.status(404)
             throw new Error("This page doesnt exist")
         }
     }
 
+
     const data = await query
 
+
+
     return res.status(200).json({
-        message : "Berhasil tampil semua lapangan",
+        message : "Berhasil tampil semua produk",
         data,
-        count : countLapangan
+        count : countProduct
     })
 
 })
 
-export const detailLapangan = asyncHandler(async (req, res) => {
+export const detailProduct = asyncHandler(async (req, res) => {
     const paramId = req.params.id
-    const dataLapangan = await Lapangan.findById(paramId)
+    const dataProduct = await Product.findById(paramId)
 
-    if(!dataLapangan){
+    if(!dataProduct){
         res.status(404)
         throw new Error("Id tidak ditemukan")
     }
 
     res.status(200).json({
-        message : "Detail lapangan berhasil ditampilkan",
-        data : dataLapangan 
+        message : "Detail produk berhasil ditampilkan",
+        data : dataProduct 
     })
 })
 
 
-export const updateLapangan = asyncHandler(async (req, res) => {
-    // res.send("Update Lapangan")
+export const updateProduct = asyncHandler(async (req, res) => {
+    // res.send("Update Product")
     const paramId = req.params.id
-    const updateLapangan = await Lapangan.findByIdAndUpdate(paramId,
+    const updateProduct = await Product.findByIdAndUpdate(paramId,
         req.body,
         {
             runValidator : false,
             new : true
         }
     )
-    
+
     return res.status(201).json({
-        message : "Update Lapangan berhasil",
-        data : updateLapangan
+        message : "Update product berhasil",
+        data : updateProduct
     })
 })
-
 
 export const deleteProduct = asyncHandler(async(req,res) => {
     // res.send("Delete Product")
@@ -109,7 +107,6 @@ export const deleteProduct = asyncHandler(async(req,res) => {
         message : "Berhasil hapus produk"
     })
 })
-
 
 export const fileUpload = asyncHandler(async(req, res) => {
 
@@ -130,6 +127,7 @@ export const fileUpload = asyncHandler(async(req, res) => {
             message : "Gambar berhasil diupload",
             url : result.secure_url
         })
+
 
     }
     )

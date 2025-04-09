@@ -1,10 +1,11 @@
-// import { query } from "express";
+import { query } from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
-// import Product from "../models/productModel.js";
-// import { v2 as cloudinary } from "cloudinary";
-// import streamifier from "streamifier"
+import Product from "../models/productModel.js";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier"
 import Lapangan from "../models/lapanganModel.js";
 import Jadwal from "../models/jadwalModel.js";
+
 import mongoose from 'mongoose';
 
 
@@ -29,6 +30,73 @@ export const AllJadwal = asyncHandler(async (req, res) => {
     });
   });
 
+
+  // export const JadwalRutinHarian = asyncHandler(async (req, res) => {
+  //     res.send("Daily sch")
+  // }); 
+  export const JadwalRutinHarian = asyncHandler(async (req, res) => {
+    const { lapangan, tanggal } = req.body;
+
+    // Validasi lapangan id dan tanggal
+    if (!lapangan || !tanggal) {
+        return res.status(400).json({ message: "Lapangan dan Tanggal harus diisi." });
+    }
+
+    // Validasi apakah lapangan ada di database
+    const lapanganExists = await Lapangan.findById(lapangan);
+    if (!lapanganExists) {
+        return res.status(404).json({ message: "Lapangan tidak ditemukan." });
+    }
+
+    // Jam yang sudah ditentukan dan harga, format jam diubah menjadi string
+    const jadwalJam = [
+        { jam: "8", harga: 25000 },
+        { jam: "9", harga: 25000 },
+        { jam: "10", harga: 25000 },
+        { jam: "11", harga: 25000 },
+        { jam: "12", harga: 25000 },
+        { jam: "13", harga: 25000 },
+        { jam: "14", harga: 25000 },
+        { jam: "15", harga: 25000 },
+        { jam: "16", harga: 25000 },
+        { jam: "17", harga: 25000 },
+        { jam: "18", harga: 35000 },
+        { jam: "19", harga: 35000 },
+        { jam: "20", harga: 35000 },
+        { jam: "21", harga: 35000 },
+        { jam: "22", harga: 35000 },
+        { jam: "23", harga: 35000 },
+    ];
+
+    // Periksa apakah jadwal sudah ada untuk tanggal dan lapangan tertentu
+    const existingJadwal = await Jadwal.find({ lapangan, tanggal });
+    
+    // Filter jam yang sudah ada, agar tidak duplikat
+    const existingJam = existingJadwal.map(jadwal => jadwal.jam);
+    
+    const jadwalToInsert = jadwalJam.filter(jam => !existingJam.includes(jam.jam));
+
+    if (jadwalToInsert.length === 0) {
+        return res.status(200).json({ message: "Tidak ada jadwal baru yang perlu ditambahkan. Semua jadwal sudah ada." });
+    }
+
+    // Tambahkan jadwal baru
+    const newJadwal = await Jadwal.insertMany(
+        jadwalToInsert.map(jam => ({
+            lapangan,
+            tanggal,
+            jam: jam.jam,
+            harga: jam.harga,
+            status: "Tersedia",
+        }))
+    );
+
+    return res.status(201).json({
+        message: "Jadwal harian berhasil ditambahkan",
+        data: newJadwal,
+    });
+});
+  
 
   // Fungsi untuk menangani request asinkron
   export const CreateJadwal = asyncHandler(async (req, res) => {
@@ -72,21 +140,6 @@ export const AllJadwal = asyncHandler(async (req, res) => {
     });
   });
   
-  export const JadwalByTanggal = async (req, res) => {
-    try {
-      const { tanggal } = req.params;
-      const jadwal = await Jadwal.find({ tanggal: tanggal });
-  
-      if (jadwal.length === 0) {
-        return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
-      }
-  
-      res.status(200).json(jadwal);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Terjadi kesalahan pada server" });
-    }
-  };
 
 
   // export const CreateJadwal = asyncHandler(async (req, res) => {
@@ -223,7 +276,6 @@ export const AllJadwal = asyncHandler(async (req, res) => {
   // });
 
 
-  
   export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
     const { tanggal, lapangan } = req.query;
 
@@ -236,20 +288,34 @@ export const AllJadwal = asyncHandler(async (req, res) => {
     }
 
     try {
-        const jadwal = await Jadwal.find({
-            tanggal, lapangan
-        })
-        .populate("lapangan");
+        const jadwal = await Jadwal.find({ tanggal, lapangan })
+            .populate("lapangan");
 
         if (!jadwal.length) {
             return res.status(404).json({ message: "Jadwal tidak ditemukan" });
         }
 
-        res.status(200).json(jadwal);
+        // Convert 'jam' to integer and sort manually
+        const sortedJadwal = jadwal
+            .map(item => ({
+                ...item.toObject(), // Convert Mongoose document to a plain object
+                jamAsInt: parseInt(item.jam.replace(":", "")) // Convert 'jam' to integer (remove ':' if present)
+            }))
+            .sort((a, b) => a.jamAsInt - b.jamAsInt); // Sort by 'jamAsInt'
+
+        // Remove the 'jamAsInt' field from the response
+        const result = sortedJadwal.map(item => {
+            const { jamAsInt, ...rest } = item;
+            return rest;
+        });
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: "Terjadi kesalahan server", error: error.message });
     }
 });
+
+
 
 
 export const JadwalByLapangan = asyncHandler(async (req, res) => {

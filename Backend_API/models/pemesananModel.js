@@ -23,7 +23,7 @@ const pemesananSchema = new Schema({
         type: String,
         enum: ["Sedang Dipesan", "Berhasil", "Dibatalkan"],
         default: "Sedang Dipesan"
-    }   
+    }
 });
 
 const Pemesanan = mongoose.model("Pemesanan", pemesananSchema);

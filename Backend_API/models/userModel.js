@@ -20,6 +20,11 @@ const userSchema = new Schema({
             message : "Inputan harus berformat Email. Ex : abc@gmail.com"
         }
     },
+    nomor_whatsapp : {
+        type : String,
+        required : [true, "Nomor WA harus diisi"],
+        unique : [true, "Nomor sudah pernah didaftarkan"]
+    },
     password : {
         type : String,
         required : [true, "Password harus diisi"],
