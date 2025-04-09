@@ -27,7 +27,12 @@
 
             </ul>
             <ul class="navbar-nav ms-3">
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-circle fs-5"></i></a></li>
+                @if (!Session::has('jwt'))
+                    <li class="nav-item"><a class="nav-link" href="{{route('login')}}"><i class="bi bi-person-circle fs-5"></i></a></li>
+                    @else
+                    <li class="nav-item"><a class="nav-link" href="{{route('logout')}}"><i class="bi bi-person-circle fs-5"></i></a></li>
+                @endif
+
             </ul>
         </div>
     </div>

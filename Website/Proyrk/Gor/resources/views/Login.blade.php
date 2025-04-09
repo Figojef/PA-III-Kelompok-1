@@ -165,7 +165,7 @@
     console.log("Sending request to API...");
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/api/login", {
+        const response = await fetch("http://localhost:3000/api/v1/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, password}),
@@ -182,7 +182,7 @@
         }
     } catch (error) {
         console.error("Fetch error:", error);
-        alert("Terjadi kesalahan, cek console untuk detail.");
+        alert("Terjadi kesalahan, cek console untuk detailss.");
     }
 });
 </script>

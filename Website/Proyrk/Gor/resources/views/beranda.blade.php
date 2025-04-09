@@ -83,6 +83,15 @@
     <div class="d-flex align-items-center">
         <h2 class="me-3">Tentang Kami</h2>
         <div class="line"></div>
+        <h2>
+            @php
+                if(isset($jwt)){
+                    echo $jwt;
+                }else{
+                    echo "Not found";
+                }
+            @endphp
+        </h2>
     </div>
 </div>
 
