@@ -8,7 +8,7 @@
 
         <title>Login</title>
         <style>
-            body {
+            body {  
                 background-color: #222F37;
                 font-family: Arial, sans-serif;
             }

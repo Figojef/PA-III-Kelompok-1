@@ -66,7 +66,7 @@ export const SelectJadwalMabar = asyncHandler(async (req, res) => {
 
 export const CreateMabar = asyncHandler(async (req, res) => {
     const {
-        nama_mabar,
+        judul_mabar,
         biaya,
         range_umur,
         level,
@@ -82,14 +82,14 @@ export const CreateMabar = asyncHandler(async (req, res) => {
     //     yourData : req.body
     // })
     // Validasi jika data yang diperlukan tidak ada
-    if (!nama_mabar || !biaya || !range_umur || !level || !kategori || !slot_peserta || !deskripsi || !user_pembuat_mabar || !jadwal) {
+    if (!judul_mabar || !biaya || !range_umur || !level || !kategori || !slot_peserta || !deskripsi || !user_pembuat_mabar || !jadwal) {
         res.status(400);
         throw new Error("Semua field harus diisi");
     }
 
     // Membuat Mabar baru
     const mabar = new Mabar({
-        nama_mabar,
+        judul_mabar,
         biaya,
         range_umur,
         level,
@@ -209,7 +209,7 @@ export const getAllMabar = asyncHandler(async (req, res) => {
         // Ambil hanya data yang relevan (hapus metadata Mongoose seperti $__)
         const cleanedData = {
             _id: data._id,
-            nama_mabar: data.nama_mabar,
+            judul_mabar: data.judul_mabar,
             biaya: data.biaya,
             range_umur: data.range_umur,
             level: data.level,
@@ -377,7 +377,7 @@ export const GetMabarOwn = asyncHandler(async (req, res) => {
         // Ambil hanya data yang relevan (hapus metadata Mongoose seperti $__)
         const cleanedData = {
             _id: data._id,
-            nama_mabar: data.nama_mabar,
+            judul_mabar: data.judul_mabar,
             biaya: data.biaya,
             range_umur: data.range_umur,
             level: data.level,
@@ -465,7 +465,7 @@ export const GetMabarJoined = asyncHandler(async (req, res) => {
             // Ambil hanya data yang relevan (hapus metadata Mongoose seperti $__)
             const cleanedData = {
                 _id: data._id,
-                nama_mabar: data.nama_mabar,
+                judul_mabar: data.judul_mabar,
                 biaya: data.biaya,
                 range_umur: data.range_umur,
                 level: data.level,

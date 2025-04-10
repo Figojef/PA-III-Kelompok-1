@@ -16,6 +16,11 @@ const lapanganSchema = new Schema({
         type : String,
         default : null
     },
+    status: {
+        type: String,
+        enum: ["Aktif", "Tidak Aktif"],
+        default: "Aktif",
+      }
 })
 
 const Lapangan = mongoose.model("Lapangan", lapanganSchema)

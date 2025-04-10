@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const mabarSchema = new Schema({
-  nama_mabar: {
+  judul_mabar: {
     type: String,
     required: [true, "Nama mabar harus diisi"],
   },

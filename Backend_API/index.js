@@ -4,7 +4,6 @@ import express from "express"
 import authRouter from './routes/authRouter.js'
 import productRouter from './routes/productRouter.js'
 import lapanganRouter from './routes/lapanganRouter.js'
-import orderRouter from './routes/orderRouter.js'
 import jadwalRouter from './routes/jadwalRouter.js'
 import pemesananRouter from './routes/pemesananRouter.js'
 import transaksiRouter from './routes/transaksiRouter.js'
@@ -46,7 +45,6 @@ dotenv.config()
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/lapangan', lapanganRouter)
-app.use('/api/v1/order', orderRouter) 
 app.use('/api/v1/jadwal', jadwalRouter)
 app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
