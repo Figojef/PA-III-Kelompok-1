@@ -42,15 +42,19 @@ export const getTransaksiById = asyncHandler(async (req, res) => {
 
 // Mengupdate status pembayaran
 export const updateTransaksi = asyncHandler(async (req, res) => {
-    const transaksi = await Transaksi.findById(req.params.id);
+    // res.send("Berhasil dibayar")
+    res.status(200).json({
+        message : "Transaksi dengan ID : 16gf76fgwt82g20hca9fi berhasil dibayar"
+    })
+    // const transaksi = await Transaksi.findById(req.params.id);
 
-    if (transaksi) {
-        transaksi.status_pembayaran = req.body.status_pembayaran || transaksi.status_pembayaran;
-        const updatedTransaksi = await transaksi.save();
-        res.json({ message: "Transaksi berhasil diperbarui", data: updatedTransaksi });
-    } else {
-        res.status(404).json({ message: "Transaksi tidak ditemukan" });
-    }
+    // if (transaksi) {
+    //     transaksi.status_pembayaran = req.body.status_pembayaran || transaksi.status_pembayaran;
+    //     const updatedTransaksi = await transaksi.save();
+    //     res.json({ message: "Transaksi berhasil diperbarui", data: updatedTransaksi });
+    // } else {
+    //     res.status(404).json({ message: "Transaksi tidak ditemukan" });
+    // } 
 });
 
 // Menghapus transaksi

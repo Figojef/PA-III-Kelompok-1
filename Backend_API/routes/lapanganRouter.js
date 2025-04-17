@@ -9,7 +9,7 @@ const router = express.Router()
 router.post('/', protectedMiddleware, adminMiddleware, CreateLapangan)
 
 
-router.get('/', AllLapangan)
+router.get('/', protectedMiddleware, AllLapangan)
 
 
 router.get('/:id', protectedMiddleware, detailLapangan)
