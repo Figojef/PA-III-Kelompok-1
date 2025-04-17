@@ -6,6 +6,7 @@ import {
   DetailJadwal, 
   UpdateJadwal, 
   DeleteJadwal, 
+  JadwalByTanggal,
   JadwalByDateAndLapangan,
   JadwalByLapangan,
   JadwalRutinHarian
@@ -17,10 +18,11 @@ const router = express.Router();
 router.get('/', AllJadwal);
 
 
-router.get('/tanggal', JadwalByDateAndLapangan);
+router.get('/tanggal/', JadwalByDateAndLapangan);
 
 router.get('/lapangan/:lapanganId', JadwalByLapangan);
 
+router.get('/tanggal/:tanggal', JadwalByTanggal);
 
 
 // Route for creating a jadwal

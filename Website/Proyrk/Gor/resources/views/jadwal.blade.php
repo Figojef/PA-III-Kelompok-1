@@ -10,6 +10,25 @@
         color: #fff;
         padding: 8px 12px;
     }
+    .jadwal-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    }
+
+    .jadwal-table th,
+    .jadwal-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    }
+
+    .jadwal-table th {
+    background-color: #222F37;
+    font-weight: bold;
+    }
+
+
 
     .jadwal-item {
         color: red;
@@ -85,7 +104,7 @@ function renderjadwal(jadwalData) {
 
     // Kelompokkan jadwal berdasarkan lapangan
     const groupedByLapangan = jadwalData.reduce((acc, item) => {
-        const lapanganName = item.lapangan; // Asumsi 'lapangan' adalah nama lapangan
+        const lapanganName = item.lapangan?.name; // Asumsi 'lapangan' adalah nama lapangan
         if (!acc[lapanganName]) {
             acc[lapanganName] = [];
         }
@@ -107,7 +126,6 @@ function renderjadwal(jadwalData) {
         // Buat header tabel
         const thead = document.createElement("thead");
         const headerRow = document.createElement("tr");
-        headerRow.innerHTML = "<th>Jam</th>"; // Header untuk kolom Jam
         thead.appendChild(headerRow);
         table.appendChild(thead);
 
@@ -123,10 +141,32 @@ function renderjadwal(jadwalData) {
         groupedByLapangan[lapangan].forEach(item => {
             const row = document.createElement("tr");
 
+            const statusJamCell = document.createElement("td");
+            statusJamCell.style.display = "flex";
+            const status = document.createElement("td");
+           
+            let statusClass = "circle"; // Semua status akan memiliki class dasar 'circle'
+    
+            if (item.status === "Tersedia") {
+            statusClass += " green"; // Jika status "Tersedia", beri warna hijau
+            } else if (item.status === "Tidak Tersedia") {
+        statusClass += " red"; // Jika status "Tidak Tersedia", beri warna merah
+            } else if (item.status === "Pending") {
+        statusClass += " grey"; // Status "Pending" menjadi abu-abu
+            } else if (item.status === "Dipesan") {
+        statusClass += " blue"; // Status "Dipesan" menjadi biru
+         } else if (item.status === "Dibatalkan") {
+        statusClass += " orange"; // Status "Dibatalkan" menjadi oranye
+    }
+
             const jamCell = document.createElement("td");
             jamCell.textContent = item.jam ? item.jam : "Jam tidak tersedia";
 
-            row.appendChild(jamCell);
+            statusJamCell.appendChild(status);
+            statusJamCell.appendChild(jamCell);
+
+                // Tambahkan statusJamCell ke dalam baris
+            row.appendChild(statusJamCell);
             tbody.appendChild(row);
         });
 

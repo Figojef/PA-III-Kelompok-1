@@ -275,45 +275,62 @@ export const AllJadwal = asyncHandler(async (req, res) => {
   //   });
   // });
 
-
+  export const JadwalByTanggal = async (req, res) => {
+    try {
+      const { tanggal } = req.params;
+      const jadwal = await Jadwal.find({ tanggal: tanggal })
+                                  .populate('lapangan', 'name');
+  
+      if (jadwal.length === 0) {
+        return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
+      }
+  
+      res.status(200).json(jadwal);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    }
+  };
+  
   export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
-    const { tanggal, lapangan } = req.query;
+    const { tanggal } = req.params;
+    const { lapangan } = req.query;
 
-    if (!tanggal || !lapangan) {
-        return res.status(400).json({ message: "Tanggal dan Lapangan harus diisi" });
+    if (!tanggal) {
+        return res.status(400).json({ message: "Tanggal harus diisi" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(lapangan)) {
-        return res.status(400).json({ message: "Lapangan ID tidak valid" });
+    let query = { tanggal };
+
+    // Tambahkan lapangan ke query jika ada
+    if (lapangan) {
+        if (!mongoose.Types.ObjectId.isValid(lapangan)) {
+            return res.status(400).json({ message: "Lapangan ID tidak valid" });
+        }
+        query.lapangan = lapangan;
     }
 
     try {
-        const jadwal = await Jadwal.find({ tanggal, lapangan })
-            .populate("lapangan");
+        const jadwal = await Jadwal.find(query).populate("lapangan");
 
         if (!jadwal.length) {
             return res.status(404).json({ message: "Jadwal tidak ditemukan" });
         }
 
-        // Convert 'jam' to integer and sort manually
         const sortedJadwal = jadwal
             .map(item => ({
-                ...item.toObject(), // Convert Mongoose document to a plain object
-                jamAsInt: parseInt(item.jam.replace(":", "")) // Convert 'jam' to integer (remove ':' if present)
+                ...item.toObject(),
+                jamAsInt: parseInt(item.jam.replace(":", ""))
             }))
-            .sort((a, b) => a.jamAsInt - b.jamAsInt); // Sort by 'jamAsInt'
+            .sort((a, b) => a.jamAsInt - b.jamAsInt)
+            .map(({ jamAsInt, ...rest }) => rest);
 
-        // Remove the 'jamAsInt' field from the response
-        const result = sortedJadwal.map(item => {
-            const { jamAsInt, ...rest } = item;
-            return rest;
-        });
-
-        res.status(200).json(result);
+        res.status(200).json(sortedJadwal);
     } catch (error) {
         res.status(500).json({ message: "Terjadi kesalahan server", error: error.message });
     }
 });
+
 
 
 

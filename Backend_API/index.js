@@ -16,10 +16,19 @@ import cookieParser from "cookie-parser"
 import helmet from "helmet"
 import ExpressMongoSanitize from "express-mongo-sanitize"
 import { v2 as cloudinary } from 'cloudinary';
+import cors from 'cors';
 
 
 const app = express()
 const port = 3000
+
+
+app.use(cors());
+
+app.use(cors({
+  origin: '*'
+}));
+
 
 
 // Configuration
