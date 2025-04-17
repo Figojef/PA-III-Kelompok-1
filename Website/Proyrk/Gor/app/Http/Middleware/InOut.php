@@ -23,7 +23,7 @@ class InOut
             if(Session::get('user_data')['role'] == 'admin'){
                 return redirect()->route('admin');
             }else{
-                return redirect()->route('/');
+                return redirect()->route('dashboard');
             }
         }
         return $next($request);

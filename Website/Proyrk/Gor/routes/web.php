@@ -11,11 +11,9 @@ use App\Http\Controllers\LapanganController;
 
 
 Route::middleware(['inout'])->group(function () {
-    Route::get('/login', function () {
-        return view('auth.login');
-    })->name('login');
+    Route::get('/login', [AuthController::class, 'index'])->name('login');
     
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
 
 
@@ -60,6 +58,22 @@ Route::get('/jadwal', [LapanganController::class, 'index']);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Test
+Route::get('/tesLapangan', [LapanganController::class, 'index']);
 
 
 

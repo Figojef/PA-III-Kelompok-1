@@ -85,10 +85,11 @@
         <div class="line"></div>
         <h2>
             @php
-                if(isset($jwt)){
-                    echo $jwt;
+                if(isset(Session::get('user_data')['role'])){
+                    // echo Session::get('user_data')['jwt'];
+                    echo Session::get('jwt');
                 }else{
-                    echo "Not found";
+                    echo ".";
                 }
             @endphp
         </h2>
