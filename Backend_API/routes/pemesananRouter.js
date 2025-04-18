@@ -5,7 +5,8 @@ import {
     getPemesananById, 
     updatePemesananStatus, 
     deletePemesanan,
-    getPemesananByUserId
+    getPemesananByUserId,
+    pesananJadwalBelumLewat
 } from "../controllers/PemesananController.js";
 import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
 
@@ -19,6 +20,9 @@ router.get("/", getAllPemesanan);
 
 // Mendapatkan detail pemesanan berdasarkan ID
 router.get("/user/:user_id", protectedMiddleware, getPemesananByUserId);
+
+// Mendapatkan detail pemesanan berdasarkan ID
+router.get("/user/pesananJadwalBelumLewat/:user_id", protectedMiddleware, pesananJadwalBelumLewat);
 
 // Mendapatkan detail pemesanan berdasarkan ID
 router.get("/:id", protectedMiddleware, getPemesananById);

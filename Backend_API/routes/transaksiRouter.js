@@ -17,6 +17,7 @@ router.get("/", protectedMiddleware, getAllTransaksi);
 router.post("/", protectedMiddleware, createTransaksi);
 
 router.route("/").post(createTransaksi).get(getAllTransaksi);
+
 router.route("/:id").get(getTransaksiById).put(updateTransaksi).delete(deleteTransaksi);
 
 export default router;

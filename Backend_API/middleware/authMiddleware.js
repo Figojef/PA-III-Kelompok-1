@@ -20,13 +20,15 @@ export const protectedMiddleware = asyncHandler(async(req, res, next) => {
     }
 })
 
+
 export const adminMiddleware = asyncHandler(
     async (req, res, next) => {
         if(req.user && req.user.role === 'admin'){
             next()
         }else{
             res.status(401)
-            throw new Error("Not Authorized as Owner")
+            // throw new Error("Not Authorized as Owner")
+            throw new Error("Anda tidak terautentikasi sebagai Owner")
         }
     }
 )

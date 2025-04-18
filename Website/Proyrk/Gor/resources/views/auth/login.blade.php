@@ -136,7 +136,17 @@
     </head>
     <body>
         <center style="margin-top: 150px;">
-        <form id="loginForm" action="{{ route('login') }}" method="POST">
+        <form id="loginForm" action="{{ route('login.submit') }}" method="POST">
+            @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
             @csrf
             <div class="card" style="width: 30rem;  margin-bottom: 100px;border-radius: 20px 20px 20px 20px;">
                 <center>  

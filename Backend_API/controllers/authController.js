@@ -59,9 +59,9 @@ export const registerUser = asyncHandler(async (req, res) => {
         role : role
     })
 
-    res.status(201).json({
-        info : req.body
-    })
+    // res.status(201).json({
+    //     info : req.body
+    // })
 
     createSendResToken(createUser, 201, res)
 
@@ -90,7 +90,7 @@ export const loginUser = asyncHandler(async(req, res) => {
         createSendResToken(userData, 200, res)
     }else{
         res.status(400)
-        throw new Error('Invalid user')
+        throw new Error('Email atau password salah')
     }
 
 })

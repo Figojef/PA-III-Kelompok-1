@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
@@ -53,9 +54,15 @@ class AuthController extends Controller
     }
 
 
+    public function index(){
+        return view('auth.login');
+    }
+
+
     // Fungsi Login
     public function login(Request $request)
     {
+        // dd('ok');
         // Validasi input
         $request->validate([
             'email' => 'required|email',
@@ -77,14 +84,18 @@ class AuthController extends Controller
                 Session::put('jwt', $data['jwt']); // Token JWT yang dikirimkan
                 Session::put('user_data', $data['data']);
                 if($data['data']['role'] == 'admin'){
-                    return redirect()->route('admin'); // Arahkan ke dashboard atau halaman setelah login
+                    return Redirect::route(route: 'admin'); // Arahkan ke dashboard atau halaman setelah login
                 }else{
-                    return redirect()->route('dashboard'); // Arahkan ke dashboard atau halaman setelah login
+                    return Redirect::route(route: 'dashboard'); // Arahkan ke dashboard atau halaman setelah login
                 }
             } else {
-                return back()->withErrors(['error' => 'Token JWT tidak ditemukan.']);
+                // return back()->withErrors(['error' => 'Token JWT tidak ditemukan.']);
+                return  Redirect::route(route: 'login');
             }
         }
+
+        return Redirect::route(route: 'login');
+
     }
 
 

@@ -162,18 +162,13 @@ export const JoinMabar = asyncHandler(async (req, res) => {
 
 // Controller untuk mengambil semua mabar yang jadwal pertama belum lewat
 export const getAllMabar = asyncHandler(async (req, res) => {
-    // Mengambil semua mabar dan mengurutkan jadwal berdasarkan tanggal dan jam
     const mabarList = await Mabar.find()
-        .populate({
-            path: "jadwal", // Populate jadwal
-            model: "Jadwal",
-            options: {
-                sort: { tanggal: 1, jam: 1 }, // Urutkan berdasarkan tanggal dan jam secara ascending
-            },
-        })
         .populate({
             path: "jadwal",
             model: "Jadwal",
+            options: {
+                sort: { tanggal: 1, jam: 1 },
+            },
             populate: {
                 path: "lapangan",
                 model: "Lapangan",
@@ -182,34 +177,28 @@ export const getAllMabar = asyncHandler(async (req, res) => {
         .populate("user_pembuat_mabar")
         .populate("user_yang_join");
 
-    // Menyaring mabar berdasarkan jadwal pertama yang belum lewat
     const currentDate = new Date();
+    const validMabars = [];
 
-    let validMabars = mabarList;
-
-    validMabars = validMabars.map(data => {
-        // Cek apakah data.user_yang_join ada dan berupa array, jika tidak, anggap sebagai array kosong
+    for (let data of mabarList) {
+        // Cek berapa orang yang join (termasuk pembuat)
         let totalJoined = (Array.isArray(data.user_yang_join) ? data.user_yang_join.length : 0) + 1;
 
         // Urutkan jadwal berdasarkan tanggal dan jam
-        if (Array.isArray(data.jadwal)) {
+        if (Array.isArray(data.jadwal) && data.jadwal.length > 0) {
             data.jadwal.sort((a, b) => {
-                const dateA = new Date(a.tanggal);
-                const dateB = new Date(b.tanggal);
-
-                // Jika tanggal sama, urutkan berdasarkan jam
-                if (dateA.getTime() === dateB.getTime()) {
-                    return a.jam - b.jam;
-                }
-
+                const dateA = new Date(`${a.tanggal}T${String(a.jam).padStart(2, '0')}:00`);
+                const dateB = new Date(`${b.tanggal}T${String(b.jam).padStart(2, '0')}:00`);
                 return dateA - dateB;
             });
-        }
+
+            const firstSchedule = data.jadwal[0];
+            const scheduleDateTime = new Date(`${firstSchedule.tanggal}T${String(firstSchedule.jam).padStart(2, '0')}:00`);
 
         // Ambil hanya data yang relevan (hapus metadata Mongoose seperti $__)
         const cleanedData = {
             _id: data._id,
-            judul_mabar: data.judul_mabar,
+            nama_mabar: data.nama_mabar,
             biaya: data.biaya,
             range_umur: data.range_umur,
             level: data.level,
@@ -234,6 +223,7 @@ export const getAllMabar = asyncHandler(async (req, res) => {
         data: validMabars,
     });
 });
+
 
 
 
