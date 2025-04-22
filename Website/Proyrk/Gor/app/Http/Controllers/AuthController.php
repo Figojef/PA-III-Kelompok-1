@@ -10,7 +10,13 @@ use Illuminate\Support\Facades\Session;
 class AuthController extends Controller
 {
     // Endpoint backend autentikasi
-    protected $authUrl = 'http://localhost:3000/api/v1/auth';
+    // protected $authUrl = 'http://localhost:3000/api/v1/auth';
+    protected $authUrl;
+
+    public function __construct(){
+        $this->authUrl = env('API_BASE_URL') . 'auth';
+    }
+
 
     // Fungsi Register
     public function register(Request $request)
@@ -24,12 +30,13 @@ class AuthController extends Controller
         ]);
 
         // Kirim data ke backend untuk register
-        $response = Http::post("{$this->authUrl}/register", [
+        $response = Http::post($this->authUrl . "/register", [
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
             'nomor_whatsapp' => $request->nomor_whatsapp,
         ]);
+
 
         // Cek jika response sukses
         if ($response->successful()) {
@@ -70,7 +77,7 @@ class AuthController extends Controller
         ]);
 
         // Kirim data ke backend untuk login
-        $response = Http::post("{$this->authUrl}/login", [
+        $response = Http::post($this->authUrl . "/login", [
             'email' => $request->email,
             'password' => $request->password,
         ]);

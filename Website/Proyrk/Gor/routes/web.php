@@ -4,8 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LapanganController;
-
-
+use App\Models\Lapangan;
 
 // Autentikasi
 
@@ -25,8 +24,9 @@ Route::middleware(['auth'])->group(function () {
 
 // Admin
 Route::middleware(['admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin');
-    Route::get('/admin/lapangan', [AdminController::class, 'lapangan'])->name('admin.lapangan');
+    Route::get('/admin', action: [AdminController::class, 'index'])->name('admin');
+    // Route::get('/admin/lapangan', [AdminController::class, 'lapangan'])->name('admin.lapangan');
+    Route::get('/admin/lapangan', [LapanganController::class, 'index'])->name('admin.lapangan');
     Route::get('/admin/jadwal', [AdminController::class, 'jadwal'])->name('admin.jadwal');
     Route::get('/admin/pemesanan', [AdminController::class, 'pemesanan'])->name('admin.pemesanan');
 });

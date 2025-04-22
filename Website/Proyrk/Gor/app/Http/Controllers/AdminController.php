@@ -12,6 +12,7 @@ class AdminController extends Controller
     }
 
     public function lapangan(){
+        
         return view('admin.lapangan');
     }
 

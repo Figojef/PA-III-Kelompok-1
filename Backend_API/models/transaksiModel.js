@@ -22,6 +22,10 @@ const transaksiSchema = new Schema({
     tanggal: {
         type: String,
         default : null
+    },
+    deadline_pembayaran: {
+        type: Date,
+        required: true
     }
 });
 

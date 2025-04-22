@@ -48,12 +48,17 @@ export const createPemesanan = asyncHandler(async (req, res) => {
     const currentDate = new Date();
     const formattedDate = currentDate.toISOString().split('T')[0];  // "2024-03-24"
 
+    const deadline = new Date(); 
+    deadline.setHours(deadline.getHours() + 6); // batas waktu 6 jam
+
+
     // Buat transaksi baru
     const newTransaksi = await Transaksi.create({
         pemesanan_id: newPemesanan._id,
         metode_pembayaran,
         status_pembayaran: "menunggu",  // Status pembayaran default adalah "menunggu"
-        tanggal: formattedDate  // Menggunakan tanggal yang sudah diformat
+        tanggal: formattedDate,  // Menggunakan tanggal yang sudah diformat
+        deadline_pembayaran: deadline
     });
 
     res.status(201).json({
@@ -137,7 +142,7 @@ export const getPemesananByUserId = asyncHandler(async (req, res) => {
     // Step 2: Get related transaksi (transactions) based on pemesanan_id
     const transaksi = await Transaksi.find({
         pemesanan_id: { $in: pemesanan.map(p => p._id) } // Fetch transactions that match the pemesanan_id
-    }).select("metode_pembayaran status_pembayaran tanggal pemesanan_id");
+    }).select("metode_pembayaran status_pembayaran tanggal pemesanan_id deadline_pembayaran");
 
     // Step 3: Combine pemesanan and transaksi data
     // Adding transaksi data to each pemesanan

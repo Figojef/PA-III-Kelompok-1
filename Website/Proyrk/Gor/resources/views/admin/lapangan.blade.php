@@ -33,7 +33,21 @@
                     </thead>
                     <tbody>
                         <!-- Contoh Baris Data -->
+                        @foreach ($lapangans['data'] as $l)
                         <tr>
+                            <td>{{$l['name']}}</td>
+                            <td>{{$l['deskripsi']}}</td>
+                            <td>
+                                <img src="https://res.cloudinary.com/de9cyaoqo/image/upload/v1741416154/uploads/xgiwpdnhdrt5i3ovydn1.jpg"
+                                     alt="Lapangan 1" width="100">
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-info">Edit</a>
+                                <a href="#" class="btn btn-sm btn-danger">Hapus</a>
+                            </td>
+                        </tr>           
+                        @endforeach
+                        {{-- <tr>
                             <td>Lapangan 1</td>
                             <td>Lapangan 1 dengan fitur xxxxxx, luas xxxx lebar xxxxx</td>
                             <td>
@@ -44,8 +58,8 @@
                                 <a href="#" class="btn btn-sm btn-info">Edit</a>
                                 <a href="#" class="btn btn-sm btn-danger">Hapus</a>
                             </td>
-                        </tr>
-                        <tr>
+                        </tr> --}}
+                        {{-- <tr>
                             <td>Lapangan 2</td>
                             <td>Lapangan yang sangat bagus</td>
                             <td><span class="text-muted">Tidak ada gambar</span></td>
@@ -53,7 +67,7 @@
                                 <a href="#" class="btn btn-sm btn-info">Edit</a>
                                 <a href="#" class="btn btn-sm btn-danger">Hapus</a>
                             </td>
-                        </tr>
+                        </tr> --}}
                         <!-- Tambahkan baris lain di sini -->
                     </tbody>
                 </table>
