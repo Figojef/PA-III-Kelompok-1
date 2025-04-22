@@ -93,7 +93,7 @@
 
             <!-- Nav Item - Charts -->
             <li class="nav-item {{ Request::is(patterns: 'admin/lapangan') ? 'active' : '' }}">
-                <a class="nav-link " href="{{route('admin.lapangan')}}">
+                <a class="nav-link " href="{{route('admin.lapangan.index')}}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Lapangan</span></a>
             </li>
