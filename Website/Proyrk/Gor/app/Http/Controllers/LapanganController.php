@@ -57,4 +57,10 @@ class LapanganController extends Controller
 
     }
 
+
+    public function test(){
+        $test1 = 123;
+        dd($test1);
+    }
+
 }

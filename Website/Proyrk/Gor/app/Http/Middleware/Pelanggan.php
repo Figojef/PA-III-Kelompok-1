@@ -17,7 +17,7 @@ class Pelanggan
     public function handle(Request $request, Closure $next): Response
     {
         
-        if(!Session::has('jwt') || Session::get('user_data')['role'] !== 'pelanggan')){
+        if(!Session::has('jwt') || Session::get('user_data')['role'] !== 'pelanggan'){
             return abort(403);
         }
         return $next($request);

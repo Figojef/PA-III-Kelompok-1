@@ -48,10 +48,15 @@ Route::get('/reservasi', function () {
     return view('reservasi');
 });
 
-Route::get('/jadwal', [LapanganController::class, 'index']);
+Route::get('/jadwal', function () {
+    return view('jadwal');
+});
 
+Route::get('/profile', function () {
+    return view('profile');
+})->name('profile');
 
-
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 
@@ -151,5 +156,10 @@ Route::get('/tesLapangan', [LapanganController::class, 'index']);
 // });
 
 
+
+// Admin
+Route::middleware(['pelanggan'])->group(function () {
+    Route::get('/pelanggan/test', action: [LapanganController::class, 'test'])->name('pelanggan.test');
+});
 
 

@@ -18,9 +18,19 @@ import helmet from "helmet"
 import ExpressMongoSanitize from "express-mongo-sanitize"
 import { v2 as cloudinary } from 'cloudinary';
 
-
 const app = express()
 const port = 3000
+
+import cors from 'cors';
+
+
+// Konfigurasi CORS dengan origin yang tepat
+const corsOptions = {
+  origin: ['http://127.0.0.1:8000', 'http://localhost:8000'], // Ganti dengan domain tempat frontend kamu berjalan
+  credentials: true,  // Memungkinkan pengiriman cookies (termasuk JWT)
+};
+
+app.use(cors(corsOptions));  // Pastikan hanya satu pemanggilan `app.use(cors(...))`
 
 
 // Configuration

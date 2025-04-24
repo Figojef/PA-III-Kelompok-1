@@ -83,16 +83,6 @@
     <div class="d-flex align-items-center">
         <h2 class="me-3">Tentang Kami</h2>
         <div class="line"></div>
-        <h2>
-            @php
-                if(isset(Session::get('user_data')['role'])){
-                    // echo Session::get('user_data')['jwt'];
-                    echo Session::get('jwt');
-                }else{
-                    echo ".";
-                }
-            @endphp
-        </h2>
     </div>
 </div>
 
@@ -130,5 +120,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Cek URL: kalau ada logout=true, hapus sessionStorage
+    if (window.location.search.includes("logout=true")) {
+        sessionStorage.removeItem('selectedSlots');
+        console.log("selectedSlots dihapus karena logout");
+    }
+</script>
 
 @endsection

@@ -10,11 +10,7 @@
         color: #fff;
         padding: 8px 12px;
     }
-    .jadwal-table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid #ddd;
-    }
+
 
     .jadwal-table th,
     .jadwal-table td {
@@ -40,17 +36,45 @@
         padding: 5px 10px;
         border-bottom: 1px solid #dee2e6;
     }
-    .circle {
+    .jam-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    }
+
+    .jam-box {
+    padding: 20px 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 100px;
+    transition: background-color 0.2s ease;
+        }
+
+        .jam-box:not(.red-bg):hover {
+    background-color: #e2e6ea;
+    cursor: pointer;
+}
+
+
+.green-bg { background-color: #FFFFFF; color: #000000; }
+.red-bg { background-color: #F93232; color: #FFFFFF; }
+.grey-bg { background-color: #e2e3e5; color: #383d41; }
+.blue-bg { background-color: #d1ecf1; color: #0c5460; }
+.orange-bg { background-color: #fff3cd; color: #856404; }
+
+    .square {
         width: 10px;
         height: 10px;
-        border-radius: 50%;
         margin-right: 8px;
     }
     .green { background-color: green; }
     .red { background-color: red; }
     .grey { background-color: grey; }
-    .blue { background-color: blue; }
-    .orange { background-color: orange; }
     .legend {
         display: flex;
         flex-direction: column;
@@ -75,11 +99,9 @@
         </div>
 
         <div class="legend">
-            <div class="legend-item"><div class="circle green"></div> Jadwal tersedia</div>
-            <div class="legend-item"><div class="circle red"></div> Jadwal sudah di-booking</div>
-            <div class="legend-item"><div class="circle blue"></div> Jadwal Dipilih</div>
-            <div class="legend-item"><div class="circle grey"></div> Jadwal Tetap</div>
-            <div class="legend-item"><div class="circle orange"></div> Jadwal Member</div>
+            <div class="legend-item"><div class="square grey"></div> Jadwal tersedia</div>
+            <div class="legend-item"><div class="square green"></div> Jadwal sudah di-booking</div>
+            <div class="legend-item"><div class="square red"></div> Tidak Tersedia</div>
         </div>
     </div>
 
@@ -104,7 +126,7 @@ function renderjadwal(jadwalData) {
 
     // Kelompokkan jadwal berdasarkan lapangan
     const groupedByLapangan = jadwalData.reduce((acc, item) => {
-        const lapanganName = item.lapangan?.name; // Asumsi 'lapangan' adalah nama lapangan
+        const lapanganName = item.lapangan?.name; 
         if (!acc[lapanganName]) {
             acc[lapanganName] = [];
         }
@@ -137,38 +159,49 @@ function renderjadwal(jadwalData) {
             return a.jam - b.jam; // Urutkan berdasarkan jam
         });
 
-        // Tambahkan baris untuk setiap jadwal
-        groupedByLapangan[lapangan].forEach(item => {
-            const row = document.createElement("tr");
+// Container kotak-kotak jam
+const kotakWrapper = document.createElement("div");
+kotakWrapper.classList.add("jam-wrapper");
 
-            const statusJamCell = document.createElement("td");
-            statusJamCell.style.display = "flex";
-            const status = document.createElement("td");
-           
-            let statusClass = "circle"; // Semua status akan memiliki class dasar 'circle'
-    
-            if (item.status === "Tersedia") {
-            statusClass += " green"; // Jika status "Tersedia", beri warna hijau
-            } else if (item.status === "Tidak Tersedia") {
-        statusClass += " red"; // Jika status "Tidak Tersedia", beri warna merah
-            } else if (item.status === "Pending") {
-        statusClass += " grey"; // Status "Pending" menjadi abu-abu
-            } else if (item.status === "Dipesan") {
-        statusClass += " blue"; // Status "Dipesan" menjadi biru
-         } else if (item.status === "Dibatalkan") {
-        statusClass += " orange"; // Status "Dibatalkan" menjadi oranye
+groupedByLapangan[lapangan].forEach(item => {
+    const jamBox = document.createElement("div");
+    jamBox.classList.add("jam-box");
+
+    let startHour = "??", endHour = "??";
+    if (item.jam != null) {
+        const jamAwal = parseInt(item.jam);
+        startHour = String(jamAwal).padStart(2, "0");
+        endHour = String(jamAwal + 1).padStart(2, "0");
     }
 
-            const jamCell = document.createElement("td");
-            jamCell.textContent = item.jam ? item.jam : "Jam tidak tersedia";
+    const statusText = item.status ? item.status : "Status tidak diketahui";
 
-            statusJamCell.appendChild(status);
-            statusJamCell.appendChild(jamCell);
+    // Tambahkan class background berdasarkan status
+    if (item.status === "Tersedia") {
+        jamBox.classList.add("green-bg");
+    } else if (item.status === "Tidak Tersedia") {
+        jamBox.classList.add("red-bg");
+    } else if (item.status === "Pending") {
+        jamBox.classList.add("grey-bg");
+    } else if (item.status === "Dipesan") {
+        jamBox.classList.add("blue-bg");
+    } else if (item.status === "Dibatalkan") {
+        jamBox.classList.add("orange-bg");
+    }
 
-                // Tambahkan statusJamCell ke dalam baris
-            row.appendChild(statusJamCell);
-            tbody.appendChild(row);
-        });
+    // Tampilkan jam dan status di dalam kotak
+    jamBox.innerHTML = `
+        <div>${startHour}:00 - ${endHour}:00</div>
+        <div style="font-size: 14px; margin-top: 4px;">${statusText}</div>
+    `;
+
+    kotakWrapper.appendChild(jamBox);
+});
+
+
+lapanganDiv.appendChild(kotakWrapper);
+
+
 
         // Tambahkan tbody ke dalam tabel
         table.appendChild(tbody);

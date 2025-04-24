@@ -11,8 +11,8 @@ class Authenticate
     public function handle(Request $request, Closure $next)
     {
         // Cek jika token JWT tidak ada di session
-        if (!Session::has('jwt')) {
-            return redirect()->route('login'); // Arahkan ke halaman login
+        if (!Session::has('jwt') || !Session::has('user_data')) {
+            return redirect()->route('login');
         }
         return $next($request);
     }

@@ -1,39 +1,70 @@
 <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">
-        <img src="images/logo.jpg" alt="Logo" class="header-logo">
+            <img src="images/logo.jpg" alt="Logo" class="header-logo">
             Ramos Badminton Center
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Link menu utama -->
             <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-    <a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('tentang') ? 'active' : '' }}" href="/tentang">Tentang</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('jadwal') ? 'active' : '' }}" href="/jadwal">Jadwal</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('reservasi') ? 'active' : '' }}" href="/reservasi">Reservasi</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link {{ Request::is('event') ? 'active' : '' }}" href="/event">Event</a>
-</li>
-
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('/') ? 'active' : '' }}" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('tentang') ? 'active' : '' }}" href="/tentang">Tentang</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('jadwal') ? 'active' : '' }}" href="/jadwal">Jadwal</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('reservasi') ? 'active' : '' }}" href="/reservasi">Reservasi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('event') ? 'active' : '' }}" href="/event">Event</a>
+                </li>
             </ul>
-            <ul class="navbar-nav ms-3">
-                @if (!Session::has('jwt'))
-                    <li class="nav-item"><a class="nav-link" href="{{route('login')}}"><i class="bi bi-person-circle fs-5"></i></a></li>
-                    @else
-                    <li class="nav-item"><a class="nav-link" href="{{route('logout')}}"><i class="bi bi-person-circle fs-5"></i></a></li>
-                @endif
 
+            <!-- Bagian Login/Logout -->
+          <!-- Bagian Login/Logout -->
+<!-- Bagian Login/Logout -->
+<ul class="navbar-nav ms-3">
+    @if (!Session::get('jwt'))
+        <li class="nav-item">
+            <a class="btn btn-outline-primary" href="{{ route('login') }}">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login
+            </a>
+        </li>
+    @else
+        <li class="nav-item dropdown d-flex align-items-center text-white">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle fs-5 me-2"></i>
+                <span>
+                    @php
+                        if(isset(Session::get('user_data')['role'])){
+                            echo Session::get('user_data')['name'];
+                        } else {
+                            echo ".";
+                        }
+                    @endphp
+                </span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{{ route('profile') }}">Profile</a></li>
+                <li>
+                    <!-- Link logout yang mengarah ke controller -->
+                    <a class="dropdown-item" href="{{ route('logout') }}">Logout</a>
+                </li>
             </ul>
+        </li>
+    @endif
+</ul>
+
+
+
         </div>
     </div>
 </nav>

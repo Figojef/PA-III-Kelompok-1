@@ -12,7 +12,7 @@ export const createPemesanan = asyncHandler(async (req, res) => {
     // res.json({
     //     info : req.body
     // })
-    // Cek apakah user ada
+    // Cek apakah user ada  
     const user = await User.findById(user_id);
     if (!user) {
         return res.status(404).json({ message: "User tidak ditemukan" });

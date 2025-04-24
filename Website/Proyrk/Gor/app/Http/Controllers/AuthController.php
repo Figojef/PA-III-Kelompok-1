@@ -120,9 +120,11 @@ class AuthController extends Controller
     // Fungsi Logout
     public function logout()
     {
-        // Hapus token JWT dari session
         Session::forget('jwt');
         Session::forget('user_data');
-        return redirect()->route('login'); // Arahkan ke halaman login
+        
+        // Tambahkan ?logout=true ke redirect URL
+        return redirect()->route('dashboard', ['logout' => 'true']);
     }
+    
 }
