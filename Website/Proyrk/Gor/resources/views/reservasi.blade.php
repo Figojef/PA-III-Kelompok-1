@@ -144,13 +144,18 @@
             <div class="legend-item"><div class="circle green"></div> Jadwal Dipilih</div>
             <div id="base-url" style="display:none">{{env('API_BASE_URL')}}</div>
         </div>
-        <form id="pemesananForm" method="POST" action="{{ route('pemesanan.store') }}">
+        
+        <input type="submit" class="lanjutkan" value="Lanjutkan" id="">
+
+        <form id="pemesananForm" action="{{ route('pemesanan.store') }}" method="POST">
     @csrf
     <input type="hidden" name="jadwal_dipesan" id="jadwal_dipesan">
     <input type="hidden" name="total_harga" id="total_harga">
     <input type="hidden" name="status_pemesanan" id="status_pemesanan" value="Sedang Dipesan">
     <input type="submit" class="lanjutkan" value="Lanjutkan" id="lanjutkanBtn">
 </form>
+
+
 
     </div>
 
@@ -300,7 +305,7 @@ async function fetchJadwalByTanggal(tanggal) {
         renderjadwal(data);
     } catch (error) {
         console.error("Error fetching jadwal:", error);
-        alert('Terjadi kesalahan saat mengambil data jadwal.');
+        alert('Jadwal tidak ada.');
     }
 }
 
@@ -315,17 +320,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const selectedCookie = document.cookie.split('; ').find(row => row.startsWith('selectedSlots='));
-    let selected = [];
-    if (selectedCookie) {
-        try {
-            selected = JSON.parse(decodeURIComponent(selectedCookie.split('=')[1]));
-        } catch (e) {
-            console.error("Gagal parsing cookie:", e);
-        }
-    }
+    const selected = JSON.parse(sessionStorage.getItem('selectedSlots') || "[]");
 
-    // Restore tampilan slot yang sudah dipilih
+    console.log("Data dari sessionStorage saat DOM loaded:", selected);
+
     selected.forEach(slot => {
         const element = document.querySelector(`.slot[data-id="${slot._id}"]`);
         if (element) {
@@ -336,22 +334,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Handler untuk tombol lanjutkan
 document.getElementById("lanjutkanBtn").addEventListener("click", function(event) {
-    event.preventDefault();  // Mencegah submit default
+    event.preventDefault(); // stop form biar JS bisa isi data
 
-    const selectedCookie = document.cookie.split('; ').find(row => row.startsWith('selectedSlots='));
-
-    if (!selectedCookie) {
-        alert("Silakan pilih jadwal terlebih dahulu sebelum melanjutkan.");
-        return;
-    }
-
-    let selected = [];
-    try {
-        selected = JSON.parse(decodeURIComponent(selectedCookie.split('=')[1]));
-    } catch (e) {
-        alert("Terjadi kesalahan membaca data jadwal.");
-        return;
-    }
+    const selected = JSON.parse(sessionStorage.getItem('selectedSlots') || "[]");
 
     if (selected.length === 0) {
         alert("Silakan pilih jadwal terlebih dahulu.");
@@ -364,24 +349,20 @@ document.getElementById("lanjutkanBtn").addEventListener("click", function(event
     document.getElementById('jadwal_dipesan').value = JSON.stringify(jadwalIds);
     document.getElementById('total_harga').value = totalHarga;
 
-    // Validasi akhir sebelum submit
-    if (!jadwalIds.length || !totalHarga) {
-        alert("Data form tidak lengkap!");
-        return;
+    // Konfirmasi sebelum kirim
+    if (confirm("Yakin ingin melanjutkan pemesanan?")) {
+        sessionStorage.removeItem('selectedSlots');
+        document.getElementById("pemesananForm").submit();
     }
-
-    document.getElementById("pemesananForm").submit();
 });
+
+
+
 
 // Event listener untuk memilih tanggal
 document.getElementById('tanggal').addEventListener('change', function () {
     fetchJadwalByTanggal(this.value);
 });
-
-if (window.location.search.includes("logout=true")) {
-        sessionStorage.removeItem('selectedSlots');
-        console.log("selectedSlots dihapus karena logout");
-    }
 
     </script>
 

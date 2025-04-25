@@ -1,163 +1,284 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
-    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Pemesanan</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #F3F3E0;
-        }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #F3F3E0;
-            padding: 10px 20px;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
-        .menu {
-            display: flex;
-            gap: 20px;
-        }
-        .menu a {
-            text-decoration: none;
-            color: black;
-            font-size: 1.1em;
-        }
-        .menu a:hover {
-            text-decoration: underline;
-        }
-        .user-icon {
-            font-size: 1.5em;
-        }
-        .container {
-            max-width: 600px;
-            margin: 100px auto 50px;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-        }
-        .container h2 {
-            margin-bottom: 15px;
-        }
-        .status {
-            background: green;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #608BC1;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-size: 1.2em;
-            margin-top: 20px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .button:hover {
-            background-color: #133E87;
-        }
+@extends('layouts.app')
 
-        footer {
-            background-color: #133E87;
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .contact {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .contact div {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .contact img {
-            height: 30px;
-        }
-        .footer-logo img {
-            height: 100px;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <div class="logo">
-            <img src="logo.png" alt="Logo">
-            <span>RAMOS BADMINTON CENTER</span>
-        </div>
-        <div class="menu">
-            <a href="#">BERANDA</a>
-            <a href="#">JADWAL</a>
-            <a href="#">RESERVASI</a>
-        </div>
-        <div class="user-icon">&#128100;</div>
-    </nav>
+@section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script>
+    window.jwt = "{{ session('jwt') ?? '' }}";
+    window.loginUrl = "{{ route('login') }}";
+    console.log("JWT dari session:", window.jwt); // cek apakah isi atau kosong
+</script>
+
+<title>Jadwal Bermain</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<style>
+#judul {
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+
+.user {
+    margin-bottom:10px;
+    font-weight: 700;
+
+}
+
+.user.data {
+
+    margin-bottom: 15px;
+    font-weight: 400;
+}
+
+.option-wrapper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+  
+    .option-wrapper input[type="radio"] {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .text-box {
+      padding: 10px 50px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: white;
+      transition: background-color 0.3s;
+      margin-bottom: 10px;
+    }
+
+    .text-box:hover{
+      padding: 10px 50px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color:rgb(117, 135, 146);
+      transition: background-color 0.3s;
+      margin-bottom: 10px;
+    }
+
+    .text-box.selected {
+      background-color: #222F37;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    td {
+      padding: 20px;
+      border: 2px solid #000;
+      border-radius: 15px;
+      vertical-align: top;
+    }
+
+    .slot-item {
+      position: relative;
+      padding: 20px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .harga {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      padding: 25px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .slot-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .slot-detail {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .konfirmasi {
+      align-items: center;
+      justify-content: center;
+      display: flex; 
+      margin-top: 50px;
+    }
     
-    <div class="container">
-        <h2>Detail Pesanan</h2>
-        <p><strong>Nama Pemesan:</strong> Benhard Sijabat</p>
-        <br>
-        <p><strong>No. Telepon:</strong> 0823 7534 2314</p>
-        <br>
-        <p><strong>Jadwal Bermain:</strong> 22 Februari 2025, 16.00 - 18.00</p>
-        <br>
-        <p><strong>Jenis Lapangan:</strong> Lapangan 1</p>
-        <br>
-        <p><strong>Status Pembayaran:</strong> <span class="status">Berhasil</span></p>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <a href="#" class="button">Selesai</a>
+    .tombol {
+    color: black;
+    font-weight: 700;
+    background-color: white;
+    width: 100%;       
+    height: 40px;      
+    border-radius: 10px;      
+    font-size: 16px;   
+    }
+
+    .tombol:hover {
+    color: white;
+    font-weight: 700;
+    background-color: #1D4ED8 ;
+    width: 100%;       
+    height: 40px;     
+    transition: 0.5s; 
+    border-radius: 10px;      
+    font-size: 16px;   
+    }
+
+</style>
+
+    <div class="container mt-4">
+                <h2 id="judul">Detail Pemesanan</h2>
+                    <label style="font-size: 25px; text-decoration: underline; font-weight: bold; margin-bottom: 25px;">Informasi Pelanggan</label>
+
+                    <div>
+                        <label class="user">Nama Pelanggan</label><br>
+                        <label class="user data">          
+                            @php
+                            if(isset(Session::get('user_data')['role'])){
+                                echo Session::get('user_data')['name'];
+                            } else {
+                                echo ".";
+                            }
+                            @endphp
+                        </label><br>
+
+                        <label class="user">No.Telepon</label><br>
+<label class="user data">
+    @php
+        // Ambil nomor WhatsApp
+        $nomorWhatsApp = Session::get('user_data')['nomor_whatsapp'] ?? "";
+
+        // Ganti kode negara 62 atau +62 dengan 0
+        $nomorWhatsApp = preg_replace('/^\+?62/', '0', $nomorWhatsApp);
+
+        // Pisahkan setiap 4 angka
+        $nomorWhatsApp = preg_replace('/(\d{4})(?=\d)/', '$1 ', $nomorWhatsApp);
+    @endphp
+
+    {{ $nomorWhatsApp }}
+</label>
+
+
+                    </div>
+                        
+                    <hr style="border: 2px solid #000000; margin: 20px 0;">
+
+                    <div>
+                        <h4 style="margin-bottom: 25px;">Pilih Jenis Pembayaran</h4>
+                        <label class="option-wrapper">
+                        <input type="radio" name="payment" value="bank">
+                        <div class="text-box">Transfer Bank</div>
+                            </label>
+
+                        <label class="option-wrapper">
+                        <input type="radio" name="payment" value="kartu">
+                        <div class="text-box">Bayar Ditempat</div>
+                        </label>
+                    </div>
+
+                            
+                    <hr style="border: 2px solid #000000; margin: 20px 0;">
+
+                    <table>
+  <tr>
+    <td id="slotContainer">
+      <!-- Slot akan tampil di sini -->
+    </td>
+  </tr>
+  <!-- Baris untuk total harga -->
+  <tr>
+    <td id="totalBayarContainer" colspan="2" style="text-align: right; font-weight: bold; padding-top: 20px;">
+      Total Bayar: <span id="totalHarga">Rp 0</span>
+    </td>
+  </tr>
+</table>
+            <div class="konfirmasi">                    
+        <input type="submit" class="tombol" value="Konfirmasi pemesanan">
+            </div>
     </div>
+
+    <script>
+    // Fungsi buat kotak radio itu
+    const wrappers = document.querySelectorAll('.option-wrapper');
+
+    wrappers.forEach(wrapper => {
+      wrapper.addEventListener('click', () => {
+        // Unselect semua
+        document.querySelectorAll('.text-box').forEach(tb => tb.classList.remove('selected'));
+        // Tambahkan class ke text-box yang diklik
+        wrapper.querySelector('.text-box').classList.add('selected');
+        // Pastikan radio-nya juga ke-check
+        wrapper.querySelector('input[type="radio"]').checked = true;
+      });
+    });
+
+    // gerenerate table
+    const namaHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const bulanIndo = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  function formatTanggal(tanggalStr) {
+    const date = new Date(tanggalStr);
+    const hari = namaHari[date.getDay()];
+    const tanggal = date.getDate();
+    const bulan = bulanIndo[date.getMonth()];
+    const tahun = date.getFullYear();
+    return `${hari}, ${tanggal} ${bulan} ${tahun}`;
+  }
+
+  const container = document.getElementById("slotContainer");
+  const stored = sessionStorage.getItem("selectedSlots");
+  const slots = stored ? JSON.parse(stored) : [];
+
+  if (slots.length === 0) {
+    container.innerHTML = "<em>Belum ada slot yang dipilih.</em>";
+    document.getElementById("totalHarga").textContent = "Rp 0"; // Menampilkan total harga 0
+  } else {
+    let totalHarga = 0; // Variabel untuk menghitung total harga
+
+    // Menampilkan setiap slot
+    slots.forEach(slot => {
+  const lapanganName = slot.lapangan?.name || "Lapangan tidak diketahui";
+  const harga = slot.harga || 0; // Set default harga ke 0 jika tidak ada
+  const tanggalFormatted = formatTanggal(slot.tanggal || "-");
+  const jam = slot.jam || "-";
+  
+  // Mengubah jam ke integer untuk manipulasi dan menambah 1 jam
+  const jamInt = parseInt(jam, 10);
+  const jamAkhir = (isNaN(jamInt) ? 0 : jamInt + 1).toString().padStart(2, '0') + ":00"; // Menambahkan 1 jam, jika jam tidak valid, set ke 00:00
+
+  // Menambahkan harga untuk total
+  totalHarga += Number(harga);
+
+  const div = document.createElement("div");
+  div.className = "slot-item";
+  div.innerHTML = `
+    <div class="harga">Rp ${Number(harga).toLocaleString()}</div>
+    <div class="slot-title">${lapanganName}</div>
+    <div class="slot-detail">${tanggalFormatted}<br>
+    ${jam}:00 - ${jamAkhir}</div>
+  `;
+  container.appendChild(div);
+});
+
+
+    // Tampilkan total harga dalam format rupiah
+    document.getElementById("totalHarga").textContent = `Rp ${totalHarga.toLocaleString()}`;
+  }
     
-    <footer>
-        <div class="contact">
-            <div><img src="phone-icon.png" alt="Phone"> +62 124 819 026</div>
-            <div><img src="email-icon.png" alt="Email"> info@ramosbadminton.com</div>
-            <div><img src="location-icon.png" alt="Location"> Jl. Sitoluama 2, Laguboti</div>
-        </div>
-        <div class="footer-logo">
-            <img src="logo.png" alt="Badminton Logo">
-        </div>
-    </footer>
-</body>
-</html>
+  </script>
+@endsection

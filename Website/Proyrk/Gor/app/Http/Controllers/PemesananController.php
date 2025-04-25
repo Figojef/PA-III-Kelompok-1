@@ -28,41 +28,42 @@ class PemesananController extends Controller
 
     // Buat pemesanan baru (POST)
     public function store(Request $request)
-{
-    // Ambil token JWT dari session
-    $token = Session::get('jwt');
+    {
+        $user = Session::get('user_data');
+        $jwt = Session::get('jwt');
+    
+        if (!$user || !$jwt) {
+            return redirect()->route('login')->withErrors(['Silakan login terlebih dahulu.']);
+        }
+    
+        $validated = $request->validate([
+            'jadwal_dipesan' => 'required|json',
+            'total_harga' => 'required|numeric',
+            'status_pemesanan' => 'required|string',
+        ]);
+    
+        $jadwal = json_decode($validated['jadwal_dipesan'], true);
 
-    // Validasi data request
-    $request->validate([
-        'jadwal_dipesan' => 'required|array',
-        'total_harga' => 'required|numeric',
-    ]);
+        $baseUrl = rtrim(env('API_BASE_URL'), '/');
+        
+        $response = Http::withToken($jwt)->post($baseUrl . '/pemesanan', [
+            'user_id' => $user['_id'],
+            'jadwal_dipesan' => $jadwal,
+            'total_harga' => $validated['total_harga'],
+            'status_pemesanan' => $validated['status_pemesanan'],
+        ]);
 
-    logger("Payload untuk API:", $request->all());
-
-    // Kirim data ke API eksternal
-    $response = Http::withCookies([
-        'jwt' => $token
-    ], env('DOMAIN'))
-    ->post($this->apiUrl, [
-        'user_id' => auth()->id(), // ID user yang sedang login
-        'jadwal_dipesan' => $request->jadwal_dipesan, // Jadwal yang dipilih
-        'total_harga' => $request->total_harga,       // Total harga
-        'status_pemesanan' => $request->status_pemesanan, // Status pemesanan
-    ]);
-
-    // Jika request berhasil
-    if ($response->successful()) {
-        return response()->json($response->json(), $response->status());
-    } else {
-        // Jika gagal
-        return response()->json([
-            'message' => 'Gagal membuat pemesanan',
-            'error' => $response->json()
-        ], $response->status());
+    
+    
+        if ($response->successful()) {
+            return redirect()->route('dashboard')->with('success', 'Pemesanan berhasil dibuat!');
+        } else {
+            return back()->withErrors(['Gagal menyimpan pemesanan ke API.']);
+        }
     }
-}
-
+    
+    
+    
     
     
 

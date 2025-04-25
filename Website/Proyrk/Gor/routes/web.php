@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LapanganController;
 use App\Models\Lapangan;
+use App\Http\Controllers\PemesananController;
 
 // Autentikasi
 
@@ -14,6 +15,8 @@ Route::middleware(['inout'])->group(function () {
     
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
+
+
 
 
 Route::middleware(['auth'])->group(function () {
@@ -31,7 +34,8 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin/pemesanan', [AdminController::class, 'pemesanan'])->name('admin.pemesanan');
 });
 
-
+// Membuat Pemesanan
+Route::post('/pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
 
 
 
@@ -51,6 +55,15 @@ Route::get('/reservasi', function () {
 Route::get('/jadwal', function () {
     return view('jadwal');
 });
+
+Route::get('/register', function () {
+    return view('auth/register');
+});
+
+Route::get('/detail_pesanan', function () {
+    return view('detail_pesanan');
+});
+
 
 Route::get('/profile', function () {
     return view('profile');

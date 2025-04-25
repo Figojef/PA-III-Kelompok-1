@@ -17,6 +17,7 @@ const transaksiSchema = new Schema({
     status_pembayaran: {
         type: String,
         enum: ["berhasil", "menunggu"],
+        default: "menunggu",
         required: [true]
     },
     tanggal: {
