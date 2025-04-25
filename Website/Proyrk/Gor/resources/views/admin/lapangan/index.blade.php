@@ -7,12 +7,35 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
 
+    {{-- ALERT SUCCESS / ERROR --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Data Lapangan</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        {{-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Lapangan
+        </a> --}}
+        <a href="{{ route('lapangan.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Lapangan
         </a>
+        
     </div>
 
     <!-- Tabel Lapangan -->
@@ -42,9 +65,9 @@
                                      alt="Lapangan 1" width="300" height="300">
                             </td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-info">Edit</a>
+                                <a href="{{ route('lapangan.edit', $l['_id']) }}" class="btn btn-sm btn-info">Edit</a>
                                 <a href="#" class="btn btn-sm btn-danger">Hapus</a>
-                            </td>
+                            </td>                            
                         </tr>           
                         @endforeach
                     </tbody>

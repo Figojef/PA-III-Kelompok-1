@@ -29,7 +29,24 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['admin'])->group(function () {
     Route::get('/admin', action: [AdminController::class, 'index'])->name('admin');
     // Route::get('/admin/lapangan', [AdminController::class, 'lapangan'])->name('admin.lapangan');
-    Route::get('/admin/lapangan', [LapanganController::class, 'index'])->name('admin.lapangan');
+
+
+    // Lapangan
+    Route::get('/admin/lapangan', [LapanganController::class, 'index'])->name('admin.lapangan.index');
+    Route::get('/admin/lapangan/create', [LapanganController::class, 'create'])->name('lapangan.create');
+    Route::post('/admin/lapangan', [LapanganController::class, 'store'])->name('lapangan.store');
+    Route::get('/admin/lapangan/{id}/edit', [LapanganController::class, 'edit'])->name('lapangan.edit');
+    Route::put('/admin/lapangan/{id}', [LapanganController::class, 'update'])->name('lapangan.update');
+    
+
+
+
+
+
+
+
+
+
     Route::get('/admin/jadwal', [AdminController::class, 'jadwal'])->name('admin.jadwal');
     Route::get('/admin/pemesanan', [AdminController::class, 'pemesanan'])->name('admin.pemesanan');
 });
