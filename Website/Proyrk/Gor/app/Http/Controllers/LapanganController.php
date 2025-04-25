@@ -74,6 +74,7 @@ class LapanganController extends Controller
     
         if ($request->hasFile('gambar')) {
             $image = $request->file('gambar');
+
             $response = Http::withCookies([
                 'jwt' => $token
             ], env('DOMAIN'))->attach(
@@ -90,7 +91,7 @@ class LapanganController extends Controller
         // Kirim data lapangan ke API
         $response = Http::withCookies([
             'jwt' => $token
-        ], env('DOMAIN'))->post(env('API_BASE_URL') . 'lapangan', [
+        ], env('DOMAIN'))->post(env(key: 'API_BASE_URL') . 'lapangan', data: [
             'name' => $request->name,
             'deskripsi' => $request->deskripsi,
             'gambar' => $gambarUrl

@@ -6,31 +6,116 @@ import Transaksi from "../models/transaksiModel.js";
 
 
 // 1. Membuat Pemesanan Baru
+// export const createPemesanan = asyncHandler(async (req, res) => {
+//     const { user_id, jadwal_dipesan, total_harga, metode_pembayaran } = req.body;
+
+//     // res.json({
+//     //     info : req.body
+//     // })
+//     // Cek apakah user ada
+//     const user = await User.findById(user_id);
+//     if (!user) {
+//         return res.status(404).json({ message: "User tidak ditemukan" });
+//     }
+
+//     // Cek apakah jadwal yang dipilih ada dan tersedia
+//     const jadwalList = await Jadwal.find({ _id: { $in: jadwal_dipesan } });
+//     if (jadwalList.length !== jadwal_dipesan.length) {
+//         return res.status(400).json({ message: "Salah satu jadwal tidak valid" });
+//     }
+
+//     // Cek apakah jadwal yang dipilih tersedia
+//     const unavailableJadwal = jadwalList.filter(jadwal => jadwal.status === "Tidak Tersedia");
+//     if (unavailableJadwal.length > 0) {
+//         return res.status(400).json({ message: "Salah satu jadwal tidak tersedia" });
+//     }
+
+//     // Buat pemesanan baru
+//     const newPemesanan = await Pemesanan.create({
+//         user_id,
+//         jadwal_dipesan,
+//         total_harga,
+//         status_pemesanan: "Sedang Dipesan"
+//     });
+
+//     // Update status jadwal yang dipesan menjadi 'Tidak Tersedia'
+//     await Jadwal.updateMany(
+//         { _id: { $in: jadwal_dipesan } },
+//         { $set: { status: "Tidak Tersedia" } }
+//     );
+
+//     // Format tanggal menjadi "YYYY-MM-DD"
+//     const currentDate = new Date();
+//     const formattedDate = currentDate.toISOString().split('T')[0];  // "2024-03-24"
+
+//     const deadline = new Date(); 
+//     deadline.setHours(deadline.getHours() + 6); // batas waktu 6 jam
+
+
+//     // Buat transaksi baru
+//     const newTransaksi = await Transaksi.create({
+//         pemesanan_id: newPemesanan._id,
+//         metode_pembayaran,
+//         status_pembayaran: "menunggu",  // Status pembayaran default adalah "menunggu"
+//         tanggal: formattedDate,  // Menggunakan tanggal yang sudah diformat
+//         deadline_pembayaran: deadline
+//     });
+
+//     res.status(201).json({
+//         message: "Pemesanan dan transaksi berhasil dibuat",
+//         data: {
+//             pemesanan: newPemesanan,
+//             transaksi: newTransaksi
+//         }
+//     });
+// });
 export const createPemesanan = asyncHandler(async (req, res) => {
     const { user_id, jadwal_dipesan, total_harga, metode_pembayaran } = req.body;
 
-    // res.json({
-    //     info : req.body
-    // })
-    // Cek apakah user ada
     const user = await User.findById(user_id);
     if (!user) {
         return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
-    // Cek apakah jadwal yang dipilih ada dan tersedia
     const jadwalList = await Jadwal.find({ _id: { $in: jadwal_dipesan } });
     if (jadwalList.length !== jadwal_dipesan.length) {
         return res.status(400).json({ message: "Salah satu jadwal tidak valid" });
     }
 
-    // Cek apakah jadwal yang dipilih tersedia
-    const unavailableJadwal = jadwalList.filter(jadwal => jadwal.status === "Tidak Tersedia");
-    if (unavailableJadwal.length > 0) {
-        return res.status(400).json({ message: "Salah satu jadwal tidak tersedia" });
+    const now = new Date();
+
+    // Periksa setiap jadwal apakah valid untuk dipesan
+    for (const jadwal of jadwalList) {
+        const pemesanan = await Pemesanan.findOne({
+            jadwal_dipesan: jadwal._id
+        }).sort({ _id: -1 });
+
+        if (pemesanan) {
+            const transaksi = await Transaksi.findOne({
+                pemesanan_id: pemesanan._id
+            });
+
+            const statusPemesanan = pemesanan.status_pemesanan;
+            const statusPembayaran = transaksi?.status_pembayaran || "menunggu";
+            const deadline = new Date(transaksi?.deadline_pembayaran || now);
+
+            // 🔴 KASUS TIDAK VALID DIPESAN
+            if (
+                (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline >= now) ||
+                (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "berhasil") ||
+                (statusPemesanan === "Berhasil" && statusPembayaran === "berhasil")
+            ) {
+                return res.status(400).json({
+                    message: `Jadwal jam ${jadwal.jam} pada tanggal ${jadwal.tanggal} tidak tersedia`
+                });
+            }
+
+            // ✅ Valid: jika dibatalkan, atau sedang dipesan tapi deadline sudah lewat
+            // lanjut ke proses
+        }
     }
 
-    // Buat pemesanan baru
+    // Buat pemesanan
     const newPemesanan = await Pemesanan.create({
         user_id,
         jadwal_dipesan,
@@ -38,26 +123,23 @@ export const createPemesanan = asyncHandler(async (req, res) => {
         status_pemesanan: "Sedang Dipesan"
     });
 
-    // Update status jadwal yang dipesan menjadi 'Tidak Tersedia'
+    // Update status jadwal di DB (optional, kalau kamu tetap ingin ada flag real-time)
     await Jadwal.updateMany(
         { _id: { $in: jadwal_dipesan } },
         { $set: { status: "Tidak Tersedia" } }
     );
 
-    // Format tanggal menjadi "YYYY-MM-DD"
     const currentDate = new Date();
-    const formattedDate = currentDate.toISOString().split('T')[0];  // "2024-03-24"
+    const formattedDate = currentDate.toISOString().split("T")[0];
 
-    const deadline = new Date(); 
-    deadline.setHours(deadline.getHours() + 6); // batas waktu 6 jam
+    const deadline = new Date();
+    deadline.setHours(deadline.getHours() + 2);
 
-
-    // Buat transaksi baru
     const newTransaksi = await Transaksi.create({
         pemesanan_id: newPemesanan._id,
         metode_pembayaran,
-        status_pembayaran: "menunggu",  // Status pembayaran default adalah "menunggu"
-        tanggal: formattedDate,  // Menggunakan tanggal yang sudah diformat
+        status_pembayaran: "menunggu",
+        tanggal: formattedDate,
         deadline_pembayaran: deadline
     });
 
@@ -69,7 +151,6 @@ export const createPemesanan = asyncHandler(async (req, res) => {
         }
     });
 });
-
 
 // 2. Mendapatkan Semua Pemesanan
 export const getAllPemesanan = asyncHandler(async (req, res) => {
