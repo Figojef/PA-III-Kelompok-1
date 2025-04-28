@@ -29,6 +29,7 @@ class PemesananController extends Controller
     // Buat pemesanan baru (POST)
     public function store(Request $request)
     {
+        // Ambil user dan token dari session
         $user = Session::get('user_data');
         $jwt = Session::get('jwt');
     
@@ -36,31 +37,43 @@ class PemesananController extends Controller
             return redirect()->route('login')->withErrors(['Silakan login terlebih dahulu.']);
         }
     
+        // Validasi data dari form
         $validated = $request->validate([
             'jadwal_dipesan' => 'required|json',
             'total_harga' => 'required|numeric',
+            'metode_pembayaran' => 'required|string',
             'status_pemesanan' => 'required|string',
         ]);
     
+        // Decode jadwal_dipesan dari JSON
         $jadwal = json_decode($validated['jadwal_dipesan'], true);
-
+    
+        // Ambil hanya _id dari setiap slot
+        $jadwal_ids = array_map(function ($item) {
+            return $item['_id'];
+        }, $jadwal);
+    
+        // Base URL backend Node.js
         $baseUrl = rtrim(env('API_BASE_URL'), '/');
-        
+    
+        // Kirim request ke API Node.js
         $response = Http::withToken($jwt)->post($baseUrl . '/pemesanan', [
             'user_id' => $user['_id'],
-            'jadwal_dipesan' => $jadwal,
+            'jadwal_dipesan' => $jadwal_ids, // ⬅️ Ini sekarang array of string ID
             'total_harga' => $validated['total_harga'],
             'status_pemesanan' => $validated['status_pemesanan'],
+            'metode_pembayaran' => $validated['metode_pembayaran'],
         ]);
-
     
-    
+        // Cek respon
         if ($response->successful()) {
-            return redirect()->route('dashboard')->with('success', 'Pemesanan berhasil dibuat!');
+            return redirect()->route('dashboard')->with('success', 'Pemesanan dan transaksi berhasil dibuat!');
         } else {
-            return back()->withErrors(['Gagal menyimpan pemesanan ke API.']);
+            return back()->withErrors(['Gagal membuat pemesanan dan transaksi.']);
         }
     }
+    
+    
     
     
     

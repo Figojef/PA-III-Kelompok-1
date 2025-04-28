@@ -145,7 +145,10 @@
             <div id="base-url" style="display:none">{{env('API_BASE_URL')}}</div>
         </div>
         
-        <input type="submit" class="lanjutkan" value="Lanjutkan" id="">
+        <form action="/detail_pesanan" method="GET">
+    <input type="submit" class="lanjutkan" value="Lanjutkan">
+</form>
+
 
         <form id="pemesananForm" action="{{ route('pemesanan.store') }}" method="POST">
     @csrf
