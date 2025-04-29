@@ -277,23 +277,7 @@ export const AllJadwal = asyncHandler(async (req, res) => {
   //   });
   // });
 
-  export const JadwalByTanggal = async (req, res) => {
-    try {
-      const { tanggal } = req.params;
-      const jadwal = await Jadwal.find({ tanggal: tanggal })
-                                  .populate('lapangan', 'name');
-  
-      if (jadwal.length === 0) {
-        return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
-      }
-  
-      res.status(200).json(jadwal);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Terjadi kesalahan pada server" });
-    }
-  };
-  
+
 //   export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
 //     const { tanggal, lapangan } = req.query;
 
@@ -336,82 +320,66 @@ export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
   const { tanggal, lapangan } = req.query;
 
   if (!tanggal || !lapangan) {
-      return res.status(400).json({ message: "Tanggal dan Lapangan harus diisi" });
+    return res.status(400).json({ message: "Tanggal dan Lapangan harus diisi" });
   }
 
   if (!mongoose.Types.ObjectId.isValid(lapangan)) {
-      return res.status(400).json({ message: "Lapangan ID tidak valid" });
+    return res.status(400).json({ message: "Lapangan ID tidak valid" });
   }
 
   try {
-      const jadwalList = await Jadwal.find({ tanggal, lapangan }).populate("lapangan");
+    const jadwalList = await Jadwal.find({ tanggal, lapangan }).populate('lapangan');
 
-      if (!jadwalList.length) {
-          return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+    if (!jadwalList.length) {
+      return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+    }
+
+    const now = new Date();
+
+    const result = await Promise.all(jadwalList.map(async (jadwal) => {
+      let status = "Tersedia"; // Default status
+      
+      const pemesanan = await Pemesanan.findOne({ jadwal_dipesan: jadwal._id }).sort({ _id: -1 });
+
+      if (pemesanan) {
+        const transaksi = await Transaksi.findOne({ pemesanan_id: pemesanan._id });
+
+        const statusPemesanan = pemesanan.status_pemesanan;
+        const statusPembayaran = transaksi?.status_pembayaran || "menunggu";
+        const deadline = transaksi ? new Date(transaksi.deadline_pembayaran) : now;
+
+        if (
+          statusPemesanan === "Dibatalkan" ||
+          (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline < now)
+        ) {
+          status = "Tersedia";
+        } else {
+          status = "Tidak Tersedia";
+        }
       }
 
-      const now = new Date();
+      return {
+        _id: jadwal._id,
+        jam: jadwal.jam,
+        harga: jadwal.harga,
+        tanggal: jadwal.tanggal,
+        lapangan: jadwal.lapangan.name, // hanya kirim nama lapangan, tidak seluruh objek
+        status,
+      };
+    }));
 
-      const result = await Promise.all(jadwalList.map(async (jadwal) => {
-          // Ambil pemesanan terbaru yang menyertakan jadwal ini
-          const pemesanan = await Pemesanan.findOne({
-              jadwal_dipesan: jadwal._id
-          }).sort({ _id: -1 });
+    const sortedResult = result
+      .map(item => ({
+        ...item,
+        jamAsInt: parseInt(item.jam.replace(':', '')),
+      }))
+      .sort((a, b) => a.jamAsInt - b.jamAsInt)
+      .map(({ jamAsInt, ...rest }) => rest);
 
-          let statusBaru = "Tersedia"; // Default
+    res.status(200).json(sortedResult);
 
-          if (pemesanan) {
-              const transaksi = await Transaksi.findOne({
-                  pemesanan_id: pemesanan._id
-              });
-
-              const statusPemesanan = pemesanan.status_pemesanan;
-              const statusPembayaran = transaksi?.status_pembayaran || "menunggu";
-              const deadline = new Date(transaksi?.deadline_pembayaran || now);
-
-              // ==== Penentuan Status Dinamis ====
-
-              // Jadwal VALID untuk dipesan kembali
-              if (
-                  statusPemesanan === "Dibatalkan" || 
-                  (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline < now)
-              ) {
-                  statusBaru = "Tersedia";
-                  // → Alasan: Sudah dibatalkan atau user tidak bayar sebelum deadline
-              }
-
-              // Jadwal TIDAK VALID untuk dipesan
-              else if (
-                  (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline >= now) ||
-                  (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "berhasil") ||
-                  (statusPemesanan === "Berhasil" && statusPembayaran === "berhasil")
-              ) {
-                  statusBaru = "Tidak Tersedia";
-                  // → Alasan: Masih dalam masa booking atau sudah dibayar, jadi dikunci
-              }
-          }
-
-          return {
-              ...jadwal.toObject(),
-              status: statusBaru
-          };
-      }));
-
-      // Urutkan berdasarkan jam (angka)
-      const sortedJadwal = result
-          .map(item => ({
-              ...item,
-              jamAsInt: parseInt(item.jam.replace(":", ""))
-          }))
-          .sort((a, b) => a.jamAsInt - b.jamAsInt)
-          .map(({ jamAsInt, ...rest }) => rest); // Buang jamAsInt sebelum dikirim
-
-      res.status(200).json(sortedJadwal);
   } catch (error) {
-      res.status(500).json({
-          message: "Terjadi kesalahan server",
-          error: error.message
-      });
+    res.status(500).json({ message: "Terjadi kesalahan server", error: error.message });
   }
 });
 

@@ -6,7 +6,6 @@ import {
   DetailJadwal, 
   UpdateJadwal, 
   DeleteJadwal, 
-    JadwalByTanggal,
   JadwalByDateAndLapangan,
   JadwalByLapangan,
   JadwalRutinHarian
@@ -22,14 +21,12 @@ router.get('/tanggal', JadwalByDateAndLapangan);
 
 router.get('/lapangan/:lapanganId', JadwalByLapangan);
 
-router.get('/tanggal/:tanggal', JadwalByTanggal);
 
 
 // Route for creating a jadwal
 router.post('/', CreateJadwal);
 
 router.post('/jadwal-harian', JadwalRutinHarian);
-
 
 
 // Route for getting a specific jadwal by its ID
