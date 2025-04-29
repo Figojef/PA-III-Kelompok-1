@@ -64,6 +64,11 @@ Route::get('/detail_pesanan', function () {
     return view('detail_pesanan');
 });
 
+Route::get('/detail_pembayaran', function () {
+    return view('detail_pembayaran');
+});
+
+
 
 Route::get('/profile', function () {
     return view('profile');

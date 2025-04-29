@@ -139,7 +139,7 @@
 </style>
 
     <div class="container mt-4">
-                <h2 id="judul">Detail Pemesanan</h2>
+                <h2 id="judul">Detail Pembayaran</h2>
                     <label style="font-size: 25px; text-decoration: underline; font-weight: bold; margin-bottom: 25px;">Informasi Pelanggan</label>
 
                     <div>
@@ -220,108 +220,6 @@
     </div>
 
     <script>
-    // Fungsi buat kotak radio itu
-    const wrappers = document.querySelectorAll('.option-wrapper');
-
-    wrappers.forEach(wrapper => {
-      wrapper.addEventListener('click', () => {
-        // Unselect semua
-        document.querySelectorAll('.text-box').forEach(tb => tb.classList.remove('selected'));
-        // Tambahkan class ke text-box yang diklik
-        wrapper.querySelector('.text-box').classList.add('selected');
-        // Pastikan radio-nya juga ke-check
-        wrapper.querySelector('input[type="radio"]').checked = true;
-      });
-    });
-
-    // gerenerate table
-    const namaHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-  const bulanIndo = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-  ];
-
-  function formatTanggal(tanggalStr) {
-    const date = new Date(tanggalStr);
-    const hari = namaHari[date.getDay()];
-    const tanggal = date.getDate();
-    const bulan = bulanIndo[date.getMonth()];
-    const tahun = date.getFullYear();
-    return `${hari}, ${tanggal} ${bulan} ${tahun}`;
-  }
-
-  const container = document.getElementById("slotContainer");
-  const stored = sessionStorage.getItem("selectedSlots");
-  const slots = stored ? JSON.parse(stored) : [];
-
-  if (slots.length === 0) {
-    container.innerHTML = "<em>Belum ada slot yang dipilih.</em>";
-    document.getElementById("totalHarga").textContent = "Rp 0"; // Menampilkan total harga 0
-  } else {
-    let totalHarga = 0; // Variabel untuk menghitung total harga
-
-    // Menampilkan setiap slot
-    slots.forEach(slot => {
-  const lapanganName = slot.lapangan?.name || "Lapangan tidak diketahui";
-  const harga = slot.harga || 0; // Set default harga ke 0 jika tidak ada
-  const tanggalFormatted = formatTanggal(slot.tanggal || "-");
-  const jam = slot.jam || "-";
-  
-  // Mengubah jam ke integer untuk manipulasi dan menambah 1 jam
-  const jamInt = parseInt(jam, 10);
-  const jamAkhir = (isNaN(jamInt) ? 0 : jamInt + 1).toString().padStart(2, '0') + ":00"; // Menambahkan 1 jam, jika jam tidak valid, set ke 00:00
-
-  // Menambahkan harga untuk total
-  totalHarga += Number(harga);
-
-  const div = document.createElement("div");
-  div.className = "slot-item";
-  div.innerHTML = `
-    <div class="harga">Rp ${Number(harga).toLocaleString()}</div>
-    <div class="slot-title">${lapanganName}</div>
-    <div class="slot-detail">${tanggalFormatted}<br>
-    ${jam}:00 - ${jamAkhir}</div>
-  `;
-  container.appendChild(div);
-});
-
-
-    // Tampilkan total harga dalam format rupiah
-    document.getElementById("totalHarga").textContent = `Rp ${totalHarga.toLocaleString()}`;
-  }
-
-  // Form konfirmasi
-  document.getElementById('formKonfirmasi').addEventListener('submit', function(event) {
-    // Ambil data slot dari sessionStorage
-    const storedSlots = sessionStorage.getItem('selectedSlots');
-    const slots = storedSlots ? JSON.parse(storedSlots) : [];
     
-    if (slots.length === 0) {
-        alert('Belum memilih slot jadwal.');
-        event.preventDefault();
-        return;
-    }
-
-    // Isi input jadwal
-    document.getElementById('jadwalDipesanInput').value = JSON.stringify(slots);
-
-    // Hitung total harga
-    let totalHarga = slots.reduce((total, slot) => total + Number(slot.harga || 0), 0);
-    document.getElementById('totalHargaInput').value = totalHarga;
-
-    // Ambil metode pembayaran
-    const metode = document.querySelector('input[name="payment"]:checked');
-    if (!metode) {
-        alert('Pilih metode pembayaran dulu.');
-        event.preventDefault();
-        return;
-    }
-    document.getElementById('metodePembayaranInput').value = metode.value;
-
-    sessionStorage.removeItem('selectedSlots');
-console.log('selectedSlots dihapus dari sessionStorage');
-
-});
-
   </script>
 @endsection
