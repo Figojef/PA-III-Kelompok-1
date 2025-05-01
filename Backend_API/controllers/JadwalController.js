@@ -7,6 +7,8 @@ import Lapangan from "../models/lapanganModel.js";
 import Jadwal from "../models/jadwalModel.js";
 
 import mongoose from 'mongoose';
+import Pemesanan from "../models/pemesananModel.js";
+import Transaksi from "../models/transaksiModel.js";
 
 
 export const AllJadwal = asyncHandler(async (req, res) => {
@@ -275,63 +277,128 @@ export const AllJadwal = asyncHandler(async (req, res) => {
   //   });
   // });
 
-  export const JadwalByTanggal = async (req, res) => {
-    try {
-      const { tanggal } = req.params;
-      const jadwal = await Jadwal.find({ tanggal: tanggal })
-                                  .populate('lapangan', 'name');
-  
-      if (jadwal.length === 0) {
-        return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
-      }
-  
-      res.status(200).json(jadwal);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Terjadi kesalahan pada server" });
+
+//   export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
+//     const { tanggal, lapangan } = req.query;
+
+//     if (!tanggal || !lapangan) {
+//         return res.status(400).json({ message: "Tanggal dan Lapangan harus diisi" });
+//     }
+
+//     if (!mongoose.Types.ObjectId.isValid(lapangan)) {
+//         return res.status(400).json({ message: "Lapangan ID tidak valid" });
+//     }
+
+//     try {
+//         const jadwal = await Jadwal.find({ tanggal, lapangan })
+//             .populate("lapangan");
+
+//         if (!jadwal.length) {
+//             return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+//         }
+
+//         // Convert 'jam' to integer and sort manually
+//         const sortedJadwal = jadwal
+//             .map(item => ({
+//                 ...item.toObject(), // Convert Mongoose document to a plain object
+//                 jamAsInt: parseInt(item.jam.replace(":", "")) // Convert 'jam' to integer (remove ':' if present)
+//             }))
+//             .sort((a, b) => a.jamAsInt - b.jamAsInt); // Sort by 'jamAsInt'
+
+//         // Remove the 'jamAsInt' field from the response
+//         const result = sortedJadwal.map(item => {
+//             const { jamAsInt, ...rest } = item;
+//             return rest;
+//         });
+
+//         res.status(200).json(result);
+//     } catch (error) {
+//         res.status(500).json({ message: "Terjadi kesalahan server", error: error.message });
+//     }
+// });
+export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
+  const { tanggal, lapangan } = req.query; 
+
+  if (!tanggal || !lapangan) {
+    return res.status(400).json({ message: "Tanggal dan Lapangan harus diisi" });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(lapangan)) {
+    return res.status(400).json({ message: "Lapangan ID tidak valid" });
+  }
+
+  try {
+    const jadwalList = await Jadwal.find({ tanggal, lapangan }).populate('lapangan');
+
+    if (!jadwalList.length) {
+      return res.status(404).json({ message: "Jadwal tidak ditemukan" });
     }
-  };
-  
-  export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
-    const { tanggal, lapangan } = req.query;
 
-    if (!tanggal || !lapangan) {
-        return res.status(400).json({ message: "Tanggal dan Lapangan harus diisi" });
-    }
+    const now = new Date();
 
-    if (!mongoose.Types.ObjectId.isValid(lapangan)) {
-        return res.status(400).json({ message: "Lapangan ID tidak valid" });
-    }
+    const result = await Promise.all(jadwalList.map(async (jadwal) => {
+      let status = "Tersedia"; // Default status
+      
+      const pemesanan = await Pemesanan.findOne({ jadwal_dipesan: jadwal._id }).sort({ _id: -1 });
 
-    try {
-        const jadwal = await Jadwal.find({ tanggal, lapangan })
-            .populate("lapangan");
+      if (pemesanan) {
+        const transaksi = await Transaksi.findOne({ pemesanan_id: pemesanan._id });
 
-        if (!jadwal.length) {
-            return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+        const statusPemesanan = pemesanan.status_pemesanan;
+        const statusPembayaran = transaksi?.status_pembayaran || "menunggu";
+        const deadline = transaksi ? new Date(transaksi.deadline_pembayaran) : now;
+
+        if (
+          statusPemesanan === "Dibatalkan" ||
+          (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline < now)
+        ) {
+          status = "Tersedia";
+        } else {
+          status = "Tidak Tersedia";
         }
+      }
 
-        // Convert 'jam' to integer and sort manually
-        const sortedJadwal = jadwal
-            .map(item => ({
-                ...item.toObject(), // Convert Mongoose document to a plain object
-                jamAsInt: parseInt(item.jam.replace(":", "")) // Convert 'jam' to integer (remove ':' if present)
-            }))
-            .sort((a, b) => a.jamAsInt - b.jamAsInt); // Sort by 'jamAsInt'
+      return {
+        _id: jadwal._id,
+        jam: jadwal.jam,
+        harga: jadwal.harga,
+        tanggal: jadwal.tanggal,
+        lapangan: jadwal.lapangan.name, // hanya kirim nama lapangan, tidak seluruh objek
+        status,
+      };
+    }));
 
-        // Remove the 'jamAsInt' field from the response
-        const result = sortedJadwal.map(item => {
-            const { jamAsInt, ...rest } = item;
-            return rest;
-        });
+    const sortedResult = result
+      .map(item => ({
+        ...item,
+        jamAsInt: parseInt(item.jam.replace(':', '')),
+      }))
+      .sort((a, b) => a.jamAsInt - b.jamAsInt)
+      .map(({ jamAsInt, ...rest }) => rest);
 
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(500).json({ message: "Terjadi kesalahan server", error: error.message });
-    }
+    res.status(200).json(sortedResult);
+
+  } catch (error) {
+    res.status(500).json({ message: "Terjadi kesalahan server", error: error.message });
+  }
 });
 
+export const JadwalByTanggal = async (req, res) => {
+  try {
+    const { tanggal } = req.params;
+    const jadwal = await Jadwal.find({ tanggal: tanggal })
+                                .populate('lapangan', 'name');
 
+    if (jadwal.length === 0) {
+      return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
+    }
+
+    res.status(200).json(jadwal);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
 
 
 export const JadwalByLapangan = asyncHandler(async (req, res) => {

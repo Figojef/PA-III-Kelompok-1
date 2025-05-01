@@ -146,11 +146,7 @@
                         <label class="user">Nama Pelanggan</label><br>
                         <label class="user data">          
                             @php
-                            if(isset(Session::get('user_data')['role'])){
                                 echo Session::get('user_data')['name'];
-                            } else {
-                                echo ".";
-                            }
                             @endphp
                         </label><br>
 
@@ -179,7 +175,7 @@
                         <h4 style="margin-bottom: 25px;">Pilih Jenis Pembayaran</h4>
                         <label class="option-wrapper">
                         <input type="radio" name="payment" value="transfer_bank">
-                        <div class="text-box">Transfer Bank</div>
+                        <div class="text-box">Transfer Bank </div>
                             </label>
 
                         <label class="option-wrapper">
@@ -211,7 +207,7 @@
         <input type="hidden" name="jadwal_dipesan" id="jadwalDipesanInput">
         <input type="hidden" name="total_harga" id="totalHargaInput">
         <input type="hidden" name="metode_pembayaran" id="metodePembayaranInput">
-        <input type="hidden" name="status_pemesanan" value="pending">
+        <input type="hidden" name="status_pemesanan" value="Sedang Dipesan">
         <input type="submit" class="tombol" value="Konfirmasi pemesanan">
     </form>
 </div>
@@ -292,36 +288,47 @@
 
   // Form konfirmasi
   document.getElementById('formKonfirmasi').addEventListener('submit', function(event) {
-    // Ambil data slot dari sessionStorage
-    const storedSlots = sessionStorage.getItem('selectedSlots');
-    const slots = storedSlots ? JSON.parse(storedSlots) : [];
-    
-    if (slots.length === 0) {
-        alert('Belum memilih slot jadwal.');
-        event.preventDefault();
-        return;
-    }
+  // Ambil data slot dari sessionStorage
+  const storedSlots = sessionStorage.getItem('selectedSlots');
+  const slots = storedSlots ? JSON.parse(storedSlots) : [];
+  
+  if (slots.length === 0) {
+    alert('Belum memilih slot jadwal.');
+    event.preventDefault();
+    return;
+  }
 
-    // Isi input jadwal
-    document.getElementById('jadwalDipesanInput').value = JSON.stringify(slots);
+  // Isi input jadwal
+  document.getElementById('jadwalDipesanInput').value = JSON.stringify(slots);
 
-    // Hitung total harga
-    let totalHarga = slots.reduce((total, slot) => total + Number(slot.harga || 0), 0);
-    document.getElementById('totalHargaInput').value = totalHarga;
+  // Hitung total harga
+  let totalHarga = slots.reduce((total, slot) => total + Number(slot.harga || 0), 0);
+  document.getElementById('totalHargaInput').value = totalHarga;
 
-    // Ambil metode pembayaran
-    const metode = document.querySelector('input[name="payment"]:checked');
-    if (!metode) {
-        alert('Pilih metode pembayaran dulu.');
-        event.preventDefault();
-        return;
-    }
-    document.getElementById('metodePembayaranInput').value = metode.value;
+  // Ambil metode pembayaran
+  const metode = document.querySelector('input[name="payment"]:checked');
+  if (!metode) {
+    alert('Pilih metode pembayaran dulu.');
+    event.preventDefault();
+    return;
+  }
+  document.getElementById('metodePembayaranInput').value = metode.value;
 
-    sessionStorage.removeItem('selectedSlots');
-console.log('selectedSlots dihapus dari sessionStorage');
+  // Hapus selectedSlots setelah konfirmasi
+  sessionStorage.removeItem('selectedSlots');
+  console.log('selectedSlots dihapus dari sessionStorage');
 
+  // Generate ID transaksi unik (bisa menggunakan timestamp atau dari backend)
+  const transactionId = `TRANS-${Date.now()}`;  // Menggunakan timestamp sebagai ID transaksi
+
+  // Simpan ID transaksi di sessionStorage
+  sessionStorage.setItem('transactionId', transactionId);
+  console.log('ID Transaksi disimpan:', transactionId);
+
+  // Bisa juga mengirimkan ID transaksi ke server (misalnya di form)
+  // document.getElementById('transactionIdInput').value = transactionId;
 });
+
 
   </script>
 @endsection

@@ -1,5 +1,6 @@
 import express from "express"
 
+// E:\a_PA3\Try\ValidasiPembayaran\BE\index.js
 // Router
 import authRouter from './routes/authRouter.js'
 import productRouter from './routes/productRouter.js'
@@ -18,6 +19,7 @@ import helmet from "helmet"
 import ExpressMongoSanitize from "express-mongo-sanitize"
 import { v2 as cloudinary } from 'cloudinary';
 
+
 const app = express()
 const port = 3000
 
@@ -31,7 +33,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));  // Pastikan hanya satu pemanggilan `app.use(cors(...))`
-
 
 // Configuration
 cloudinary.config({ 
@@ -62,6 +63,11 @@ app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
 app.use('/api/v1/mabar', mabarRouter)
 
+
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.originalUrl}`);
+  next();
+});
 
 
 app.use(notFound)

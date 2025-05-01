@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LapanganController;
 use App\Models\Lapangan;
 use App\Http\Controllers\PemesananController;
+use App\Http\Controllers\TransaksiController;
 
 // Autentikasi
 
@@ -37,11 +38,14 @@ Route::middleware(['admin'])->group(function () {
 // Membuat Pemesanan
 Route::post('/pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
 
+Route::get('/pembayaran/{id}', [PembayaranController::class, 'showPaymentDetail'])->name('pembayaran.detail');
+
+
 
 
 // Halaman pengunjung
 Route::get('/', function () {
-    return view('beranda'); // Ganti dengan view dashboard Anda
+    return view('beranda'); // Ganti dengan view dashboard Anda 
 })->name('dashboard');
 
 Route::get('/tentang', function () {
@@ -64,11 +68,13 @@ Route::get('/detail_pesanan', function () {
     return view('detail_pesanan');
 });
 
-Route::get('/detail_pembayaran', function () {
-    return view('detail_pembayaran');
+Route::get('/profil', function () {
+    return view('profil');
 });
 
-
+Route::get('/detail_pembayaran', function () {
+    return view('detail_pembayaran');
+})->name('detail_pembayaran');
 
 Route::get('/profile', function () {
     return view('profile');

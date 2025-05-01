@@ -72,77 +72,92 @@ import Transaksi from "../models/transaksiModel.js";
 export const createPemesanan = asyncHandler(async (req, res) => {
     const { user_id, jadwal_dipesan, total_harga, metode_pembayaran } = req.body;
 
+    // 1. Validasi User
     const user = await User.findById(user_id);
     if (!user) {
         return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
+    // 2. Validasi Jadwal
     const jadwalList = await Jadwal.find({ _id: { $in: jadwal_dipesan } });
     if (jadwalList.length !== jadwal_dipesan.length) {
-        return res.status(400).json({ message: "Salah satu jadwal tidak valid" });
+        return res.status(400).json({ message: "Beberapa jadwal tidak valid" });
     }
 
     const now = new Date();
 
-    // Periksa setiap jadwal apakah valid untuk dipesan
+    // 3. Cek status setiap Jadwal
     for (const jadwal of jadwalList) {
-        const pemesanan = await Pemesanan.findOne({
+        const pemesananTerkait = await Pemesanan.findOne({
             jadwal_dipesan: jadwal._id
         }).sort({ _id: -1 });
 
-        if (pemesanan) {
-            const transaksi = await Transaksi.findOne({
-                pemesanan_id: pemesanan._id
+        if (pemesananTerkait) {
+            const transaksiTerkait = await Transaksi.findOne({
+                pemesanan_id: pemesananTerkait._id
             });
 
-            const statusPemesanan = pemesanan.status_pemesanan;
-            const statusPembayaran = transaksi?.status_pembayaran || "menunggu";
-            const deadline = new Date(transaksi?.deadline_pembayaran || now);
+            const statusPemesanan = pemesananTerkait.status_pemesanan;
+            const statusPembayaran = transaksiTerkait?.status_pembayaran || "menunggu";
+            const deadline = transaksiTerkait?.deadline_pembayaran ? new Date(transaksiTerkait.deadline_pembayaran) : now;
 
-            // 🔴 KASUS TIDAK VALID DIPESAN
+            // 🔴 Kasus Tidak Valid
             if (
                 (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline >= now) ||
                 (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "berhasil") ||
                 (statusPemesanan === "Berhasil" && statusPembayaran === "berhasil")
             ) {
                 return res.status(400).json({
-                    message: `Jadwal jam ${jadwal.jam} pada tanggal ${jadwal.tanggal} tidak tersedia`
+                    message: `Jadwal jam ${jadwal.jam} tanggal ${jadwal.tanggal} sudah tidak tersedia`
                 });
             }
-
-            // ✅ Valid: jika dibatalkan, atau sedang dipesan tapi deadline sudah lewat
-            // lanjut ke proses
         }
+
+        // Selain itu (dibatalkan / expired), dianggap valid
     }
 
-    // Buat pemesanan
+    // 4. Buat Pemesanan Baru
     const newPemesanan = await Pemesanan.create({
         user_id,
         jadwal_dipesan,
         total_harga,
-        status_pemesanan: "Sedang Dipesan"
+        status_pemesanan: "Sedang Dipesan",
+        is_expired: false
     });
 
-    // Update status jadwal di DB (optional, kalau kamu tetap ingin ada flag real-time)
+    // 5. Update status_booking di semua Jadwal jadi "Pending Payment"
     await Jadwal.updateMany(
         { _id: { $in: jadwal_dipesan } },
-        { $set: { status: "Tidak Tersedia" } }
+        { $set: { status_booking: "Pending Payment" } }
     );
 
+    // 6. Buat Transaksi
     const currentDate = new Date();
-    const formattedDate = currentDate.toISOString().split("T")[0];
+    const formattedDate = currentDate.toISOString().split("T")[0];  
 
-    const deadline = new Date();
-    deadline.setHours(deadline.getHours() + 2);
+    // const deadlinePembayaran = new Date();
+    // // deadlinePembayaran.setHours(deadlinePembayaran.getHours() + 2); // Misal 2 jam untuk pembayaran
+    // deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 1); // Tambah 1 menit
+    const deadlinePembayaran = new Date();
 
+    if (metode_pembayaran === "transfer_bank") {
+        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 45); // 45 menit
+    } else if (metode_pembayaran === "bayar_langsung") {
+        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 60); // 60 menit
+    } else {
+        return res.status(400).json({ message: "Metode pembayaran tidak valid" });
+    }
+
+    
     const newTransaksi = await Transaksi.create({
         pemesanan_id: newPemesanan._id,
         metode_pembayaran,
         status_pembayaran: "menunggu",
         tanggal: formattedDate,
-        deadline_pembayaran: deadline
+        deadline_pembayaran: deadlinePembayaran
     });
 
+    // 7. Return response
     res.status(201).json({
         message: "Pemesanan dan transaksi berhasil dibuat",
         data: {
@@ -278,5 +293,6 @@ export const pesananJadwalBelumLewat = asyncHandler(async (req, res) => {
         masihAdaJadwalBelumLewat: masihAdaYangBelumLewat
     });
 });
+
 
 

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const jadwalSchema = new Schema({
   lapangan: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Lapangan",
     required: true,
   },
@@ -20,21 +20,20 @@ const jadwalSchema = new Schema({
     type: Number,
     required: [true, "Harga harus diisi"],
   },
-  status: {
+  status_booking: {
     type: String,
-    enum: ["Tersedia", "Tidak Tersedia"],
+    enum: ["Tersedia", "Pending Payment", "Booked"],
     default: "Tersedia",
   }
 });
 
-// Membuat composite index yang menggabungkan lapangan, tanggal, dan jam
-// Menjamin bahwa duplikasi jam hanya bisa terjadi pada lapangan dan tanggal yang berbeda
+// Membuat composite index (supaya tidak ada jam lapangan sama di hari sama)
 jadwalSchema.index({ lapangan: 1, tanggal: 1, jam: 1 }, { unique: true });
 
-// Membuat model
 const Jadwal = mongoose.model("Jadwal", jadwalSchema);
 
 export default Jadwal;
+
 
 
 

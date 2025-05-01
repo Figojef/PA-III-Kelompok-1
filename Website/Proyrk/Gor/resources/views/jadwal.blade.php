@@ -220,38 +220,46 @@
 
                 // Tambahkan baris untuk setiap jadwal
                 groupedByLapangan[lapangan].forEach(item => {
-                    const row = document.createElement("tr");
+    const row = document.createElement("tr");
 
-                    const statusJamCell = document.createElement("td");
-                    statusJamCell.style.display = "flex";
-                    statusJamCell.style.alignItems = "center";
+    const statusJamCell = document.createElement("td");
+    statusJamCell.style.display = "flex";
+    statusJamCell.style.alignItems = "center";
 
-                    const status = document.createElement("div");
-                    let statusClass = "circle";
+    const status = document.createElement("div");
+    let statusClass = "circle";
 
-                    if (item.status === "Tersedia") {
-                        statusClass += " green";
-                    } else if (item.status === "Tidak Tersedia") {
-                        statusClass += " red";
-                    } else if (item.status === "Pending") {
-                        statusClass += " grey";
-                    } else if (item.status === "Dipesan") {
-                        statusClass += " blue";
-                    } else if (item.status === "Dibatalkan") {
-                        statusClass += " orange";
-                    }
+    if (item.status === "Tersedia") {
+        statusClass += " green";
+    } else if (item.status === "Tidak Tersedia") {
+        statusClass += " red";
+    } else if (item.status === "Pending") {
+        statusClass += " grey";
+    } else if (item.status === "Dipesan") {
+        statusClass += " blue";
+    } else if (item.status === "Dibatalkan") {
+        statusClass += " orange";
+    }
 
-                    status.className = statusClass;
+    status.className = statusClass;
 
-                    const jamCell = document.createElement("span");
-                    jamCell.textContent = item.jam ? item.jam : "Jam tidak tersedia";
+    const jamCell = document.createElement("span");
+    if (item.jam !== undefined) {
+        const jam = parseInt(item.jam);
+        const startHour = jam.toString().padStart(2, '0');
+        const endHour = (jam + 1).toString().padStart(2, '0');
+        jamCell.textContent = `${startHour}:00 - ${endHour}:00`;
+    } else {
+        jamCell.textContent = "Jam tidak tersedia";
+    }
 
-                    statusJamCell.appendChild(status);
-                    statusJamCell.appendChild(jamCell);
+    statusJamCell.appendChild(status);
+    statusJamCell.appendChild(jamCell);
 
-                    row.appendChild(statusJamCell);
-                    tbody.appendChild(row);
-                });
+    row.appendChild(statusJamCell);
+    tbody.appendChild(row);
+});
+
 
                 table.appendChild(tbody);
                 lapanganDiv.appendChild(table);

@@ -111,44 +111,53 @@ export const deleteProduct = asyncHandler(async(req,res) => {
 })
 
 
-export const fileUpload = asyncHandler(async(req, res) => {
+export const fileUpload = asyncHandler(async (req, res) => {
+    const { transactionId } = req.params; // Ambil ID transaksi dari parameter
 
-    const stream = cloudinary.uploader.upload_stream({
-        folder : 'uploads',
-        allowed_formats : ['jpg', 'png'],
-    },
-    function(err, result){
-        if(err){
-            console.log(err)
-            return res.status(500).json({
-                message : "gagal upload gambar",
-                error : err
-            })
-        }
-
-        res.json({
-            message : "Gambar berhasil diupload",
-            url : result.secure_url
-        })
-
+    // Pastikan file ada dalam request
+    if (!req.file) {
+        return res.status(400).json({ message: "Tidak ada file yang diupload" });
     }
-    )
 
-    streamifier.createReadStream(req.file.buffer).pipe(stream)
+    // Upload gambar ke Cloudinary
+    const stream = cloudinary.uploader.upload_stream(
+        {
+            folder: 'bukti_pembayaran', // Folder di Cloudinary
+            allowed_formats: ['jpg', 'png'],
+        },
+        async (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({
+                    message: "Gagal upload bukti pembayaran",
+                    error: err,
+                });
+            }
 
-    // res.send('File upload product')
-    // const file = req.file
-    // if(!file){
-    //     res.status(400)
-    //     throw new Error("Tidak ada file yang diinput")
-    // }
+            // Mendapatkan URL gambar dari Cloudinary
+            const imageUrl = result.secure_url;
 
-    // const imageFileName = file.filename
-    // const pathImageFile = `uploads/${imageFileName}`
+            // Cari transaksi berdasarkan ID
+            const transaksi = await Transaksi.findById(transactionId);
 
-    // res.status(200).json({
-    //     message : "Image berhasil diupload",
-    //     image : pathImageFile
-    // })
+            if (!transaksi) {
+                return res.status(404).json({ message: "Transaksi tidak ditemukan" });
+            }
 
-})
+            // Update field bukti_pembayaran dengan URL gambar yang diupload
+            transaksi.bukti_pembayaran = imageUrl;
+
+            // Simpan perubahan ke database
+            await transaksi.save();
+
+            // Mengirimkan respons dengan URL gambar bukti pembayaran yang baru
+            res.status(200).json({
+                message: "Bukti pembayaran berhasil diperbarui",
+                data: transaksi,
+            });
+        }
+    );
+
+    // Mengirimkan buffer gambar ke Cloudinary
+    streamifier.createReadStream(req.file.buffer).pipe(stream);
+});

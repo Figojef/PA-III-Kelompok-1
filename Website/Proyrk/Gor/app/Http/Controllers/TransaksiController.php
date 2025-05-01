@@ -8,31 +8,28 @@ use Illuminate\Support\Facades\Session;
 
 class TransaksiController extends Controller
 {
-    public function store(Request $request)
-    {
-        $user = Session::get('user_data');
-        $jwt = Session::get('jwt');
+  // Function untuk upload bukti pembayaran
+  public function updateGambar(Request $request, $id)
+  {
+      $request->validate([
+          'bukti_pembayaran' => 'required|image|max:2048',
+      ]);
+  
+      $pembayaran = Pembayaran::findOrFail($id);
+  
+      // Simpan file
+      $filename = time() . '.' . $request->file('bukti_pembayaran')->extension();
+      $path = $request->file('bukti_pembayaran')->move(public_path('uploads'), $filename);
+  
+      // Update DB
+      $pembayaran->bukti_pembayaran = 'uploads/' . $filename;
+      $pembayaran->save();
+  
+      return redirect()->back()->with('success', 'Gambar berhasil diupload');
+  }
+  
+    
 
-        if (!$user || !$jwt) {
-            return redirect()->route('login')->withErrors(['Silakan login terlebih dahulu.']);
-        }
-
-        $validated = $request->validate([
-            'pemesanan_id' => 'required|string',
-            'metode_pembayaran' => 'required|string',
-        ]);
-
-        $baseUrl = rtrim(env('API_BASE_URL'), '/');
-
-        $response = Http::withToken($jwt)->post($baseUrl . '/transaksi', [
-            'pemesanan_id' => $validated['pemesanan_id'],
-            'metode_pembayaran' => $validated['metode_pembayaran'],
-        ]);
-
-        if ($response->successful()) {
-            return redirect()->route('dashboard')->with('success', 'Transaksi berhasil dibuat!');
-        } else {
-            return back()->withErrors(['Gagal menyimpan transaksi ke API.']);
-        }
-    }
 }
+
+

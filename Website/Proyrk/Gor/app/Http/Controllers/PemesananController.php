@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
 
 class PemesananController extends Controller
 {
@@ -26,7 +27,6 @@ class PemesananController extends Controller
         return response()->json($response->json(), $response->status());
     }
 
-    // Buat pemesanan baru (POST)
     public function store(Request $request)
     {
         // Ambil user dan token dari session
@@ -56,18 +56,32 @@ class PemesananController extends Controller
         // Base URL backend Node.js
         $baseUrl = rtrim(env('API_BASE_URL'), '/');
     
-        // Kirim request ke API Node.js
-        $response = Http::withToken($jwt)->post($baseUrl . '/pemesanan', [
+        // Kirim request ke API Node.js untuk membuat pemesanan
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $jwt,
+        ])->post($baseUrl . '/pemesanan', [
             'user_id' => $user['_id'],
-            'jadwal_dipesan' => $jadwal_ids, // ⬅️ Ini sekarang array of string ID
+            'jadwal_dipesan' => $jadwal_ids,
             'total_harga' => $validated['total_harga'],
-            'status_pemesanan' => $validated['status_pemesanan'],
             'metode_pembayaran' => $validated['metode_pembayaran'],
         ]);
     
-        // Cek respon
+        // Cek respon dari API Node.js
         if ($response->successful()) {
-            return redirect()->route('dashboard')->with('success', 'Pemesanan dan transaksi berhasil dibuat!');
+            // Ambil ID transaksi dan deadline dari response API
+            $transactionId = $response->json()['data']['transaksi']['_id'];  // Ambil _id dari transaksi
+            $deadlineUTC = $response->json()['data']['transaksi']['deadline_pembayaran'];  // Ambil waktu deadline dalam UTC
+    
+            // Konversi waktu deadline dari UTC ke waktu lokal
+            $deadline = Carbon::parse($deadlineUTC)->setTimezone(config('app.timezone'));  // Sesuaikan dengan timezone aplikasi
+    
+            // Simpan transaksi dan deadline ke session (hanya untuk frontend yang membutuhkan)
+            session([
+                'transaction_id' => $transactionId,
+                'payment_deadline' => $deadline->format('Y-m-d H:i:s'),  // Format sesuai kebutuhan
+            ]);
+    
+            return redirect()->route('detail_pembayaran')->with('success', 'Pemesanan dan transaksi berhasil dibuat!');
         } else {
             return back()->withErrors(['Gagal membuat pemesanan dan transaksi.']);
         }
@@ -76,10 +90,28 @@ class PemesananController extends Controller
     
     
     
-    
-    
-    
 
+
+
+
+
+
+
+    // Fungsi untuk mengambil data pemesanan berdasarkan ID transaksi
+    private function getPemesananData($transactionId)
+    {
+        // Ambil data transaksi dan pemesanan dari API atau database
+        // Contoh mengambil dari API:
+        $response = Http::get("url/api/transaksi/$transactionId");
+        
+        if ($response->successful()) {
+            return $response->json()['data'];
+        }
+    
+        return null;
+    }
+    
+    
     // Ambil detail satu pemesanan (GET by ID)
     public function show($id)
     {

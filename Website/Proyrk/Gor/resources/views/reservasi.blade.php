@@ -5,115 +5,90 @@
 <script>
     window.jwt = "{{ session('jwt') ?? '' }}";
     window.loginUrl = "{{ route('login') }}";
-    console.log("JWT dari session:", window.jwt); // cek apakah isi atau kosong
 </script>
 
 <title>Jadwal Bermain</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
 <style>
+    /* --- CSS sama seperti sebelumnya --- */
     .jadwal-header {
         background-color: #343a40;
         color: #fff;
         padding: 8px 12px;
     }
+
     .jadwal-table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 1px solid #ddd;
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
     }
 
-
-    
     .lapangan-container {
-    margin-bottom: 2rem;
-}
-
-.slot-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
-    margin-top: 1rem;
-}
-
-.jadwal-slot {
-    padding: 25px;
-    text-align: center;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-weight: bold;
-    background-color: white;
-    cursor: default;
-    transition: all 0.2s ease;
-}
-
-.jadwal-slot.available {
-    background-color: #ffffff;
-    color: #000000;
-    cursor: pointer;
-}
-
-.jadwal-slot.unavailable {
-    background-color: #F93232;
-    color: #ffffff;
-    cursor: not-allowed;
-}
-.jadwal-slot.available .harga {
-    color: #000000; 
-}
-
-.jadwal-slot.unavailable .harga {
-    color: #ffffff; 
-}
-
-.jadwal-slot.available:hover {
-    background-color: #c8f0c8;
-}
-
-.jadwal-slot.dipilih {
-    background-color: #085F06;
-    color: #ffffff;
-}
-.jadwal-slot.dipilih .harga{
-    color: #ffffff;
-}
-
-    .jadwal-item {
-        color: red;
+        margin-bottom: 2rem;
     }
-    .slot.dipilih {
-    background-color: #4CAF50; /* hijau */
-    color: white;
-    border: 2px solid #388E3C;
-}
 
+    .slot-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 1rem;
+    }
 
-    .time-slot {
-        display: flex;
-        align-items: center;
-        padding: 5px 10px;
-        border-bottom: 1px solid #dee2e6;
+    .jadwal-slot {
+        padding: 25px;
+        text-align: center;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-weight: bold;
+        background-color: white;
+        cursor: default;
+        transition: all 0.2s ease;
     }
-    .circle {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: 8px;
+
+    .jadwal-slot.available {
+        background-color: #ffffff;
+        color: #000000;
+        cursor: pointer;
     }
-    .green { background-color: green; }
-    .red { background-color: red; }
-    .grey { background-color: grey; }
-    .white { background-color: white; }
-    .orange { background-color: orange; }
+
+    .jadwal-slot.unavailable {
+        background-color: #F93232;
+        color: #ffffff;
+        cursor: not-allowed;
+    }
+
+    .jadwal-slot.available:hover {
+        background-color: #c8f0c8;
+    }
+
+    .jadwal-slot.dipilih {
+        background-color: #085F06;
+        color: #ffffff;
+    }
+
     .legend {
         display: flex;
         flex-direction: column;
         gap: 8px;
         margin-top: 15px;
     }
+
     .legend-item {
         display: flex;
         align-items: center;
     }
+
+    .circle {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    .green { background-color: green; }
+    .red { background-color: red; }
+    .white { background-color: white; }
 
     .lanjutkan {
         margin-top: 50px;
@@ -123,79 +98,62 @@
         border-radius: 7px;
         font-weight: bold;
         font-size: 20px;
-
     }
 </style>
 
-    <div class="container mt-4">
-        <h4>Jadwal bermain</h4>
-        <div class="mb-3">
-            <label for="tanggal" class="form-label">Pilih Tanggal</label>
-            <input type="date" id="tanggal" class="form-control">
-        </div>
-
-        <div class="row" id="jadwalContainer">
-            <!-- Konten Jadwal Akan Dimanipulasi Lewat JavaScript -->
-        </div>
-
-        <div class="legend">
-            <div class="legend-item"><div class="circle white"></div> Jadwal tersedia</div>
-            <div class="legend-item"><div class="circle red"></div> Jadwal sudah di-booking</div>
-            <div class="legend-item"><div class="circle green"></div> Jadwal Dipilih</div>
-            <div id="base-url" style="display:none">{{env('API_BASE_URL')}}</div>
-        </div>
-        
-        <form action="/detail_pesanan" method="GET">
-    <input type="submit" class="lanjutkan" value="Lanjutkan">
-</form>
-
-
-        <form id="pemesananForm" action="{{ route('pemesanan.store') }}" method="POST">
-    @csrf
-    <input type="hidden" name="jadwal_dipesan" id="jadwal_dipesan">
-    <input type="hidden" name="total_harga" id="total_harga">
-    <input type="hidden" name="status_pemesanan" id="status_pemesanan" value="Sedang Dipesan">
-    <input type="submit" class="lanjutkan" value="Lanjutkan" id="lanjutkanBtn">
-</form>
-
-
-
+<div class="container mt-4">
+    <h4>Jadwal bermain</h4>
+    <div class="mb-3">
+        <label for="tanggal" class="form-label">Pilih Tanggal</label>
+        <input type="date" id="tanggal" class="form-control">
     </div>
 
-    <script>
+    <div class="row" id="jadwalContainer"></div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="circle white"></div> Jadwal tersedia</div>
+        <div class="legend-item"><div class="circle red"></div> Jadwal sudah di-booking</div>
+        <div class="legend-item"><div class="circle green"></div> Jadwal dipilih</div>
+        <div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+    <form action="/detail_pesanan" method="GET" onsubmit="return cekSebelumSubmit()">
+        <input type="submit" class="lanjutkan btn btn-primary" value="Lanjutkan">
+    </form>
+    <button id="resetBtn" type="button" class="lanjutkan btn btn-secondary" onclick="resetPilihan()">Reset Pilihan</button>
+</div>
+
+</div>
+
+<script>
+function formatJam(jam) {
+    const jamInt = parseInt(jam, 10); // konversi ke integer
+    const jamAwal = jamInt.toString().padStart(2, '0') + ":00";
+    const jamAkhir = (jamInt + 1).toString().padStart(2, '0') + ":00";
+    return `${jamAwal} - ${jamAkhir}`;
+}
 
 
 function renderjadwal(jadwalData) {
-    console.log("Data diterima di renderjadwal:", jadwalData);
-
     const container = document.getElementById("jadwalContainer");
-    if (!container) {
-        console.error("Element jadwalContainer tidak ditemukan di HTML.");
-        return;
-    }
+    container.innerHTML = "";
 
-    container.innerHTML = ""; // Hapus konten lama
-
-    // Ambil data dari sessionStorage (selectedSlots)
-    let selected = JSON.parse(sessionStorage.getItem('selectedSlots')) || [];
+    const selected = JSON.parse(sessionStorage.getItem('selectedSlots')) || [];
 
     if (!jadwalData || jadwalData.length === 0) {
         container.innerHTML = "<p>Tidak ada jadwal tersedia.</p>";
         return;
     }
 
-    // Kelompokkan jadwal berdasarkan lapangan
-    const groupedByLapangan = jadwalData.reduce((acc, item) => {
-        const lapanganName = item.lapangan?.name || "Tanpa Nama";
-        if (!acc[lapanganName]) {
-            acc[lapanganName] = [];
-        }
-        acc[lapanganName].push(item);
+    const grouped = jadwalData.reduce((acc, item) => {
+        const lapangan = item.lapangan?.name || "Tanpa Nama";
+        acc[lapangan] = acc[lapangan] || [];
+        acc[lapangan].push(item);
         return acc;
     }, {});
 
-    // Tampilkan jadwal per lapangan
-    Object.keys(groupedByLapangan).forEach(lapangan => {
+    Object.keys(grouped).forEach(lapangan => {
         const lapanganDiv = document.createElement("div");
         lapanganDiv.classList.add("lapangan-container");
 
@@ -206,18 +164,16 @@ function renderjadwal(jadwalData) {
         const slotGrid = document.createElement("div");
         slotGrid.classList.add("slot-grid");
 
-        groupedByLapangan[lapangan].sort((a, b) => a.jam - b.jam).forEach(item => {
+        grouped[lapangan].sort((a, b) => a.jam - b.jam).forEach(item => {
             const slot = document.createElement("div");
             slot.classList.add("jadwal-slot");
+            slot.setAttribute("data-id", item._id);
 
-            // Tambahkan class warna berdasar status
-            if (item.status === "Tersedia") {
+            if (item.status_booking === "Tersedia") {
                 slot.classList.add("available");
-                    
+
                 const isSelected = selected.find(s => s._id === item._id);
-                if (isSelected) {
-                    slot.classList.add("dipilih");
-                }
+                if (isSelected) slot.classList.add("dipilih");
 
                 slot.addEventListener('click', () => {
                     if (!window.jwt) {
@@ -235,138 +191,132 @@ function renderjadwal(jadwalData) {
                     };
 
                     const index = selected.findIndex(s => s._id === dataToSave._id);
-
                     if (index > -1) {
                         selected.splice(index, 1);
                         slot.classList.remove("dipilih");
-                        alert("Slot dibatalkan:\n" + JSON.stringify(dataToSave, null, 2));
-                        console.log("Slot dibatalkan:", dataToSave);
                     } else {
                         selected.push(dataToSave);
                         slot.classList.add("dipilih");
-                        alert("Slot dipilih:\n" + JSON.stringify(dataToSave, null, 2));
-                        console.log("Slot dipilih:", dataToSave);
                     }
 
-                    // Update sessionStorage
                     sessionStorage.setItem('selectedSlots', JSON.stringify(selected));
-                });
-            }
 
-            else if (item.status === "Tidak Tersedia") {
-                    slot.classList.add("unavailable");
+                    updateResetButtonStatus();
+                });
+            } else {
+                slot.classList.add("unavailable");
             }
-            const jamInt = parseInt(item.jam, 10);
-            const jamAwal = jamInt.toString().padStart(2, '0') + ":00";
-            const jamAkhir = (jamInt + 1).toString().padStart(2, '0') + ":00";
 
             slot.innerHTML = `
-                <div style="margin-bottom: 6px;">${jamAwal} - ${jamAkhir}</div>
+                <div style="margin-bottom: 6px;">${formatJam(item.jam)}</div>
                 <div class="harga">Rp ${item.harga?.toLocaleString('id-ID') ?? '-'}</div>
             `;
-
             slotGrid.appendChild(slot);
         });
 
         lapanganDiv.appendChild(slotGrid);
         container.appendChild(lapanganDiv);
     });
+
+    updateResetButtonStatus(); // <== Pastikan ini ada di akhir!
 }
 
-
-
-
 async function fetchJadwalByTanggal(tanggal) {
-    // Cek apakah tanggal kosong
     if (!tanggal) {
         alert('Tanggal belum dipilih.');
         return;
     }
 
     try {
-        const apiBaseUrl = document.getElementById('base-url').textContent;
+        const baseUrl = document.getElementById('base-url').textContent;
+        if (!baseUrl) throw new Error('API Base URL tidak ditemukan');
 
-                    // Memastikan nilai API_BASE_URL berhasil diambil
-                    if (!apiBaseUrl) {
-                throw new Error('API Base URL tidak ditemukan');
-            }
-
-            const response = await fetch(`${apiBaseUrl}jadwal/tanggal/${tanggal}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch(`${baseUrl}jadwal/tanggal/${tanggal}`);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
 
         const data = await response.json();
-        console.log(data); // Cek data di console
-
-        if (!data || data.length === 0) {
-            alert('Jadwal tidak ditemukan');
-            return;
-        }
-
         renderjadwal(data);
-    } catch (error) {
-        console.error("Error fetching jadwal:", error);
-        alert('Jadwal tidak ada.');
+    } catch (err) {
+        console.error("Fetch error:", err);
+        alert('Gagal mengambil data jadwal.');
     }
+}
+
+async function resetPilihan() {
+    sessionStorage.removeItem('selectedSlots');
+
+    const tanggal = document.getElementById('tanggal').value;
+
+    // Tunggu data jadwal selesai dimuat
+    await fetchJadwalByTanggal(tanggal);
+
+    // Tunggu render selesai dulu sebelum update tombol
+    setTimeout(() => {
+        updateResetButtonStatus();
+    }, 300); // atau kamu bisa panggil langsung jika yakin render selesai di renderjadwal()
 }
 
 
 
-document.addEventListener('DOMContentLoaded', function () {
-    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    document.getElementById('tanggal').value = today; // Set nilai input tanggal dengan hari ini
 
-    // Fetch jadwal untuk hari ini secara otomatis saat halaman dimuat
-    fetchJadwalByTanggal(today);
-});
 
-document.addEventListener('DOMContentLoaded', function () {
+function updateResetButtonStatus() {
+    const resetBtn = document.getElementById("resetBtn");
+    const selected = JSON.parse(sessionStorage.getItem("selectedSlots")) || [];
+    console.log("Selected slots:", selected); // DEBUG
+    resetBtn.disabled = selected.length === 0;
+}
+
+
+function pilihSlot(slotId) {
+    let selected = JSON.parse(sessionStorage.getItem("selectedSlots")) || [];
+    
+    // Cek apakah sudah ada
+    if (!selected.includes(slotId)) {
+        selected.push(slotId);
+    }
+
+    sessionStorage.setItem("selectedSlots", JSON.stringify(selected));
+    updateResetButtonStatus();
+}
+
+function hapusSlot(slotId) {
+    let selected = JSON.parse(sessionStorage.getItem("selectedSlots")) || [];
+
+    selected = selected.filter(id => id !== slotId);
+
+    sessionStorage.setItem("selectedSlots", JSON.stringify(selected));
+    updateResetButtonStatus();
+}
+
+    // Saat halaman dimuat, set tombol Reset sesuai data
+    document.addEventListener("DOMContentLoaded", function () {
+        const selected = JSON.parse(sessionStorage.getItem("selectedSlots")) || [];
+        document.getElementById("resetBtn").disabled = selected.length === 0;
+    });
+
+function cekSebelumSubmit() {
     const selected = JSON.parse(sessionStorage.getItem('selectedSlots') || "[]");
+    if (selected.length === 0) {
+        alert("Pilih minimal satu slot terlebih dahulu.");
+        return false;
+    }
+    return true;
+}
 
-    console.log("Data dari sessionStorage saat DOM loaded:", selected);
+document.addEventListener('DOMContentLoaded', function () {
+    const tanggalInput = document.getElementById('tanggal');
+    const today = new Date().toISOString().split('T')[0];
+    tanggalInput.value = today;
+    fetchJadwalByTanggal(today);
 
-    selected.forEach(slot => {
-        const element = document.querySelector(`.slot[data-id="${slot._id}"]`);
-        if (element) {
-            element.classList.add("dipilih");
-        }
+    tanggalInput.addEventListener('change', function () {
+        const tanggal = this.value;
+        const selected = JSON.parse(sessionStorage.getItem('selectedSlots') || "[]")
+            .filter(s => s.tanggal === tanggal);
+        sessionStorage.setItem('selectedSlots', JSON.stringify(selected));
+        fetchJadwalByTanggal(tanggal);
     });
 });
-
-// Handler untuk tombol lanjutkan
-document.getElementById("lanjutkanBtn").addEventListener("click", function(event) {
-    event.preventDefault(); // stop form biar JS bisa isi data
-
-    const selected = JSON.parse(sessionStorage.getItem('selectedSlots') || "[]");
-
-    if (selected.length === 0) {
-        alert("Silakan pilih jadwal terlebih dahulu.");
-        return;
-    }
-
-    const jadwalIds = selected.map(slot => slot._id);
-    const totalHarga = selected.reduce((total, slot) => total + (slot.harga || 0), 0);
-
-    document.getElementById('jadwal_dipesan').value = JSON.stringify(jadwalIds);
-    document.getElementById('total_harga').value = totalHarga;
-
-    // Konfirmasi sebelum kirim
-    if (confirm("Yakin ingin melanjutkan pemesanan?")) {
-        sessionStorage.removeItem('selectedSlots');
-        document.getElementById("pemesananForm").submit();
-    }
-});
-
-
-
-
-// Event listener untuk memilih tanggal
-document.getElementById('tanggal').addEventListener('change', function () {
-    fetchJadwalByTanggal(this.value);
-});
-
-    </script>
-
+</script>
 @endsection

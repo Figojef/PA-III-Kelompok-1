@@ -2,6 +2,8 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Transaksi from "../models/transaksiModel.js";
 import Pemesanan from "../models/pemesananModel.js";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from 'streamifier';
 
 // Membuat transaksi baru
 export const createTransaksi = asyncHandler(async (req, res) => {
@@ -67,4 +69,78 @@ export const deleteTransaksi = asyncHandler(async (req, res) => {
     } else {
         res.status(404).json({ message: "Transaksi tidak ditemukan" });
     }
+    
 });
+
+
+export const fileUpload = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!req.file) {
+        return res.status(400).json({ message: "Tidak ada file yang diupload" });
+    }
+
+    const stream = cloudinary.uploader.upload_stream(
+        {
+            folder: 'uploads',
+            allowed_formats: ['jpg', 'png'],
+        },
+        async (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: "Gagal upload gambar", error: err });
+            }
+
+            const imageUrl = result.secure_url;
+
+            // Simpan ke database
+            const transaksi = await Transaksi.findById(id);
+            if (!transaksi) {
+                return res.status(404).json({ message: "Transaksi tidak ditemukan" });
+            }
+
+            transaksi.bukti_pembayaran = imageUrl;
+            await transaksi.save();
+
+            res.status(200).json({
+                message: "Bukti pembayaran berhasil diupload dan disimpan",
+                url: imageUrl,
+                data: transaksi
+            });
+        }
+    );
+
+    streamifier.createReadStream(req.file.buffer).pipe(stream);
+});
+
+
+
+
+export const updateBuktiPembayaran = asyncHandler(async (req, res) => {
+    const { transactionId } = req.params;
+    const { imageUrl } = req.body; // URL gambar yang diterima dari frontend
+
+    if (!imageUrl) {
+        return res.status(400).json({ message: "URL gambar tidak ditemukan" });
+    }
+
+    const transaksi = await Transaksi.findById(transactionId);
+    if (!transaksi) {
+        return res.status(404).json({ message: "Transaksi tidak ditemukan" });
+    }
+
+    // Menyimpan URL gambar ke dalam field 'bukti_pembayaran'
+    transaksi.bukti_pembayaran = imageUrl;
+    await transaksi.save();
+
+    res.status(200).json({
+        message: "Bukti pembayaran berhasil diperbarui",
+        data: transaksi,
+    });
+    console.log("Image URL:", imageUrl);
+
+});
+
+
+
+
+  

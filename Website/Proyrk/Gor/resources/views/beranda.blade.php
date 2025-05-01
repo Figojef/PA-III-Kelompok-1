@@ -109,6 +109,7 @@
             <div class="col-md-6 d-flex flex-column justify-content-center bg-dark text-white p-4">
                 <h1 class="fw-bold">Lokasi</h1>
                 <p class="fs-5">Sitoluama, Kec. Sigumpar, Toba, Sumatera Utara 22382</p>
+                
             </div>
             <!-- Bagian Gambar Peta -->
             <div class="col-md-6 d-flex justify-content-center align-items-center p-3">
@@ -125,6 +126,7 @@
     // Cek URL: kalau ada logout=true, hapus sessionStorage
     if (window.location.search.includes("logout=true")) {
         sessionStorage.removeItem('selectedSlots');
+        sessionStorage.removeItem('transactionId');
         console.log("selectedSlots dihapus karena logout");
     }
 </script>
