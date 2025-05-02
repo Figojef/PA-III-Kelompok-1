@@ -80,6 +80,8 @@ Route::get('/profile', function () {
     return view('profile');
 })->name('profile');
 
+Route::get('/upload-bukti/{id}', [TransaksiController::class, 'showUploadForm']);
+
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 

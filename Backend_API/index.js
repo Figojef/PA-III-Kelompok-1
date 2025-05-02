@@ -10,6 +10,7 @@ import jadwalRouter from './routes/jadwalRouter.js'
 import pemesananRouter from './routes/pemesananRouter.js'
 import transaksiRouter from './routes/transaksiRouter.js'
 import mabarRouter from './routes/mabarRouter.js'
+import eventRouter from './routes/eventRouter.js'
 
 
 import dotenv from "dotenv"
@@ -61,6 +62,7 @@ app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/jadwal', jadwalRouter)
 app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
+app.use('/api/v1/event', eventRouter)
 app.use('/api/v1/mabar', mabarRouter)
 
 

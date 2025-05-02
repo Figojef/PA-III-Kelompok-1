@@ -74,6 +74,26 @@
         .countdown-container .deadline-content p {
             margin-left: 10px;
         }
+
+        .upload-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #white;
+      color: black;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 2px solid black;
+      transition: background-color 0.3s ease;
+    }
+
+    .upload-btn:hover {
+      background-color: grey;
+    }
+
+    #upload-input {
+      display: none;
+    }
     </style>
 
 <body>
@@ -103,8 +123,12 @@
                     <input type="file" name="bukti_transfer" id="upload" class="d-none" accept="image/*,application/pdf" required>
 
 
-
-
+                    <label class="informasi1">Bukti Pembayaran</label><br>  
+                    <label for="upload-input" class="upload-btn">
+                        <img src="{{ asset('icons/icon_upload.png') }}" alt="Upload Icon" style="width: 20px; vertical-align: middle; margin-right: 8px;">
+                        Upload
+                    </label>
+                    <input type="file" id="upload-input" style="display: none;" accept="image/*">
 
             </div>
 
@@ -113,7 +137,7 @@
                 <div class="deadline">
                     <div class="deadline-content">
                         <!-- Deadline icon (path updated to public/icons) -->
-                        <img src="{{ asset('icons/icon_Jam.png') }}" alt="Icon" width="30" height="30" class="icon-deadline" onclick="downloadImage()">
+                        <img src="{{ asset('icons/icon_Jam.png') }}" alt="Icon" width="30" height="30" class="icon-deadline">
                         <p>Batas Akhir Pembayaran <br>
                         <strong id="countdown"></strong></p>
                     </div>
@@ -123,7 +147,7 @@
 
         <!-- Second <hr> line -->
         <hr style="border: 2px solid #000000; margin: 20px 0;">
-        <input type="submit" class="tombol" value="Konfirmasi Pemesanan">
+        <button type="button" onclick="uploadImage()" class="tombol">Konfirmasi Pembayaran</button>
     </div>
 
     <script>
@@ -171,15 +195,33 @@
             });
         }
 
-        // Function to download the image when the countdown icon is clicked
-        function downloadImage() {
-            const imageUrl = "{{ asset('icons/icon_Jam.png') }}"; //     URL of the image
-            const link = document.createElement("a");
-            link.href = imageUrl;
-            link.download = "deadline_icon.png"; // Image will be saved as deadline_icon.png
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+
+        document.getElementById('upload-input').addEventListener('change', async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const transactionId = '{{ session('transaction_id') }}'; // langsung dari session
+            const response = await fetch(`http://localhost:3000/api/v1/transaksi/${transactionId}/bukti-pembayaran`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            console.log(result);
+
+            if (response.ok) {
+                alert('Upload berhasil!');
+            } else {
+                alert('Upload gagal: ' + result.message);
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            alert('Terjadi kesalahan saat upload');
         }
+    });
     </script>
 @endsection

@@ -141,9 +141,9 @@ export const createPemesanan = asyncHandler(async (req, res) => {
     const deadlinePembayaran = new Date();
 
     if (metode_pembayaran === "transfer_bank") {
-        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 45); // 45 menit
+        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 10); // 45 menit
     } else if (metode_pembayaran === "bayar_langsung") {
-        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 60); // 60 menit
+        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 30); // 60 menit
     } else {
         return res.status(400).json({ message: "Metode pembayaran tidak valid" });
     }

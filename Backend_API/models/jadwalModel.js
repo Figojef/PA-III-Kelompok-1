@@ -8,6 +8,7 @@ const jadwalSchema = new Schema({
     ref: "Lapangan",
     required: true,
   },
+  
   jam: {
     type: String,
     required: [true, "Jam harus diisi"],

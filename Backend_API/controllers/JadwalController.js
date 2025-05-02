@@ -386,14 +386,46 @@ export const JadwalByDateAndLapangan = asyncHandler(async (req, res) => {
 export const JadwalByTanggal = async (req, res) => {
   try {
     const { tanggal } = req.params;
-    const jadwal = await Jadwal.find({ tanggal: tanggal })
-                                .populate('lapangan', 'name');
 
-    if (jadwal.length === 0) {
+    const jadwalList = await Jadwal.find({ tanggal }).populate('lapangan', 'name');
+
+    if (jadwalList.length === 0) {
       return res.status(404).json({ message: "Jadwal tidak ditemukan untuk tanggal tersebut" });
     }
 
-    res.status(200).json(jadwal);
+    const now = new Date();
+
+    const result = await Promise.all(jadwalList.map(async (jadwal) => {
+      let status_booking = "Tersedia";
+
+      const pemesanan = await Pemesanan.findOne({ jadwal_dipesan: jadwal._id }).sort({ _id: -1 });
+
+      if (pemesanan) {
+        const transaksi = await Transaksi.findOne({ pemesanan_id: pemesanan._id });
+
+        const statusPemesanan = pemesanan.status_pemesanan;
+        const statusPembayaran = transaksi?.status_pembayaran || "menunggu";
+        const deadline = transaksi ? new Date(transaksi.deadline_pembayaran) : now;
+
+        if (
+          statusPemesanan === "Dibatalkan" ||
+          (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline < now)
+        ) {
+          status_booking = "Tersedia";
+        } else {
+          status_booking = "Tidak Tersedia";
+        }
+        
+      }
+
+      return {
+        ...jadwal.toObject(),
+        status_booking, // hanya menambahkan ini, tidak mengubah apapun
+      };
+    }));
+
+    res.status(200).json(result);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
