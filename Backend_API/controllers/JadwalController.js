@@ -409,18 +409,18 @@ export const JadwalByTanggal = async (req, res) => {
 
         if (
           statusPemesanan === "Dibatalkan" ||
-          (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline < now)
+          (statusPemesanan === "Sedang Dipesan" && statusPembayaran === "menunggu" && deadline < now) ||
+          (statusPemesanan === "Ditolak" && statusPembayaran === "gagal")
         ) {
           status_booking = "Tersedia";
         } else {
           status_booking = "Tidak Tersedia";
         }
-        
       }
 
       return {
         ...jadwal.toObject(),
-        status_booking, // hanya menambahkan ini, tidak mengubah apapun
+        status_booking,
       };
     }));
 
@@ -431,6 +431,7 @@ export const JadwalByTanggal = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
 };
+
 
 
 export const JadwalByLapangan = asyncHandler(async (req, res) => {
@@ -455,22 +456,74 @@ export const JadwalByLapangan = asyncHandler(async (req, res) => {
 
 });
 
-  
+export const getJadwalBerhasil = async (req, res) => {
+  try {
+    const userId = req.query.user_id;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "user_id diperlukan di query." });
+    }
+
+    const hasil = await Pemesanan.aggregate([
+      {
+        $match: {
+          user_id: new mongoose.Types.ObjectId(userId),
+          status_pemesanan: "Berhasil"
+        }
+      },
+      {
+        $lookup: {
+          from: "transaksis",
+          localField: "_id",
+          foreignField: "pemesanan_id",
+          as: "transaksi"
+        }
+      },
+      {
+        $unwind: "$transaksi"
+      },
+      {
+        $match: {
+          "transaksi.status_pembayaran": "berhasil"
+        }
+      },
+      {
+        $lookup: {
+          from: "jadwals",
+          localField: "jadwal_dipesan",
+          foreignField: "_id",
+          as: "detail_jadwal"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          total_harga: 1,
+          status_pemesanan: 1,
+          "transaksi.metode_pembayaran": 1,
+          "transaksi.status_pembayaran": 1,
+          detail_jadwal: 1
+        }
+      }
+    ]);
+
+    res.status(200).json({ success: true, data: hasil });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Terjadi kesalahan saat mengambil data." });
+  }
+};
+
 
 
 export const DetailJadwal = asyncHandler(async(req,res) => {
-    res.send("Detail Jadwal")
+  res.send("Detail Jadwal")
 })
 
 export const UpdateJadwal = asyncHandler(async(req,res) => {
-    res.send("Update Jadwal")
+  res.send("Update Jadwal")
 })
 
 export const DeleteJadwal = asyncHandler(async(req,res) => {
-    res.send("Delete Jadwal")
+  res.send("Delete Jadwal")
 })
-
-
-
-
-

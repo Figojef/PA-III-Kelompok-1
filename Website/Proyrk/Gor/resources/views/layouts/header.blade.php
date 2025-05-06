@@ -24,6 +24,9 @@
                     <a class="nav-link {{ Request::is('reservasi') ? 'active' : '' }}" href="/reservasi">Reservasi</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ Request::is('mabar') ? 'active' : '' }}" href="/mabar">Mabar</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ Request::is('event') ? 'active' : '' }}" href="/event">Event</a>
                 </li>
             </ul>
@@ -42,18 +45,26 @@
         <li class="nav-item dropdown d-flex align-items-center text-white">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle fs-5 me-2"></i>
+                <?php
+// Ambil nama lengkap dari session
+$name = Session::get('user_data')['name'];
+
+// Pecah nama berdasarkan spasi
+$name_parts = explode(' ', $name);
+
+// Ambil kata pertama dan kata terakhir
+$first_name = $name_parts[0];
+$last_name = end($name_parts); // Ambil kata terakhir
+
+// Gabungkan kembali kata pertama dan kata terakhir
+$short_name = $first_name . ' ' . $last_name;
+?>
+
                 <span>
-                    @php
-                        if(isset(Session::get('user_data')['role'])){
-                            echo Session::get('user_data')['name'];
-                        } else {
-                            echo ".";
-                        }
-                    @endphp
-                </span>
+                <label>{{ $short_name }}</label>
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="{{ route('profile') }}">Profile</a></li>
+                <li><a class="dropdown-item" href="{{ route('profil') }}">Profile</a></li>
                 <li>
                     <!-- Link logout yang mengarah ke controller -->
                     <a class="dropdown-item" href="{{ route('logout') }}">Logout</a>

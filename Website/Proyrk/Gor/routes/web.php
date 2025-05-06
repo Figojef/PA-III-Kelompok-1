@@ -54,7 +54,7 @@ Route::get('/tentang', function () {
 
 Route::get('/reservasi', function () {
     return view('reservasi');
-});
+})->name('reservasi');
 
 Route::get('/jadwal', function () {
     return view('jadwal');
@@ -68,17 +68,21 @@ Route::get('/detail_pesanan', function () {
     return view('detail_pesanan');
 });
 
-Route::get('/profil', function () {
-    return view('profil');
-});
+Route::get('/mabar', function () {
+    return view('mabar');
+})->name('mabar');
+
+Route::get('/tambahMabar', function () {
+    return view('tambahMabar');
+})->name('tambahMabar');
 
 Route::get('/detail_pembayaran', function () {
     return view('detail_pembayaran');
 })->name('detail_pembayaran');
 
-Route::get('/profile', function () {
-    return view('profile');
-})->name('profile');
+Route::get('/profil', function () {
+    return view('profil');
+})->name('profil');
 
 Route::get('/upload-bukti/{id}', [TransaksiController::class, 'showUploadForm']);
 

@@ -9,6 +9,8 @@
 
 <title>Jadwal Bermain</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
     /* --- CSS sama seperti sebelumnya --- */
@@ -99,14 +101,23 @@
         font-weight: bold;
         font-size: 20px;
     }
+
+    .jadwal-slot.expired {
+    opacity: 0.3; /* Mengurangi kecerahan untuk menunjukkan slot sudah lewat */
+    pointer-events: none; /* Nonaktifkan interaksi, agar tidak bisa diklik */
+    background-color: #f5f5f5; /* Warna latar belakang lebih terang untuk slot expired */
+}
+    
+
 </style>
 
 <div class="container mt-4">
     <h4>Jadwal bermain</h4>
-    <div class="mb-3">
-        <label for="tanggal" class="form-label">Pilih Tanggal</label>
-        <input type="date" id="tanggal" class="form-control">
-    </div>
+
+<div class="mb-3">
+    <label for="tanggal" class="form-label">Pilih Tanggal</label>
+    <input type="text" id="tanggal" class="form-control" placeholder="Pilih Tanggal">
+</div>
 
     <div class="row" id="jadwalContainer"></div>
 
@@ -146,6 +157,10 @@ function renderjadwal(jadwalData) {
         return;
     }
 
+    // Ambil waktu sekarang dalam zona waktu Asia/Jakarta
+    const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+    const nowDate = new Date(now);  // Waktu sekarang dalam objek Date
+
     const grouped = jadwalData.reduce((acc, item) => {
         const lapangan = item.lapangan?.name || "Tanpa Nama";
         acc[lapangan] = acc[lapangan] || [];
@@ -165,61 +180,87 @@ function renderjadwal(jadwalData) {
         slotGrid.classList.add("slot-grid");
 
         grouped[lapangan].sort((a, b) => a.jam - b.jam).forEach(item => {
-            const slot = document.createElement("div");
-            slot.classList.add("jadwal-slot");
-            slot.setAttribute("data-id", item._id);
+    const slot = document.createElement("div");
+    slot.classList.add("jadwal-slot");
+    slot.setAttribute("data-id", item._id);
 
-            if (item.status_booking === "Tersedia") {
-                slot.classList.add("available");
+    // Ambil jam dari angka dan konversi menjadi waktu yang dapat dibandingkan
+    const jam = item.jam.toString().padStart(2, "0"); // Menambah angka 0 di depan jika jam < 10
+    const tanggalSlot = new Date(`${document.getElementById("tanggal").value} ${jam}:00`);
 
-                const isSelected = selected.find(s => s._id === item._id);
-                if (isSelected) slot.classList.add("dipilih");
+    // Jika jadwal sudah lewat, beri kelas "expired"
+    if (tanggalSlot <= nowDate) {
+        slot.classList.add("expired");
+    } else if (item.status_booking === "Tersedia") {
+        slot.classList.add("available");
 
-                slot.addEventListener('click', () => {
-                    if (!window.jwt) {
-                        alert("Silakan login terlebih dahulu untuk memilih jadwal.");
+        const isSelected = selected.find(s => s._id === item._id);
+        if (isSelected) slot.classList.add("dipilih");
+
+        slot.addEventListener('click', () => {
+            if (!window.jwt) {
+                // Menampilkan SweetAlert2 jika belum login
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Untuk memesan lapangan harus login',
+                    text: 'Apakah Anda ingin login?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya',
+                    cancelButtonText: 'Tidak',
+                    reverseButtons: true,
+                    allowOutsideClick: false, // Mencegah klik di luar alert
+                    allowEscapeKey: false, // Mencegah menutup alert dengan tombol Escape
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Arahkan ke halaman login jika pengguna memilih 'Ya'
                         window.location.href = window.loginUrl;
-                        return;
                     }
-
-                    const dataToSave = {
-                        _id: item._id,
-                        lapangan: item.lapangan,
-                        jam: item.jam,
-                        tanggal: document.getElementById("tanggal").value,
-                        harga: item.harga
-                    };
-
-                    const index = selected.findIndex(s => s._id === dataToSave._id);
-                    if (index > -1) {
-                        selected.splice(index, 1);
-                        slot.classList.remove("dipilih");
-                    } else {
-                        selected.push(dataToSave);
-                        slot.classList.add("dipilih");
-                    }
-
-                    sessionStorage.setItem('selectedSlots', JSON.stringify(selected));
-
-                    updateResetButtonStatus();
                 });
-            } else {
-                slot.classList.add("unavailable");
+                return;
             }
 
-            slot.innerHTML = `
-                <div style="margin-bottom: 6px;">${formatJam(item.jam)}</div>
-                <div class="harga">Rp ${item.harga?.toLocaleString('id-ID') ?? '-'}</div>
-            `;
-            slotGrid.appendChild(slot);
+            const dataToSave = {
+                _id: item._id,
+                lapangan: item.lapangan,
+                jam: item.jam,
+                tanggal: document.getElementById("tanggal").value,
+                harga: item.harga
+            };
+
+            const index = selected.findIndex(s => s._id === dataToSave._id);
+if (index > -1) {
+    selected.splice(index, 1);
+    slot.classList.remove("dipilih");
+    showToast("Jadwal Dibatalkan.", "warning");
+} else {
+    selected.push(dataToSave);
+    slot.classList.add("dipilih");
+    showToast("Jadwal Berhasil ditambahkan.", "success");
+}
+
+sessionStorage.setItem('selectedSlots', JSON.stringify(selected));
+updateResetButtonStatus();
+
         });
+    } else {
+        slot.classList.add("unavailable");
+    }
+
+    slot.innerHTML = `
+        <div style="margin-bottom: 6px;">${formatJam(item.jam)}</div>
+        <div class="harga">Rp ${item.harga?.toLocaleString('id-ID') ?? '-'}</div>
+    `;
+    slotGrid.appendChild(slot);
+});
+
 
         lapanganDiv.appendChild(slotGrid);
         container.appendChild(lapanganDiv);
     });
 
-    updateResetButtonStatus(); // <== Pastikan ini ada di akhir!
+    updateResetButtonStatus(); // Pastikan ini ada di akhir!
 }
+
 
 async function fetchJadwalByTanggal(tanggal) {
     if (!tanggal) {
@@ -243,22 +284,32 @@ async function fetchJadwalByTanggal(tanggal) {
 }
 
 async function resetPilihan() {
-    sessionStorage.removeItem('selectedSlots');
+        // Menanyakan konfirmasi sebelum reset pilihan
+        const result = await Swal.fire({
+            title: 'Anda yakin ingin mereset pilihan?',
+            text: 'Semua pilihan yang telah dipilih akan dihapus.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, reset',
+            cancelButtonText: 'Tidak',
+            reverseButtons: true,
+        });
 
-    const tanggal = document.getElementById('tanggal').value;
+        if (result.isConfirmed) {
+            // Hapus selectedSlots dari sessionStorage
+            sessionStorage.removeItem('selectedSlots');
 
-    // Tunggu data jadwal selesai dimuat
-    await fetchJadwalByTanggal(tanggal);
+            const tanggal = document.getElementById('tanggal').value;
 
-    // Tunggu render selesai dulu sebelum update tombol
-    setTimeout(() => {
-        updateResetButtonStatus();
-    }, 300); // atau kamu bisa panggil langsung jika yakin render selesai di renderjadwal()
-}
+            // Tunggu data jadwal selesai dimuat
+            await fetchJadwalByTanggal(tanggal);
 
-
-
-
+            // Tunggu render selesai sebelum update tombol
+            setTimeout(() => {
+                updateResetButtonStatus();
+            }, 300); // atau panggil langsung jika yakin render selesai di renderjadwal()
+        }
+    }
 
 function updateResetButtonStatus() {
     const resetBtn = document.getElementById("resetBtn");
@@ -318,5 +369,64 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchJadwalByTanggal(tanggal);
     });
 });
+
+flatpickr("#tanggal", {
+        dateFormat: "Y-m-d", // Format tanggal
+        minDate: "today", // Membatasi tanggal hanya hari ini atau setelahnya
+        maxDate: new Date().fp_incr(30), // Maksimal 30 hari ke depan
+    });
+
+
+    function showToast(message, type = "primary") {
+    const toastEl = document.getElementById("liveToast");
+    const toastBody = document.getElementById("toastMessage");
+
+    toastBody.textContent = message;
+    toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+}
+
+
+
 </script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('alert'))
+        <script>
+            Swal.fire({
+                icon: '{{ session('alert')['type'] }}',
+                title: '{{ session('alert')['title'] }}',
+                text: '{{ session('alert')['message'] }}',
+            });
+        </script>
+    @endif
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+  <div
+    id="liveToast"
+    class="toast align-items-center text-white bg-success border-0"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-bs-autohide="true"
+    data-bs-delay="1000"
+  >
+    <div class="d-flex">
+      <div class="toast-body" id="toastMessage">
+        Slot ditambahkan!
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+  </div>
+</div>
+
+
 @endsection

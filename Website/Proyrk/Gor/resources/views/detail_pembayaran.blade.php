@@ -94,6 +94,14 @@
     #upload-input {
       display: none;
     }
+
+    .preview-image {
+    max-width: 80px;
+    max-height: 80px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    object-fit: cover;
+}
     </style>
 
 <body>
@@ -124,11 +132,16 @@
 
 
                     <label class="informasi1">Bukti Pembayaran</label><br>  
-                    <label for="upload-input" class="upload-btn">
-                        <img src="{{ asset('icons/icon_upload.png') }}" alt="Upload Icon" style="width: 20px; vertical-align: middle; margin-right: 8px;">
-                        Upload
-                    </label>
-                    <input type="file" id="upload-input" style="display: none;" accept="image/*">
+                    <div class="upload-container">
+    <label for="upload-input" class="upload-btn">
+        <img src="{{ asset('icons/icon_upload.png') }}" alt="Upload Icon"
+             style="width: 20px; vertical-align: middle; margin-right: 8px;">
+        Upload
+    </label>
+    <img id="preview" class="preview-image" src="{{ asset('images/placeholder.png') }}" alt="Preview Gambar">
+</div>
+
+<input type="file" id="upload-input" accept="image/*" style="display: none;">
 
             </div>
 
@@ -196,32 +209,47 @@
         }
 
 
-        document.getElementById('upload-input').addEventListener('change', async function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        let selectedFile = null; // simpan file yang dipilih
 
-        const formData = new FormData();
-        formData.append('image', file);
+document.getElementById('upload-input').addEventListener('change', function(event) {
+    selectedFile = event.target.files[0];
+    if (!selectedFile) return;
 
-        try {
-            const transactionId = '{{ session('transaction_id') }}'; // langsung dari session
-            const response = await fetch(`http://localhost:3000/api/v1/transaksi/${transactionId}/bukti-pembayaran`, {
-                method: 'POST',
-                body: formData
-            });
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('preview').src = e.target.result;
+    };
+    reader.readAsDataURL(selectedFile);
+});
 
-            const result = await response.json();
-            console.log(result);
+async function uploadImage() {
+    if (!selectedFile) {
+        alert('Silakan pilih gambar terlebih dahulu.');
+        return;
+    }
 
-            if (response.ok) {
-                alert('Upload berhasil!');
-            } else {
-                alert('Upload gagal: ' + result.message);
-            }
-        } catch (err) {
-            console.error('Error:', err);
-            alert('Terjadi kesalahan saat upload');
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    try {
+        const transactionId = '{{ session('transaction_id') }}';
+        const response = await fetch(`http://localhost:3000/api/v1/transaksi/${transactionId}/bukti-pembayaran`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        console.log(result);
+
+        if (response.ok) {
+            alert('Upload berhasil!');
+        } else {
+            alert('Upload gagal: ' + result.message);
         }
-    });
+    } catch (err) {
+        console.error('Error:', err);
+        alert('Terjadi kesalahan saat upload');
+    }
+}
     </script>
 @endsection

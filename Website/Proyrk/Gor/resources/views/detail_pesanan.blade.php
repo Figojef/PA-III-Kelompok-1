@@ -138,7 +138,12 @@
 
 </style>
 
-    <div class="container mt-4">
+    <div class="container mt-4">   
+       <div class="mt-4">
+    <a href="{{ route('reservasi') }}" class="btn btn-secondary">
+        ← 
+    </a>
+  </div>
                 <h2 id="judul">Detail Pemesanan</h2>
                     <label style="font-size: 25px; text-decoration: underline; font-weight: bold; margin-bottom: 25px;">Informasi Pelanggan</label>
 
@@ -286,49 +291,134 @@
     document.getElementById("totalHarga").textContent = `Rp ${totalHarga.toLocaleString()}`;
   }
 
+
+
   // Form konfirmasi
   document.getElementById('formKonfirmasi').addEventListener('submit', function(event) {
+  // Hentikan form submit untuk memastikan kita bisa melakukan pemeriksaan
+  event.preventDefault();  // Mencegah pengiriman form langsung
+
   // Ambil data slot dari sessionStorage
   const storedSlots = sessionStorage.getItem('selectedSlots');
   const slots = storedSlots ? JSON.parse(storedSlots) : [];
-  
+
+  // Cek apakah belum ada slot yang dipilih
   if (slots.length === 0) {
-    alert('Belum memilih slot jadwal.');
-    event.preventDefault();
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal',
+      text: 'Belum memilih slot jadwal.',
+      showCancelButton: true,
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return; // Jika Batal dipilih, tidak ada tindakan lanjut
+      }
+
+      // Lanjutkan jika OK dipilih (form masih belum dikirim)
+      submitForm();  // Kirim form setelah konfirmasi
+    });
     return;
   }
 
-  // Isi input jadwal
+  // Isi input jadwal dengan slot yang dipilih
   document.getElementById('jadwalDipesanInput').value = JSON.stringify(slots);
 
   // Hitung total harga
   let totalHarga = slots.reduce((total, slot) => total + Number(slot.harga || 0), 0);
   document.getElementById('totalHargaInput').value = totalHarga;
 
-  // Ambil metode pembayaran
+  // Ambil metode pembayaran yang dipilih
   const metode = document.querySelector('input[name="payment"]:checked');
   if (!metode) {
-    alert('Pilih metode pembayaran dulu.');
-    event.preventDefault();
-    return;
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal',
+      text: 'Pilih metode pembayaran dulu.',
+      showCancelButton: false,
+      confirmButtonText: 'OK',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Jika OK dipilih, tetap tidak lanjutkan penghapusan sessionStorage
+        return; // Jangan lanjutkan jika metode pembayaran belum dipilih
+      }
+    });
+    return; // Mencegah form submit jika metode belum dipilih
   }
+
+  // Isi input metode pembayaran
   document.getElementById('metodePembayaranInput').value = metode.value;
 
-  // Hapus selectedSlots setelah konfirmasi
-  sessionStorage.removeItem('selectedSlots');
-  console.log('selectedSlots dihapus dari sessionStorage');
+  // Jika metode pembayaran adalah 'Bayar Ditempat', tampilkan pesan konfirmasi
+  if (metode.value === 'bayar_langsung') {
+    Swal.fire({
+      icon: 'info',
+      title: 'Bayar Ditempat diberikan 1 jam dari pesanan dibuat',
+      text: 'Pelanggan harus membayar dengan tepat waktu apakah yakin melanjutkan',
+      showCancelButton: true,
+      confirmButtonText: 'Lanjutkan',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return; // Jika Batal dipilih, tidak ada tindakan lanjut
+      }
 
-  // Generate ID transaksi unik (bisa menggunakan timestamp atau dari backend)
-  const transactionId = `TRANS-${Date.now()}`;  // Menggunakan timestamp sebagai ID transaksi
+      // Lanjutkan jika OK dipilih
+      submitForm(); // Kirim form setelah konfirmasi
+    });
+  }
 
-  // Simpan ID transaksi di sessionStorage
-  sessionStorage.setItem('transactionId', transactionId);
-  console.log('ID Transaksi disimpan:', transactionId);
+  // Jika metode pembayaran adalah 'Transfer Bank', tampilkan pesan konfirmasi
+  if (metode.value === 'transfer_bank') {
+    Swal.fire({
+      icon: 'info',
+      title: 'Pembayaran Transfer Bank hanya berlaku 10 menit setelah jadwal dibuat.',
+      text: 'Setelah itu Pesanan akan kadaluarsa, Yakin melanjutkan?',
+      showCancelButton: true,
+      confirmButtonText: 'Lanjutkan',
+      cancelButtonText: 'Batal',
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return; // Jika Batal dipilih, tidak ada tindakan lanjut
+      }
 
-  // Bisa juga mengirimkan ID transaksi ke server (misalnya di form)
-  // document.getElementById('transactionIdInput').value = transactionId;
+      // Lanjutkan jika OK dipilih
+      submitForm();  // Kirim form setelah konfirmasi
+    });
+  }
+
+  // Fungsi untuk mengirimkan form setelah konfirmasi selesai
+  function submitForm() {
+    // Hapus selectedSlots setelah form akan dikirim
+    sessionStorage.removeItem('selectedSlots');
+    console.log('selectedSlots dihapus dari sessionStorage');
+
+    // Generate ID transaksi unik (bisa menggunakan timestamp atau dari backend)
+    const transactionId = `TRANS-${Date.now()}`;  // Menggunakan timestamp sebagai ID transaksi
+
+    // Simpan ID transaksi di sessionStorage
+    sessionStorage.setItem('transactionId', transactionId);
+    console.log('ID Transaksi disimpan:', transactionId);
+
+    // Kirim form setelah semuanya siap
+    document.getElementById('formKonfirmasi').submit();  // Kirim form
+  }
 });
 
 
+
   </script>
+
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if (session('alert'))
+        <script>
+            Swal.fire({
+                icon: '{{ session('alert')['type'] }}',
+                title: '{{ session('alert')['title'] }}',
+                text: '{{ session('alert')['message'] }}',
+            });
+        </script>
+    @endif
+    
 @endsection

@@ -28,6 +28,7 @@
         .jadwal-table th {
             background-color: #222F37;
             font-weight: bold;
+            color: white;
         }
 
         .jadwal-item {
@@ -101,6 +102,11 @@
         .form-control {
             margin-bottom: 20px;
         }
+
+        .expired-row {
+            color: #999 ;
+        }
+
     </style>
 
     <div class="container mt-5">
@@ -121,152 +127,140 @@
             <div class="legend-item">
                 <div class="circle red"></div> Jadwal sudah di-booking
             </div>
-            <div class="legend-item">
-                <div class="circle blue"></div> Jadwal Dipilih
-            </div>
-            <div class="legend-item">
-                <div class="circle grey"></div> Jadwal Tetap
-            </div>
-            <div class="legend-item">
-                <div class="circle orange"></div> Jadwal Member
-            </div>
-        </div>
         <div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
     </div>
 
     <script>
-        function renderjadwal(jadwalData, selectedDate = new Date().toISOString().split('T')[0]) {
-            console.log("Data diterima di renderjadwal:", jadwalData);
+function renderjadwal(jadwalData, selectedDate = new Date().toISOString().split('T')[0]) {
+    console.log("Data diterima di renderjadwal:", jadwalData);
 
-            const container = document.getElementById("jadwalContainer");
-            if (!container) {
-                console.error("Element jadwalContainer tidak ditemukan di HTML.");
-                return;
-            }
+    const container = document.getElementById("jadwalContainer");
+    if (!container) {
+        console.error("Element jadwalContainer tidak ditemukan di HTML.");
+        return;
+    }
 
-            container.innerHTML = ""; // Hapus konten lama
+    container.innerHTML = ""; // Hapus konten lama
 
-            if (!jadwalData || jadwalData.length === 0) {
-                container.innerHTML = "<p>Tidak ada jadwal tersedia.</p>";
-                return;
-            }
+    if (!jadwalData || jadwalData.length === 0) {
+        container.innerHTML = "<p>Tidak ada jadwal tersedia.</p>";
+        return;
+    }
 
-            // Format tanggal ke dalam bentuk '3 Maret 2025'
-            const dateObj = new Date(selectedDate);
-            const options = {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            };
-            const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+    const dateObj = new Date(selectedDate);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+    const dayOptions = { weekday: 'long' };
+    const dayName = dateObj.toLocaleDateString('id-ID', dayOptions);
 
-            // Get the day of the week in Indonesian (e.g., "Senin", "Selasa")
-            const dayOptions = {
-                weekday: 'long'
-            };
-            const dayName = dateObj.toLocaleDateString('id-ID', dayOptions);
+    const groupedByLapangan = jadwalData.reduce((acc, item) => {
+        const lapanganName = item.lapangan?.name || "Tanpa Nama";
+        if (!acc[lapanganName]) acc[lapanganName] = [];
+        acc[lapanganName].push(item);
+        return acc;
+    }, {});
 
-            // Kelompokkan jadwal berdasarkan lapangan
-            const groupedByLapangan = jadwalData.reduce((acc, item) => {
-                const lapanganName = item.lapangan?.name || "Tanpa Nama";
-                if (!acc[lapanganName]) {
-                    acc[lapanganName] = [];
-                }
-                acc[lapanganName].push(item);
-                return acc;
-            }, {});
+    const sortedLapangan = Object.keys(groupedByLapangan).sort();
 
-            // Urutkan nama lapangan agar konsisten (misal: Lapangan 1, Lapangan 2)
-            const sortedLapangan = Object.keys(groupedByLapangan).sort();
+    sortedLapangan.forEach((lapangan) => {
+        const lapanganCol = document.createElement("div");
+        lapanganCol.classList.add("col-md-6");
 
-            // Buat container untuk setiap lapangan
-            sortedLapangan.forEach((lapangan, index) => {
-                const lapanganCol = document.createElement("div");
-                lapanganCol.classList.add("col-md-6"); // Setiap lapangan mengambil 50% lebar
+        const lapanganDiv = document.createElement("div");
+        lapanganDiv.classList.add("lapangan-container");
 
-                const lapanganDiv = document.createElement("div");
-                lapanganDiv.classList.add("lapangan-container");
+        lapanganDiv.innerHTML = `
+            <div class="lapangan-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="text-align: left;">
+                    <h3 style="margin: 0;">${lapangan}</h3>
+                    <small style="color: #ccc;">${dayName}</small>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 1.1em; color: #fff;">${formattedDate}</span>
+                </div>
+            </div>
+        `;
 
-                // Buat header dengan nama lapangan, keterangan Hari (dinamis), dan tanggal
-                lapanganDiv.innerHTML = `
-                    <div class="lapangan-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="text-align: left;">
-                            <h3 style="margin: 0;">${lapangan}</h3>
-                            <small style="color: #ccc;">${dayName}</small>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 1.1em; color: #fff;">${formattedDate}</span>
-                        </div>
-                    </div>
-                `;
+        const jadwalList = groupedByLapangan[lapangan];
+        jadwalList.sort((a, b) => a.jam - b.jam);
 
-                // Buat tabel untuk menampilkan jadwal
-                const table = document.createElement("table");
-                table.classList.add("jadwal-table");
+        const leftColumn = jadwalList.slice(0, 8);
+        const rightColumn = jadwalList.slice(8, 16);
 
-                // Buat header tabel
-                const thead = document.createElement("thead");
-                const headerRow = document.createElement("tr");
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
+        const columnsContainer = document.createElement("div");
+        columnsContainer.style.display = "flex";
+        columnsContainer.style.gap = "16px";
+        columnsContainer.style.flexWrap = "wrap";
+        columnsContainer.style.marginTop = "10px";
+        columnsContainer.style.justifyContent = "space-between";
 
-                // Buat badan tabel (tbody)
-                const tbody = document.createElement("tbody");
+        function createJadwalTable(dataSubset) {
+            const table = document.createElement("table");
+            table.classList.add("jadwal-table");
+            table.style.width = "48%";
 
-                // Urutkan jadwal berdasarkan jam
-                groupedByLapangan[lapangan].sort((a, b) => {
-                    return a.jam - b.jam;
-                });
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            headerRow.innerHTML = `<th>Jam</th>`;
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
 
-                // Tambahkan baris untuk setiap jadwal
-                groupedByLapangan[lapangan].forEach(item => {
+            const tbody = document.createElement("tbody");
+
+            dataSubset.forEach(item => {
     const row = document.createElement("tr");
+
+    // Cek apakah slot sudah lewat (expired)
+    const jam = item.jam.toString().padStart(2, '0');
+    const tanggalInput = document.getElementById("tanggal").value;
+    const slotDate = new Date(`${tanggalInput}T${jam}:00:00`);
+    const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+    const nowDate = new Date(now);
+
+    if (slotDate <= nowDate) {
+        row.classList.add("expired-row");
+    }
 
     const statusJamCell = document.createElement("td");
     statusJamCell.style.display = "flex";
     statusJamCell.style.alignItems = "center";
+    statusJamCell.style.justifyContent = "center";
+    statusJamCell.style.gap = "8px";
 
     const status = document.createElement("div");
     let statusClass = "circle";
 
-    if (item.status === "Tersedia") {
+    if (item.status_booking === "Tersedia") {
         statusClass += " green";
-    } else if (item.status === "Tidak Tersedia") {
+    } else if (item.status_booking === "Tidak Tersedia") {
         statusClass += " red";
-    } else if (item.status === "Pending") {
-        statusClass += " grey";
-    } else if (item.status === "Dipesan") {
-        statusClass += " blue";
-    } else if (item.status === "Dibatalkan") {
-        statusClass += " orange";
     }
 
     status.className = statusClass;
 
     const jamCell = document.createElement("span");
-    if (item.jam !== undefined) {
-        const jam = parseInt(item.jam);
-        const startHour = jam.toString().padStart(2, '0');
-        const endHour = (jam + 1).toString().padStart(2, '0');
-        jamCell.textContent = `${startHour}:00 - ${endHour}:00`;
-    } else {
-        jamCell.textContent = "Jam tidak tersedia";
-    }
+    const startHour = jam;
+    const endHour = (parseInt(jam) + 1).toString().padStart(2, '0');
+    jamCell.textContent = `${startHour}:00 - ${endHour}:00`;
 
     statusJamCell.appendChild(status);
     statusJamCell.appendChild(jamCell);
-
     row.appendChild(statusJamCell);
     tbody.appendChild(row);
 });
 
 
-                table.appendChild(tbody);
-                lapanganDiv.appendChild(table);
-                lapanganCol.appendChild(lapanganDiv);
-                container.appendChild(lapanganCol);
-            });
+            table.appendChild(tbody);
+            return table;
         }
+
+        columnsContainer.appendChild(createJadwalTable(leftColumn));
+        columnsContainer.appendChild(createJadwalTable(rightColumn));
+        lapanganDiv.appendChild(columnsContainer);
+        lapanganCol.appendChild(lapanganDiv);
+        container.appendChild(lapanganCol);
+    });
+}
 
         async function fetchJadwalByTanggal(tanggal) {
             if (!tanggal) {

@@ -1,6 +1,15 @@
 import express from "express"
 import { protectedMiddleware, adminMiddleware } from "../middleware/authMiddleware.js"
-import { CekJoin, CreateMabar, getAllMabar, GetMabarJoined, GetMabarOwn, HapusMabar, JoinMabar, KeluarMabar, SelectJadwalMabar } from "../controllers/mabarController.js"
+import {    CekJoin, 
+            CreateMabar, 
+            getAllMabar, 
+            GetMabarJoined, 
+            GetMabarOwn, 
+            HapusMabar, 
+            JoinMabar, 
+            KeluarMabar, 
+            SelectJadwalMabar } 
+        from "../controllers/MabarController.js"
 
 
 const router = express.Router()
@@ -22,6 +31,6 @@ router.post('/mabar-own', GetMabarOwn)
 router.post('/mabar-joined', GetMabarJoined)
 
 
-router.post('/select-jadwal-mabar', SelectJadwalMabar)
+router.post('/select_jadwal', SelectJadwalMabar)
 
 export default router

@@ -9,7 +9,8 @@ import {
   JadwalByDateAndLapangan,
   JadwalByLapangan,
   JadwalRutinHarian,
-  JadwalByTanggal
+  JadwalByTanggal,
+  getJadwalBerhasil
 
 } from "../controllers/JadwalController.js";
 
@@ -29,6 +30,8 @@ router.get('/lapangan/:lapanganId', JadwalByLapangan);
 
 router.get('/tanggal/:tanggal', JadwalByTanggal);
 
+
+router.get('/jadwal-berhasil', getJadwalBerhasil);
 
 
 // Route for creating a jadwal
