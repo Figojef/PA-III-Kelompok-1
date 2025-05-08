@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
+use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
+
+class MabarController extends Controller
+{
+    public function getMabar()
+    {
+        // URL API yang akan diakses
+        $url = 'http://localhost:3000/api/v1/mabar';
+        
+        // Inisialisasi Guzzle client
+        $client = new Client();
+
+        try {
+            // Melakukan GET request menggunakan Guzzle
+            $response = $client->request('GET', $url);
+
+            // Mengambil isi response body dalam bentuk string
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            // Mengembalikan response data ke client
+            return response()->json($data);
+
+        } catch (RequestException $e) {
+            // Menangani error jika request gagal
+            return response()->json(['error' => 'Unable to fetch data from the API'], 500);
+        }
+    }
+    
+
+    public function buatMabar(Request $request)
+    {
+        // Validasi input dari form
+        $validated = $request->validate([
+            'nama_mabar' => 'required|string|max:255',
+            'biaya' => 'required|numeric',
+            'umur_min' => 'required|integer|min:0',
+            'umur_max' => 'required|integer|gte:umur_min',
+            'level' => 'required|string|max:50',
+            'kategori' => 'required|string|max:50',
+            'slot' => 'required|integer|min:1',
+            'deskripsi' => 'required|string|max:1000',
+            'user_id' => 'required|string', 
+            'jadwal_dipesan' => 'required|array|min:1',
+            'jadwal_dipesan.*' => 'required|string',
+        ]);
+    
+        $data = [
+            'nama_mabar' => $validated['nama_mabar'],
+            'biaya' => $validated['biaya'],
+            'range_umur' => "{$validated['umur_min']}-{$validated['umur_max']}",
+            'level' => $validated['level'],
+            'kategori' => $validated['kategori'],
+            'slot_peserta' => $validated['slot'],
+            'deskripsi' => $validated['deskripsi'],
+            'user_pembuat_mabar' => $validated['user_id'],
+            'jadwal' => $validated['jadwal_dipesan'],
+        ];
+    
+        // Ambil token dan domain dari session dan env
+        $jwt = Session::get('jwt');
+        $domain = env('DOMAIN'); // Misalnya: 'localhost'
+    
+        try {
+            $client = new Client();
+            $apiUrl = rtrim(env('API_BASE_URL'), '/') . '/mabar';
+    
+            // Buat CookieJar dari array
+            $cookieJar = CookieJar::fromArray([
+                'jwt' => $jwt,  // Cookie jwt yang dikirim
+            ], $domain);  // Menggunakan domain untuk menentukan scope cookie
+    
+            // Mengirim permintaan POST dengan menggunakan Guzzle
+            $response = $client->post($apiUrl, [
+                'json' => $data,  // Data yang dikirim dalam format JSON
+                'cookies' => $cookieJar,  // Kirim cookie menggunakan CookieJar
+                'headers' => [
+                    'Content-Type' => 'application/json',  // Mengatur header Content-Type
+                ]
+            ]);
+    
+            // Mendapatkan body response dan mengonversinya ke array
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+    
+            if ($response->getStatusCode() === 200 && ($responseBody['success'] ?? false)) {
+                return redirect('/mabar')->with('success', 'Mabar berhasil dibuat!');
+            } else {
+                // Debugging jika gagal
+                return redirect('/mabar')->with('error', 'Gagal membuat mabar. Coba lagi.');
+            }
+        } catch (\Exception $e) {
+            // Menampilkan exception jika terjadi error
+            return redirect('/mabar')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function show($id)
+    {
+        $mabar = Mabar::with(['jadwalDipesan', 'userPembuatMabar'])->findOrFail($id);
+    
+        return view('detail_mabar', compact('mabar'));
+    }
+
+
+}

@@ -24,7 +24,7 @@
                     <a class="nav-link {{ Request::is('reservasi') ? 'active' : '' }}" href="/reservasi">Reservasi</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ Request::is('mabar') ? 'active' : '' }}" href="/mabar">Mabar</a>
+                <a class="nav-link {{ Request::is('mabar', 'detail_mabar', 'tambahMabar') ? 'active' : '' }}" href="/mabar">Mabar</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ Request::is('event') ? 'active' : '' }}" href="/event">Event</a>

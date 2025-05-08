@@ -127,6 +127,7 @@
     if (window.location.search.includes("logout=true")) {
         sessionStorage.removeItem('selectedSlots');
         sessionStorage.removeItem('transactionId');
+        sessionStorage.removeItem('selectedMabar');
         console.log("selectedSlots dihapus karena logout");
     }
 </script>

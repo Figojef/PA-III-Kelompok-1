@@ -7,6 +7,7 @@ use App\Http\Controllers\LapanganController;
 use App\Models\Lapangan;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\MabarController;
 
 // Autentikasi
 
@@ -40,6 +41,22 @@ Route::post('/pemesanan', [PemesananController::class, 'store'])->name('pemesana
 
 Route::get('/pembayaran/{id}', [PembayaranController::class, 'showPaymentDetail'])->name('pembayaran.detail');
 
+// Mabar
+//Menampilkan Mabar
+
+Route::get('/mabar', [MabarController::class, 'getMabar']);
+
+
+//Membuat Mabar
+Route::post('/buat-mabar', [MabarController::class, 'buatMabar'])->name('mabar.buat-mabar');
+
+// Detail Mabar
+Route::get('/mabar/detail/{id}', function ($id) {
+    return view('detail_mabar', ['mabarId' => $id]);
+})->name('mabar.detail');
+
+// web.php
+Route::get('/mabar/detail/{id}', [MabarController::class, 'show'])->name('mabar.detail');
 
 
 
@@ -71,6 +88,12 @@ Route::get('/detail_pesanan', function () {
 Route::get('/mabar', function () {
     return view('mabar');
 })->name('mabar');
+
+Route::get('/detail_mabar', function () {
+    return view('detail_mabar');
+})->name('detail_mabar');
+
+
 
 Route::get('/tambahMabar', function () {
     return view('tambahMabar');
