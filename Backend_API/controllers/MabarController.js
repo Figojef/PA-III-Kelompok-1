@@ -10,7 +10,7 @@ export const SelectJadwalMabar = asyncHandler(async (req, res) => {
     // 1. Ambil pemesanan berdasarkan user_id yang ada di req.body (asumsi user_id ada di req.body)
     const pemesanan = await Pemesanan.find({ 
         user_id: req.body.user_id, 
-        status_pemesanan: { $in: ["Sedang Dipesan", "Berhasil"] }
+        status_pemesanan: { $in: ["Berhasil"] }
     })
     .populate({
         path: "jadwal_dipesan",
@@ -121,12 +121,20 @@ export const JoinMabar = asyncHandler(async (req, res) => {
     const mabar = await Mabar.findById(mabarId);
     
     // 2. Cek apakah Mabar ditemukan
-    if (!mabar) {
-        return res.status(404).json({
-            success: false,
-            message: "Mabar tidak ditemukan",
-        });
-    }
+// 2. Cek apakah Mabar ditemukan
+if (!mabar) {
+    return res.status(404).json({
+        success: false,
+        message: "Mabar tidak ditemukan",
+    });
+}
+
+if (mabar.user_pembuat_mabar.toString() === userId) {
+    return res.status(400).json({
+        success: false,
+        message: "Anda adalah pembuat Mabar dan tidak perlu bergabung.",
+    });
+}
 
     const jumlahJoined = mabar.user_yang_join.length + 1;
 

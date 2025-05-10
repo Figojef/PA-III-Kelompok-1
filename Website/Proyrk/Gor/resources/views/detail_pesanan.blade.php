@@ -159,7 +159,7 @@
 <label class="user data">
     @php
         // Ambil nomor WhatsApp
-        $nomorWhatsApp = Session::get('user_data')['nomor_whatsapp'] ?? "";
+        $nomorWhatsApp = Session::get('user_data')['nomor_telepon'] ?? "";
 
         // Ganti kode negara 62 atau +62 dengan 0
         $nomorWhatsApp = preg_replace('/^\+?62/', '0', $nomorWhatsApp);

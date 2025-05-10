@@ -35,38 +35,63 @@ const createSendResToken = (user, statusCode, res) => {
 }
 
 export const registerUser = asyncHandler(async (req, res) => {
-    const isOwner = (await User.countDocuments()) === 0
+    const { name, email, nomor_telepon, password } = req.body;
 
-    const role = isOwner ? 'admin' : 'pelanggan'
-    
-    
-    if(!req.body.email || !req.body.password || !req.body.nomor_whatsapp){
-        res.status(400)
-        throw new Error('Email, password, dan nomor whatsapp tidak boleh kosong')
+    // Validasi input wajib
+    if (!name || !email || !nomor_telepon || !password) {
+        res.status(400);
+        throw new Error("Nama, email, nomor telepon, dan password tidak boleh kosong.");
     }
 
-    let nomor_whatsapp = req.body.nomor_whatsapp
-
-    if(nomor_whatsapp[0] == 0){
-        nomor_whatsapp = nomor_whatsapp.slice(1)
+    // Validasi format email
+    if (!validator.isEmail(email)) {
+        res.status(400);
+        throw new Error("Email tidak valid. Contoh: abc@gmail.com");
     }
 
+    // Validasi panjang password
+    if (password.length < 6) {
+        res.status(400);
+        throw new Error("Password minimal 6 karakter.");
+    }
+
+    // Validasi unik email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+        res.status(400);
+        throw new Error("Email sudah pernah didaftarkan.");
+    }
+
+    // Validasi unik nomor telepon
+    const existingPhone = await User.findOne({ nomor_telepon });
+    if (existingPhone) {
+        res.status(400);
+        throw new Error("Nomor telepon sudah pernah didaftarkan.");
+    }
+
+    // Validasi unik nama
+    const existingName = await User.findOne({ name });
+    if (existingName) {
+        res.status(400);
+        throw new Error("Nama sudah digunakan.");
+    }
+
+    // Tentukan role: admin jika user pertama
+    const isOwner = (await User.countDocuments()) === 0;
+    const role = isOwner ? "admin" : "pelanggan";
+
+    // Buat user baru
     const createUser = await User.create({
-        name : req.body.name,
-        email : req.body.email,
-        nomor_whatsapp,
-        password : req.body.password,
-        role : role
-    })
+        name,
+        email,
+        nomor_telepon,
+        password,
+        role,
+    });
 
-    // res.status(201).json({
-    //     info : req.body
-    // })
-
-    createSendResToken(createUser, 201, res)
-
-})
-
+    // Kirim token dan response
+    createSendResToken(createUser, 201, res);
+});
 
 export const loginUser = asyncHandler(async(req, res) => {
 

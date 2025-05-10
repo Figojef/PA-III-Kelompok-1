@@ -20,7 +20,7 @@ const userSchema = new Schema({
             message : "Inputan harus berformat Email. Ex : abc@gmail.com"
         }
     },
-    nomor_whatsapp : {
+    nomor_telepon : {
         type : String,
         required : [true, "Nomor WA harus diisi"],
         unique : [true, "Nomor sudah pernah didaftarkan"]
@@ -40,10 +40,14 @@ const userSchema = new Schema({
 
 // Before the file is saved, run the callback. This function is one of the midleware of mongoose
 // NB : Dont use arrow function
-userSchema.pre("save", async function() {
-    const salt = await bycrypt.genSalt(10)
-    this.password = await bycrypt.hash(this.password, salt)
-})
+userSchema.pre("save", async function(next) {
+    if (!this.isModified("password")) return next();
+
+    const salt = await bycrypt.genSalt(10);
+    this.password = await bycrypt.hash(this.password, salt);
+    next();
+});
+
 
 userSchema.methods.comparePassword = async function(reqBody){
     return await bycrypt.compare(reqBody, this.password)
@@ -51,4 +55,4 @@ userSchema.methods.comparePassword = async function(reqBody){
 
 const User = mongoose.model("User", userSchema)
 
-export default User
+export default User

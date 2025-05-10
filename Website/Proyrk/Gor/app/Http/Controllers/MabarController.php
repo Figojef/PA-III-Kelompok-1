@@ -108,5 +108,94 @@ class MabarController extends Controller
         return view('detail_mabar', compact('mabar'));
     }
 
+public function joinMabar(Request $request)
+{
+    $mabarId = $request->input('mabar_id');
 
+    if (!$mabarId) {
+        return response()->json(['message' => 'ID Mabar wajib diisi.'], 400);
+    }
+
+    $token = Session::get('jwt'); // Ambil token dari session
+
+    if (!$token) {
+        return response()->json(['message' => 'Token tidak ditemukan. Silakan login.'], 401);
+    }
+
+    try {
+        // Ambil userId dari payload token
+        $payload = json_decode(base64_decode(explode('.', $token)[1]), true);
+        $userId = $payload['id'] ?? null;
+
+
+        // ✅ Debug: pastikan semua data sudah lengkap
+        // dd([
+        //     'mabarId' => $mabarId,
+        //     'token' => $token,
+        //     'userId' => $userId,
+        //     'payload' => $payload,
+        // ]);
+
+        // (Nanti aktifkan bagian ini setelah test)
+        
+        $apiUrl = env('API_BASE_URL') . 'mabar/join';
+
+        $response = Http::withToken($token)
+            ->post($apiUrl, [
+                'mabarId' => $mabarId,
+                'userId' => $userId
+            ]);
+
+        if ($response->successful()) {
+            return redirect()->back()->with('success', 'Berhasil join mabar.');
+        }
+
+        return redirect()->back()->with('error', 'Gagal join mabar: ' . json_encode($response->json()));
+        
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    }
+}
+
+public function keluarMabar(Request $request)
+{
+    $mabarId = $request->input('mabar_id');
+
+    if (!$mabarId) {
+        return response()->json(['message' => 'ID Mabar wajib diisi.'], 400);
+    }
+
+    $token = Session::get('jwt'); // Ambil token dari session
+
+    if (!$token) {
+        return response()->json(['message' => 'Token tidak ditemukan. Silakan login.'], 401);
+    }
+
+    try {
+        // Ambil userId dari payload token
+        $payload = json_decode(base64_decode(explode('.', $token)[1]), true);
+        $userId = $payload['id'] ?? null;
+
+        // Endpoint API keluar mabar
+        $apiUrl = env('API_BASE_URL') . 'mabar/keluar';
+
+        $response = Http::withToken($token)
+            ->post($apiUrl, [
+                'mabarId' => $mabarId,
+                'userId' => $userId
+            ]);
+
+        if ($response->successful()) {
+            return redirect()->back()->with('success', $response->json()['message'] ?? 'Berhasil keluar dari mabar.');
+        }
+
+        
+        return redirect()->back()->with('error', 'Gagal keluar dari mabar: ' . json_encode($response->json()));
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    }
+}
+
+    
 }

@@ -313,6 +313,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const jadwalInfo = `${lapangan} - ${tanggal} Pukul ${formatJam(jam)}`;
 
 
+
+
   return `
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 p-2 border rounded">
       <div class="d-flex align-items-center gap-3">

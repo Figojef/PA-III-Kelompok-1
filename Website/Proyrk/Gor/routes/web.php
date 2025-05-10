@@ -57,8 +57,11 @@ Route::get('/mabar/detail/{id}', function ($id) {
 
 // web.php
 Route::get('/mabar/detail/{id}', [MabarController::class, 'show'])->name('mabar.detail');
+// Join Mabar
+Route::post('/mabar/join', [MabarController::class, 'joinMabar'])->name('mabar.join');
 
-
+//Keluar Mabar
+Route::post('/mabar/keluar', [MabarController::class, 'keluarMabar'])->name('mabar.keluar');
 
 // Halaman pengunjung
 Route::get('/', function () {

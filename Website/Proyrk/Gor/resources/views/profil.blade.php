@@ -132,11 +132,11 @@
                                     <strong>Nomor Telepon</strong>
                                     <p>
                                         @php
-                                            $nomor_whatsapp = Session::get('user_data')['nomor_whatsapp'] ?? '6281234567890';
-                                            if (substr($nomor_whatsapp, 0, 2) === '62') {
-                                                $nomor_whatsapp = '0' . substr($nomor_whatsapp, 2);
+                                            $nomor_telepon = Session::get('user_data')['nomor_telepon'] ?? '6281234567890';
+                                            if (substr($nomor_telepon, 0, 2) === '62') {
+                                                $nomor_telepon = '0' . substr($nomor_telepon, 2);
                                             }
-                                            echo $nomor_whatsapp;
+                                            echo $nomor_telepon;
                                         @endphp
                                     </p>
                                 </div>
@@ -161,8 +161,8 @@
                                 <input type="text" class="form-control" id="name" name="name" value="{{ Session::get('user_data')['name'] ?? '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="nomor_whatsapp" class="form-label">Nomor Telepon</label>
-                                <input type="text" class="form-control" id="nomor_whatsapp" name="nomor_whatsapp" value="{{ Session::get('user_data')['nomor_whatsapp'] ?? '' }}">
+                                <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
+                                <input type="text" class="form-control" id="nomor_telepon" name="nomor_telepon" value="{{ Session::get('user_data')['nomor_telepon'] ?? '' }}">
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
