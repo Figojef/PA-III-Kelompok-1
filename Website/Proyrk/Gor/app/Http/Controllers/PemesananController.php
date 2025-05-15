@@ -95,46 +95,21 @@ public function showProfil()
         return back()->withErrors('Token tidak ditemukan. Pastikan kamu sudah login.');
     }
     
-    $baseUri = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
-    $domain = env('DOMAIN', 'localhost');
-    
     $response = Http::withOptions([
-        'base_uri' => $baseUri,
+        'base_uri' => 'http://localhost:3000',
     ])->withCookies([
         'jwt' => $token,
-    ], $domain)->get('/api/v1/pemesanan/user/pesananBelumLewatDeadline');
+    ], 'localhost')->get('/api/v1/pemesanan/user/pesananBelumLewatDeadline');
 
     if ($response->successful()) {
         $data = $response->json()['data'];
 
-        return view('profil', compact('data'));
+        return view('profil', compact('data')); // ✅ Gunakan ini
     } else {
         return back()->withErrors('Gagal mengambil data pemesanan.');
     }
 }
 
-// public function showProfil()
-// {
-//     $token = Session::get('jwt'); 
-
-//     if (!$token) {
-//         return back()->withErrors('Token tidak ditemukan. Pastikan kamu sudah login.');
-//     }
-    
-//     $response = Http::withOptions([
-//         'base_uri' => 'http://localhost:3000',
-//     ])->withCookies([
-//         'jwt' => $token,
-//     ], 'localhost')->get('/api/v1/pemesanan/user/pesananBelumLewatDeadline');
-
-//     if ($response->successful()) {
-//         $data = $response->json()['data'];
-
-//         return view('profil', compact('data')); // ✅ Gunakan ini
-//     } else {
-//         return back()->withErrors('Gagal mengambil data pemesanan.');
-//     }
-// }
 
 
 
