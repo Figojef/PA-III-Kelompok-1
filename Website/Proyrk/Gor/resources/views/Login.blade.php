@@ -152,6 +152,7 @@
             </div>
          </form">
     </center>
+    <div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
 
     <script>
     document.getElementById("loginForm").addEventListener("submit", async function(event) {
@@ -164,12 +165,20 @@
 
     console.log("Sending request to API...");
 
-    try {
-        const response = await fetch("http://localhost:3000/api/v1/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, password}),
-        });
+try {
+  const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+
+  const response = await fetch(`${baseUrl}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, password }),
+  });
+
+  // lanjutkan proses response...
+} catch (error) {
+  console.error("Error saat login:", error);
+  alert("Terjadi kesalahan, silakan coba lagi.");
+}
 
         const data = await response.json();
         console.log("Response received:", data);

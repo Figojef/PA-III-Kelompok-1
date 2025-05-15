@@ -162,7 +162,7 @@
         <hr style="border: 2px solid #000000; margin: 20px 0;">
         <button type="button" onclick="uploadImage()" class="tombol">Konfirmasi Pembayaran</button>
     </div>
-
+<div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
     <script>
   // Ambil data deadline dari session Laravel
   const deadlineString = "{{ session('payment_deadline') }}";  // Format: "YYYY-MM-DD HH:MM:SS"
@@ -231,25 +231,27 @@ async function uploadImage() {
     const formData = new FormData();
     formData.append('image', selectedFile);
 
-    try {
-        const transactionId = '{{ session('transaction_id') }}';
-        const response = await fetch(`http://localhost:3000/api/v1/transaksi/${transactionId}/bukti-pembayaran`, {
-            method: 'POST',
-            body: formData
-        });
+ try {
+  const transactionId = '{{ session('transaction_id') }}';
+  const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+  
+  const response = await fetch(`${baseUrl}/transaksi/${transactionId}/bukti-pembayaran`, {
+    method: 'POST',
+    body: formData
+  });
 
-        const result = await response.json();
-        console.log(result);
+  const result = await response.json();
+  console.log(result);
 
-        if (response.ok) {
-            alert('Upload berhasil!');
-        } else {
-            alert('Upload gagal: ' + result.message);
-        }
-    } catch (err) {
-        console.error('Error:', err);
-        alert('Terjadi kesalahan saat upload');
-    }
+  if (response.ok) {
+    alert('Upload berhasil!');
+  } else {
+    alert('Upload gagal: ' + result.message);
+  }
+} catch (err) {
+  console.error('Error:', err);
+  alert('Terjadi kesalahan saat upload');
+}
 }
     </script>
 @endsection

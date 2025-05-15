@@ -7,32 +7,28 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\RequestException;
 
 class MabarController extends Controller
 {
-    public function getMabar()
-    {
-        // URL API yang akan diakses
-        $url = 'http://localhost:3000/api/v1/mabar';
-        
-        // Inisialisasi Guzzle client
-        $client = new Client();
+   public function getMabar()
+{
+    $baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+    $url = $baseUrl . '/mabar';
 
-        try {
-            // Melakukan GET request menggunakan Guzzle
-            $response = $client->request('GET', $url);
+    $client = new Client();
 
-            // Mengambil isi response body dalam bentuk string
-            $data = json_decode($response->getBody()->getContents(), true);
+    try {
+        $response = $client->request('GET', $url);
 
-            // Mengembalikan response data ke client
-            return response()->json($data);
+        $data = json_decode($response->getBody()->getContents(), true);
 
-        } catch (RequestException $e) {
-            // Menangani error jika request gagal
-            return response()->json(['error' => 'Unable to fetch data from the API'], 500);
-        }
+        return response()->json($data);
+
+    } catch (RequestException $e) {
+        return response()->json(['error' => 'Unable to fetch data from the API'], 500);
     }
+}
     
 public function showPemainFromRequest(Request $request)
 {
@@ -161,17 +157,18 @@ public function showPemainFromRequest(Request $request)
     }
 
 
-    public function getHistoryMabar()
+   public function getHistoryMabar()
 {
-    $response = Http::get('http://localhost:3000/api/v1/mabar/history'); // URL API eksternal
+    $baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+    $response = Http::get("{$baseUrl}/mabar/history"); // URL API dinamis dari .env
 
-    // Pastikan response berhasil
     if ($response->successful()) {
         return response()->json($response->json());
     } else {
         return response()->json(['success' => false, 'message' => 'Gagal mengambil data.'], 500);
     }
 }
+
 
 public function joinMabar(Request $request)
 {

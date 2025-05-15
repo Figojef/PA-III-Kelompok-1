@@ -131,12 +131,13 @@
     </div>
 </div>
 
+<div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   function checkLoginStatus() {
-    let jwtToken = "{{ Session::get('jwt') }}"; // or use JavaScript to fetch it if it's in a cookie or localStorage
+    let jwtToken = "{{ Session::get('jwt') }}"; 
     
     if (!jwtToken) {
       Swal.fire({
@@ -211,7 +212,10 @@ function setActiveTab(clickedTab) {
 }
 
 function fetchMabarList() {
-  fetch("http://localhost:3000/api/v1/mabar/sebelum")
+  const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+  const apiUrl = `${baseUrl}/mabar/sebelum`;
+
+  fetch(apiUrl)
     .then(response => response.json())
     .then(result => {
       if (result.success) {
@@ -228,26 +232,29 @@ function fetchMabarList() {
 }
 
 function fetchRiwayatMabar() {
-  const userId = jwtUserId; // Ambil user_id dari sesi atau lokal
+  const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+  const userId = jwtUserId;    // pastikan variabel ini sudah tersedia di scope
+  const jwtToken = jwtToken;   // pastikan token juga tersedia
 
-  fetch(`http://localhost:3000/api/v1/mabar/history/${userId}`, {
-  headers: {
-    'Authorization': `Bearer ${jwtToken}`,  // Add JWT token to Authorization header
-  }
-})  // API untuk Riwayat Mabar
-      .then(response => response.json())
-      .then(result => {
-          if (result.success) {
-              displayMabarList(result.data); // Menampilkan riwayat mabar
-          } else {
-              document.getElementById("mabar-list").innerHTML = "<p>Tidak ada riwayat mabar.</p>";
-          }
-      })
-      .catch(error => {
-          console.error("Error fetching data:", error);
-          document.getElementById("mabar-list").innerHTML = "<p>Terjadi kesalahan saat mengambil data.</p>";
-      });
+  fetch(`${baseUrl}/mabar/history/${userId}`, {
+    headers: {
+      'Authorization': `Bearer ${jwtToken}`,
+    }
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.success) {
+      displayMabarList(result.data);
+    } else {
+      document.getElementById("mabar-list").innerHTML = "<p>Tidak ada riwayat mabar.</p>";
+    }
+  })
+  .catch(error => {
+    console.error("Error fetching data:", error);
+    document.getElementById("mabar-list").innerHTML = "<p>Terjadi kesalahan saat mengambil data.</p>";
+  });
 }
+
 
 
 

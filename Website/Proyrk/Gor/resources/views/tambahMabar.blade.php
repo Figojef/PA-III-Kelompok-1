@@ -157,6 +157,7 @@
     </div>
 </div>
 
+<div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
 
 <!-- Script -->
 <script>
@@ -283,22 +284,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   // Menampilkan pilihan jadwal
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
   const tombolPilih = document.querySelector('[data-bs-target="#jadwalModal"]');
   const userId = document.getElementById('userId').value;
+  const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
 
   tombolPilih.addEventListener("click", async function () {
     try {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    const response = await fetch("http://localhost:3000/api/v1/mabar/select_jadwal", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": token
-      },
-      body: JSON.stringify({ user_id: userId }),
-    });
+      const response = await fetch(`${baseUrl}/mabar/select_jadwal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": token
+        },
+        body: JSON.stringify({ user_id: userId }),
+      });
+
+      // lanjutkan proses response...
+
 
     const result = await response.json();
     const display = document.getElementById("jadwalListModal"); 

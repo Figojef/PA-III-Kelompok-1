@@ -21,8 +21,7 @@
                 <div style="width: 160px; text-align: right; font-weight: bold; padding-right: 10px;">
                     Nama :
                 </div>
-                <div style="margin-left: 10px;">{{ $ratings['name'] ?? '-' }}
-</div>
+                <div style="margin-left: 10px;">John Doe</div>
             </div>
 
             <!-- No. Telepon -->

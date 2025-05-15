@@ -105,6 +105,8 @@
         </div>
     </div>
 
+<div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
+
     <script>
 
 
@@ -215,26 +217,27 @@ lapanganDiv.appendChild(kotakWrapper);
 }
 
 async function fetchJadwalByTanggal(tanggal) {
-    try {
-        const response = await fetch(`http://localhost:3000/api/v1/jadwal/tanggal/${tanggal}`);
+  try {
+    const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+    const response = await fetch(`${baseUrl}/jadwal/tanggal/${tanggal}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(data); // Cek data di console
-
-        if (!data || data.length === 0) {
-            alert('Jadwal tidak ditemukan');
-            return;
-        }
-
-        renderjadwal(data);
-    } catch (error) {
-        console.error("Error fetching jadwal:", error);
-        alert('Terjadi kesalahan saat mengambil data jadwal.');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data = await response.json();
+    console.log(data); // Cek data di console
+
+    if (!data || data.length === 0) {
+      alert('Jadwal tidak ditemukan');
+      return;
+    }
+
+    renderjadwal(data);
+  } catch (error) {
+    console.error("Error fetching jadwal:", error);
+    alert('Terjadi kesalahan saat mengambil data jadwal.');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function () {

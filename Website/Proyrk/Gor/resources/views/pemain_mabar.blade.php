@@ -76,9 +76,11 @@ h2 {
             <div>
                 <p style="margin: 0; font-weight: bold;">{{ $pembuat['name'] ?? '-' }}</p>
                 <p style="margin: 0;">{{ $pembuat['nomor_telepon'] ?? '-' }}</p>
+                <a style="color: green; text-decoration: underline;">Penyelenggara</a>
             </div>
         </div>
         <a href="{{ route('informasi.pemain', ['userId' => $pembuat['_id'] ?? '']) }}" class="btn btn-primary btn-sm">Informasi</a>
+        
     </div>
 
     <!-- Peserta Join -->
