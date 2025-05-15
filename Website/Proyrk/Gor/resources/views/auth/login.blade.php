@@ -1,181 +1,106 @@
-<!Doctype HTML>
-<HTML lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <head>
+    <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
-    
-
-        <title>Login</title>
-        <style>
-            body {
-                background-color: #222F37;
-                font-family: Arial, sans-serif;
-            }
-
-        .footer {
-            background-color: #0A3873;
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+    <style>
+        body {
+            background-color: #222F37;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
+
         .card {
             background-color: #FDFDD7;
-        }
-        .footer .contact {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .footer .contact div {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .footer .contact img {
-            width: 20px;
-            height: 20px;
-        }
-        .footer .logo img {
-            width: 100px;
-            height: 100px;
-
-        }
-        @media (max-width: 600px) {
-            .footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-            .Login {
-                width: 400px;
-                height: 60px;
-                font-size: 16px;
-                padding: 10px 10 10;
-                margin: 40px 0 0 0;
-                border-radius: 10px 10px 10px 10px;
-                border-width: 1px;
-
-            }
-
-            .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #f5f5dc;
-            padding: 10px 20px;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.5em;
-            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-        }
-        .logo img {
-            height: 40px;
-            margin-right: 10px;
-        }
-        .menu {
-            display: flex;
-            gap: 20px;
-        }
-        .menu a {
-            text-decoration: none;
-            color: black;
-            font-size: 1.1em;
-        }
-        .menu a:hover {
-            text-decoration: underline;
-        }
-        .user-icon {
-            font-size: 1.5em;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+            /* Pusatkan secara horizontal */
         }
 
-        /* Hamburger Menu Styles */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 30px;
-            height: 25px;
-            background: transparent;
+        .login-input {
+            height: 50px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding-left: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-btn {
+            background-color: #222F37;
+            color: #FDFDD7;
+            font-weight: bold;
+            border-radius: 10px;
+            height: 50px;
+            font-size: 16px;
             border: none;
-            cursor: pointer;
         }
 
-        .hamburger div {
-            width: 30px;
-            height: 4px;
-            background-color: black;
+        .login-btn:hover {
+            background-color: #1b252c;
         }
 
-        /* Responsive Styles */
         @media (max-width: 768px) {
-            .menu {
-                display: none;
-                width: 100%;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-                padding: 10px;
-                background-color: #f5f5dc;
-            }
-
-            .menu.active {
-                display: flex;
-            }
-
-            .hamburger {
-                display: flex;
+            .card {
+                padding: 1.5rem;
             }
         }
-        </style>
-    </head>
-    <body>
-        <center style="margin-top: 150px;">
-        <form id="loginForm" action="{{ route('login.submit') }}" method="POST">
-            @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+    </style>
+</head>
 
+<body>
+    <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh; padding: 15px;">
+        <form id="loginForm" action="{{ route('login.submit') }}" method="POST" class="card p-4 shadow-sm w-100">
             @csrf
-            <div class="card" style="width: 30rem;  margin-bottom: 100px;border-radius: 20px 20px 20px 20px;">
-                <center>  
-                    <img width="100px" height="100px" src="{{ asset('storage/Logo.png') }}" style="margin-top: 5%;" alt="Badminton Logo"><br>
-                        <label style="font-size:20px; font-weight:bold; padding-top:5%;">Ramos Badminton</label><br>
-                        @if($errors->any())
-                        <div>
-                            @foreach($errors->all() as $error)
-                                <p>{{ $error }}</p>
-                            @endforeach
-                        </div>
-                         @endif
-                            <input type="email" name="email" id="email" placeholder="Email Pengguna" class="Login" style="background-color: rgba(255, 255, 255, 0.5); padding-left: 20px;" required><br>
-                            <input type="password" name="password" id="password" placeholder="Kata Sandi" class="Login" style="background-color: rgba(255, 255, 255, 0.5);padding-left: 20px;" required><br>
-                            <button type="submit" class="Login" style="color: #FDFDD7; font-weight: bold; background-color: #222F37;">Masuk</button><br><br>
-                            <a href="" style="text-decoration: none; color: #222F37;font-size:15px; font-weight:bold;" >Lupa Kata Sandi?</a><br><br>
-                            <p style="font-size: 20px;">Belum punya akun?
-                            <a href="{{ url('/') }}" style="text-decoration: none;">Daftar yuk!</a>
-                </center>
-            </div>
-         </form>
-    </center>
-    
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    </body>
-</HTML>
 
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="text-center mb-4">
+                <img src="{{ asset('storage/Logo.png') }}" alt="Logo" width="100" height="100">
+                <h4 class="mt-3 mb-0 fw-bold">Ramos Badminton</h4>
+            </div>
+
+            <div class="mb-3">
+                <input type="email" name="email" id="email" placeholder="Email Pengguna"
+                    class="form-control login-input" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" id="password" placeholder="Kata Sandi"
+                    class="form-control login-input" required>
+            </div>
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary login-btn">Masuk</button>
+            </div>
+            <div class="text-center">
+                <a href="#" class="text-decoration-none fw-bold" style="color: #222F37;">Lupa Kata
+                    Sandi?</a>
+            </div>
+            <div class="text-center mt-3">
+                <span style="font-size: 16px;">Belum punya akun?
+                    <a href="{{ url('/') }}" class="text-decoration-none fw-bold">Daftar yuk!</a>
+                </span>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
 {{-- <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,9 +120,9 @@
         <button type="submit">Login</button>
     </form>
 
-    @if($errors->any())
+    @if ($errors->any())
         <div>
-            @foreach($errors->all() as $error)
+            @foreach ($errors->all() as $error)
                 <p>{{ $error }}</p>
             @endforeach
         </div>
