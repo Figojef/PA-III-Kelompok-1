@@ -29,6 +29,11 @@ const pemesananSchema = new Schema({
   is_expired: {
     type: Boolean,
     default: false
+  },
+
+    alasan_penolakan : {
+    type: String,
+    default: null
   }
 
 });

@@ -87,16 +87,33 @@ class PemesananController extends Controller
         }
     }
     
+public function showProfil()
+{
+    $token = Session::get('jwt'); 
+
+    if (!$token) {
+        return back()->withErrors('Token tidak ditemukan. Pastikan kamu sudah login.');
+    }
     
+    $response = Http::withOptions([
+        'base_uri' => 'http://localhost:3000',
+    ])->withCookies([
+        'jwt' => $token,
+    ], 'localhost')->get('/api/v1/pemesanan/user/pesananBelumLewatDeadline');
+
+    if ($response->successful()) {
+        $data = $response->json()['data'];
+
+        return view('profil', compact('data')); // ✅ Gunakan ini
+    } else {
+        return back()->withErrors('Gagal mengambil data pemesanan.');
+    }
+}
+
+
+
+
     
-    
-
-
-
-
-
-
-
     // Fungsi untuk mengambil data pemesanan berdasarkan ID transaksi
     private function getPemesananData($transactionId)
     {

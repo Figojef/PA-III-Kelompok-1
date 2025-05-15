@@ -11,6 +11,7 @@ import pemesananRouter from './routes/pemesananRouter.js'
 import transaksiRouter from './routes/transaksiRouter.js'
 import mabarRouter from './routes/mabarRouter.js'
 import eventRouter from './routes/eventRouter.js'
+import ratingRouter from './routes/ratingRouter.js'
 
 
 import dotenv from "dotenv"
@@ -64,7 +65,7 @@ app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
 app.use('/api/v1/event', eventRouter)
 app.use('/api/v1/mabar', mabarRouter)
-
+app.use('/api/v1/rating', ratingRouter)
 
 app.use((req, res, next) => {
   console.log(`[${req.method}] ${req.originalUrl}`);

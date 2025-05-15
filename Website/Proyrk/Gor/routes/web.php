@@ -4,10 +4,12 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LapanganController;
-use App\Models\Lapangan;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\MabarController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\RatingController;
+
 
 // Autentikasi
 
@@ -25,6 +27,8 @@ Route::middleware(['auth'])->group(function () {
     // Routes for authenticated users
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+Route::get('/profil', [PemesananController::class, 'showProfil'])->name('profil')->middleware('auth');
 
 
 // Admin
@@ -55,21 +59,41 @@ Route::get('/mabar/detail/{id}', function ($id) {
     return view('detail_mabar', ['mabarId' => $id]);
 })->name('mabar.detail');
 
+// mabar yang sudah lewat
+Route::get('/api/v1/mabar/history', [MabarController::class, 'getHistoryMabar']);
+
 // web.php
-Route::get('/mabar/detail/{id}', [MabarController::class, 'show'])->name('mabar.detail');
+Route::get('/mabar/pemain', [MabarController::class, 'showPemainFromRequest'])->name('mabar.pemainFromRequest');
+
 // Join Mabar
 Route::post('/mabar/join', [MabarController::class, 'joinMabar'])->name('mabar.join');
 
 //Keluar Mabar
 Route::post('/mabar/keluar', [MabarController::class, 'keluarMabar'])->name('mabar.keluar');
 
+// Menampilkan Pemain permabar
+Route::get('/mabar/pemain/{mabarId}', [MabarController::class, 'showPemain'])->name('mabar.pemain');
+
+// Menampilkan Rating User
+Route::get('/informasi-pemain/{userId}', [RatingController::class, 'showInformasiPemain'])->name('informasi.pemain');
+
+
+
+//Menampilkan Event
+Route::get('/event', [EventController::class, 'showEvents']);
+
 // Halaman pengunjung
 Route::get('/', function () {
     return view('beranda'); // Ganti dengan view dashboard Anda 
 })->name('dashboard');
 
+
 Route::get('/tentang', function () {
     return view('tentang');
+});
+
+Route::get('/pemain_mabar', function () {
+    return view('pemain_mabar');
 });
 
 Route::get('/reservasi', function () {
@@ -80,9 +104,19 @@ Route::get('/jadwal', function () {
     return view('jadwal');
 });
 
+Route::get('/informasi_pemain', function () {
+    return view('informasi_pemain');
+});
+
 Route::get('/register', function () {
     return view('auth/register');
 });
+
+
+
+// Route::get('/event', function () {
+//     return view('event');
+// });
 
 Route::get('/detail_pesanan', function () {
     return view('detail_pesanan');
@@ -105,10 +139,6 @@ Route::get('/tambahMabar', function () {
 Route::get('/detail_pembayaran', function () {
     return view('detail_pembayaran');
 })->name('detail_pembayaran');
-
-Route::get('/profil', function () {
-    return view('profil');
-})->name('profil');
 
 Route::get('/upload-bukti/{id}', [TransaksiController::class, 'showUploadForm']);
 

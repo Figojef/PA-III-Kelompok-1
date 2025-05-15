@@ -34,6 +34,58 @@ class MabarController extends Controller
         }
     }
     
+public function showPemainFromRequest(Request $request)
+{
+    $mabarId = $request->query('mabarId'); // ambil dari ?mabarId=...
+
+    if (!$mabarId) {
+        abort(400, 'mabarId tidak ditemukan');
+    }
+
+    $baseUri = rtrim(env('API_BASE_URL'), '/') . '/';
+
+    try {
+        // Jika kamu perlu kirim cookie jwt, bisa aktifkan ini
+        // $token = Session::get('jwt');
+
+        $response = Http::withOptions([
+            'base_uri' => $baseUri,
+        ])
+        // ->withCookies(['jwt' => $token], env('DOMAIN'))
+        ->get("mabar/Userbymabar/{$mabarId}");
+
+        if ($response->failed()) {
+            abort(404, 'Mabar tidak ditemukan');
+        }
+
+        $data = $response->json();
+
+        if (!isset($data['success']) || !$data['success']) {
+            abort(404, $data['message'] ?? 'Data tidak valid');
+        }
+
+        $pemain = $data['data'] ?? null;
+        if (!$pemain) {
+            abort(404, 'Data pemain tidak ditemukan');
+        }
+
+        $pembuat = $pemain['pembuat'] ?? null;
+        $peserta = $pemain['peserta'] ?? [];
+        $kapasitas = $pemain['kapasitas'] ?? null;
+
+        $jumlahPeserta = 1 + count($peserta);
+
+        return view('pemain_mabar', compact('pembuat', 'peserta', 'jumlahPeserta', 'kapasitas'));
+
+    } catch (\Exception $e) {
+        // Log error untuk debugging
+        \Log::error('Error saat fetch data mabar: ' . $e->getMessage());
+        abort(500, 'Gagal mengambil data dari API');
+    }
+}
+
+
+
 
     public function buatMabar(Request $request)
     {
@@ -107,6 +159,19 @@ class MabarController extends Controller
     
         return view('detail_mabar', compact('mabar'));
     }
+
+
+    public function getHistoryMabar()
+{
+    $response = Http::get('http://localhost:3000/api/v1/mabar/history'); // URL API eksternal
+
+    // Pastikan response berhasil
+    if ($response->successful()) {
+        return response()->json($response->json());
+    } else {
+        return response()->json(['success' => false, 'message' => 'Gagal mengambil data.'], 500);
+    }
+}
 
 public function joinMabar(Request $request)
 {

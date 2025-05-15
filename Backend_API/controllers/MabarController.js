@@ -3,6 +3,11 @@ import asyncHandler from "../middleware/asyncHandler.js"
 import Jadwal from "../models/jadwalModel.js";
 import Mabar from "../models/mabarModel.js";
 import Pemesanan from "../models/pemesananModel.js";
+import Lapangan from "../models/lapanganModel.js";
+import User from "../models/userModel.js";
+import dayjs from "dayjs";
+import "dayjs/locale/id.js";
+dayjs.locale("id");
 
 
 // Controller untuk mengambil jadwal yang belum lewat dari pemesanan user yang login
@@ -232,6 +237,98 @@ export const getAllMabar = asyncHandler(async (req, res) => {
     });
 });
 
+export const getUpcomingMabar = asyncHandler(async (req, res) => {
+    const mabarList = await Mabar.find()
+        .populate({
+            path: "jadwal",
+            model: "Jadwal",
+            options: { sort: { tanggal: 1, jam: 1 } },
+            populate: { path: "lapangan", model: "Lapangan" },
+        })
+        .populate("user_pembuat_mabar")
+        .populate("user_yang_join");
+
+    const currentDate = new Date();
+    const validMabars = [];
+
+    for (let data of mabarList) {
+        if (Array.isArray(data.jadwal) && data.jadwal.length > 0) {
+            data.jadwal.sort((a, b) => new Date(`${a.tanggal}T${a.jam}:00`) - new Date(`${b.tanggal}T${b.jam}:00`));
+
+            const first = data.jadwal[0];
+            const mulai = new Date(`${first.tanggal}T${String(first.jam).padStart(2, '0')}:00`);
+
+            if (currentDate < mulai) {
+                const last = data.jadwal[data.jadwal.length - 1];
+                const jamSelesai = String(parseInt(last.jam) + 1).padStart(2, '0') + ':00';
+                const totalJoined = (data.user_yang_join?.length ?? 0) + 1;
+
+                validMabars.push({ ...data._doc, jamSelesai, totalJoined });
+            }
+        }
+    }
+
+    res.status(200).json({ success: true, data: validMabars });
+});
+
+
+export const HistoryMabar = asyncHandler(async (req, res) => {
+  const { user_id } = req.params;
+
+  // Ambil semua mabar yang dibuat oleh user tersebut atau diikuti olehnya
+  const mabars = await Mabar.find({
+    $or: [
+      { user_pembuat_mabar: user_id },
+      { user_yang_join: user_id },
+    ],
+  })
+    .populate({
+      path: "jadwal",
+      populate: {
+        path: "lapangan",
+        model: "Lapangan",
+      },
+    })
+    .populate("user_pembuat_mabar", "name") // hanya ambil nama user
+    .lean();
+
+  const hasil = [];
+
+  for (const mabar of mabars) {
+    if (!mabar.jadwal || mabar.jadwal.length === 0) continue;
+
+    // Menghitung jumlah peserta yang bergabung (termasuk pembuat mabar)
+    const totalJoined = (mabar.user_yang_join?.length ?? 0) + 1; // +1 untuk pembuat mabar
+
+    // Ambil array jadwal langsung tanpa perhitungan waktu
+    const lapanganUnik = [
+      ...new Map(
+        mabar.jadwal.map((j) => [j.lapangan._id.toString(), { nama: j.lapangan.name }])
+      ).values(),
+    ];
+
+    hasil.push({
+      id_mabar: mabar._id,
+      user_pembuat_mabar: {
+        id_user: mabar.user_pembuat_mabar._id,
+        name: mabar.user_pembuat_mabar.name,
+      },
+      totalJoined, // Hitung jumlah total peserta yang bergabung
+      kategori: mabar.kategori,
+      slot_peserta: mabar.slot_peserta,
+      jadwal: mabar.jadwal, 
+      biaya: mabar.biaya,
+      nama_mabar: mabar.nama_mabar,
+      maksimal: mabar.slot_peserta,
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    count: hasil.length,
+    data: hasil,
+  });
+});
 
 
 
@@ -400,6 +497,39 @@ export const GetMabarOwn = asyncHandler(async (req, res) => {
         data: validMabars,
     });
 });
+
+export const GetPemainByMabarId = asyncHandler(async (req, res) => {
+    const { mabarId } = req.params;
+
+    // Validasi format ObjectId
+    if (!mongoose.Types.ObjectId.isValid(mabarId)) {
+        return res.status(400).json({ success: false, message: "ID Mabar tidak valid" });
+    }
+
+    // Cari mabar berdasarkan ID dan populate user pembuat serta user yang join
+    const mabar = await Mabar.findById(mabarId)
+        .populate("user_pembuat_mabar", "name nomor_telepon") // Bisa ditambah field user lain sesuai kebutuhan
+        .populate("user_yang_join", "name nomor_telepon");
+
+    if (!mabar) {
+        return res.status(404).json({ success: false, message: "Mabar tidak ditemukan" });
+    }
+
+    // Kumpulkan data user pembuat dan user yang join
+    const pemain = {
+        pembuat: mabar.user_pembuat_mabar,
+        peserta: mabar.user_yang_join,
+        kapasitas: mabar.slot_peserta 
+    };
+
+    res.status(200).json({
+        success: true,
+        data: pemain
+    });
+});
+
+
+
 
 
 export const GetMabarJoined = asyncHandler(async (req, res) => {

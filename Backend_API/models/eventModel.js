@@ -3,17 +3,30 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const eventSchema = new Schema({
-    Deskripsi : {
+
+    judul : {
         type: String,
         required : true,
     },
-    tanggal : {
-        type: String,
-        required : true
-    },
+
     gambar : {
         type: String,
         default: null
+    },
+
+    deskripsi : {
+        type: String,
+        required : true,
+    },
+
+    tanggal_mulai : {
+        type: String,
+        required : true
+    },
+
+    tanggal_selesai : {
+        type: String,
+        required : true
     }
 
 })

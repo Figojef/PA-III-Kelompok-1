@@ -143,7 +143,7 @@ export const createPemesanan = asyncHandler(async (req, res) => {
     if (metode_pembayaran === "transfer_bank") {
         deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 10); // 45 menit
     } else if (metode_pembayaran === "bayar_langsung") {
-        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 30); // 60 menit
+        deadlinePembayaran.setMinutes(deadlinePembayaran.getMinutes() + 60); // 60 menit
     } else {
         return res.status(400).json({ message: "Metode pembayaran tidak valid" });
     }
@@ -254,45 +254,50 @@ export const getPemesananByUserId = asyncHandler(async (req, res) => {
 });
 
 
-export const pesananJadwalBelumLewat = asyncHandler(async (req, res) => {
-    const { user_id } = req.params;
+// Pesanan belun lewat
+export const pesananBelumLewatDeadline = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
 
-    // 1. Cek apakah user ada
-    const user = await User.findById(user_id);
-    if (!user) {
-        return res.status(404).json({ success: false, message: "User tidak ditemukan" });
-    }
+    // Ambil semua pemesanan user beserta jadwal dan lapangan
+    const pemesananList = await Pemesanan.find({ user_id: userId }).populate({
+        path: "jadwal_dipesan",
+        populate: {
+            path: "lapangan",
+            select: "name"
+        }
+    });
 
-    // 2. Ambil semua pemesanan oleh user, dan populate jadwal_dipesan
-    const pemesananList = await Pemesanan.find({ user_id }).populate("jadwal_dipesan");
-
-    // 3. Ambil waktu sekarang
     const now = new Date();
-
-    // 4. Loop jadwal dan cek apakah masih ada yang belum lewat
-    let masihAdaYangBelumLewat = false;
+    const hasilPemesanan = [];
 
     for (const pemesanan of pemesananList) {
-        for (const jadwal of pemesanan.jadwal_dipesan) {
-            // Format jam ke 2 digit, misal "8" jadi "08"
-            const jamFormatted = jadwal.jam.padStart(2, "0");
+        // Ambil transaksi berdasarkan ID pemesanan
+        const transaksi = await Transaksi.findOne({ pemesanan_id: pemesanan._id });
 
-            // Gabungkan jadi date time
-            const jadwalDateTime = new Date(`${jadwal.tanggal}T${jamFormatted}:00:00`);
-
-            if (jadwalDateTime > now) {
-                masihAdaYangBelumLewat = true;
-                break;
-            }
+        if (!transaksi || !transaksi.deadline_pembayaran) {
+            continue; // skip jika tidak ada transaksi atau deadline
         }
-        if (masihAdaYangBelumLewat) break;
+
+        const deadline = new Date(transaksi.deadline_pembayaran);
+
+        // Cek apakah sekarang masih sebelum deadline
+        if (now < deadline) {
+            hasilPemesanan.push({
+                pemesanan,
+                transaksi
+            });
+        }
     }
 
-    return res.status(200).json({
+    res.status(200).json({
         success: true,
-        masihAdaJadwalBelumLewat: masihAdaYangBelumLewat
+        jumlah: hasilPemesanan.length,
+        data: hasilPemesanan
     });
 });
+
+
+
 
 
 

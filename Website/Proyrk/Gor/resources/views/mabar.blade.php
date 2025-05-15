@@ -116,6 +116,10 @@
   <li class="nav-item">
     <a class="nav-link" id="tab-mabar-diikuti" href="#">Mabar yang Diikuti</a>
   </li>
+<li class="nav-item">
+    <a class="nav-link" id="tab-riwayat-main-bareng" href="#">Riwayat Main Bareng</a>
+</li>
+
 </ul>
 
     <hr style="border: 2px solid #000000; margin: 20px 0;">
@@ -160,33 +164,46 @@
 
 let jwtUserId = "{{ Session::get('user_data')['_id'] ?? '' }}";
 let allMabarData = [];
+const jwtToken = "{{ Session::get('jwt') }}"; // Fetch token from Laravel session
+
 
 document.addEventListener('DOMContentLoaded', function () {
-  fetchMabarList();
+  fetchMabarList(); // Panggil data untuk tab utama (Main Bareng)
 
+  // Event listener untuk tab "Main Bareng"
   document.getElementById('tab-main-bareng').addEventListener('click', function () {
     setActiveTab(this);
-    displayMabarList(allMabarData); // tanpa filter
+    displayMabarList(allMabarData); 
   });
 
+  // Event listener untuk tab "Mabar Anda"
   document.getElementById('tab-mabar-anda').addEventListener('click', function () {
-  setActiveTab(this);
-  const filtered = allMabarData.filter(m => {
-    console.log("Filter check: ", m.user_pembuat_mabar?._id, jwtUserId);
-    return m.user_pembuat_mabar?._id === jwtUserId;
-  });
-  displayMabarList(filtered);
-});
-
-
-  document.getElementById('tab-mabar-diikuti').addEventListener('click', function () {
     setActiveTab(this);
-    const filtered = allMabarData.filter(m => 
-      m.user_pembuat_mabar?._id !== jwtUserId && m.user_yang_join?.includes(jwtUserId)
-    );
+    const filtered = allMabarData.filter(m => m.user_pembuat_mabar?._id === jwtUserId);
     displayMabarList(filtered);
   });
+
+  // Event listener untuk tab "Mabar yang Diikuti"
+  document.getElementById('tab-mabar-diikuti').addEventListener('click', function () {
+    setActiveTab(this);
+    const filtered = allMabarData.filter(m => m.user_pembuat_mabar?._id !== jwtUserId &&
+    m.user_yang_join?.some(u => u._id === jwtUserId));
+    displayMabarList(filtered);
+  });
+
+  // Event listener untuk tab "Riwayat Main Bareng"
+  document.getElementById('tab-riwayat-main-bareng').addEventListener('click', function () {
+    setActiveTab(this);
+    fetchRiwayatMabar(); // Ambil data riwayat
+  });
 });
+
+
+document.getElementById('tab-riwayat-main-bareng').addEventListener('click', function () {
+  setActiveTab(this);
+  fetchRiwayatMabar(); // Panggil fungsi untuk menampilkan riwayat main bareng
+});
+
 
 function setActiveTab(clickedTab) {
   document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
@@ -194,7 +211,7 @@ function setActiveTab(clickedTab) {
 }
 
 function fetchMabarList() {
-  fetch("http://localhost:3000/api/v1/mabar")
+  fetch("http://localhost:3000/api/v1/mabar/sebelum")
     .then(response => response.json())
     .then(result => {
       if (result.success) {
@@ -210,18 +227,41 @@ function fetchMabarList() {
     });
 }
 
+function fetchRiwayatMabar() {
+  const userId = jwtUserId; // Ambil user_id dari sesi atau lokal
+
+  fetch(`http://localhost:3000/api/v1/mabar/history/${userId}`, {
+  headers: {
+    'Authorization': `Bearer ${jwtToken}`,  // Add JWT token to Authorization header
+  }
+})  // API untuk Riwayat Mabar
+      .then(response => response.json())
+      .then(result => {
+          if (result.success) {
+              displayMabarList(result.data); // Menampilkan riwayat mabar
+          } else {
+              document.getElementById("mabar-list").innerHTML = "<p>Tidak ada riwayat mabar.</p>";
+          }
+      })
+      .catch(error => {
+          console.error("Error fetching data:", error);
+          document.getElementById("mabar-list").innerHTML = "<p>Terjadi kesalahan saat mengambil data.</p>";
+      });
+}
+
+
 
 function displayMabarList(data) {
     const container = document.getElementById("mabar-list");
-    container.innerHTML = "";
+    container.innerHTML = ""; // Mengosongkan container sebelum diisi dengan data baru
 
     if (data.length === 0) {
-        container.innerHTML = "<p>Tidak ada mabar yang tersedia.</p>";
+        container.innerHTML = "<p>Tidak ada riwayat mabar yang ditemukan.</p>";
         return;
     }
 
     data.forEach(mabar => {
-        const pembuat = mabar.user_pembuat_mabar?.nama || 'Tidak diketahui';
+        const pembuat = mabar.user_pembuat_mabar?.name || 'Tidak diketahui';
         const jadwal = mabar.jadwal || [];
 
         // Ambil tanggal dan format hari + tanggal
@@ -251,34 +291,40 @@ function displayMabarList(data) {
             jamMulai = jamList[0] + ":00";
             jamSelesai = (jamList[jamList.length - 1] + 1) + ":00";
         }
+        // Cek apakah user sudah bergabung dengan mabar ini
+        const userJoined = mabar.user_yang_join || [];
+        const isUserJoined = userJoined.some(user => user._id === jwtUserId); // Ganti dengan _id untuk pengecekan
+
+        // Debugging
+        console.log(`User ID (JWT): ${jwtUserId}, Mabar User Joined: ${userJoined}`);
+        console.log(`Is user joined? ${isUserJoined}`);
 
         const mabarHTML = `
             <div class="card-wrapper">
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="d-flex align-items-center mb-2">
+                        <div class="d-flex align-items-center mb-2" style="position: relative;">
                             <i class="bi bi-person-circle fs-5 me-2"></i>
                             <strong>${mabar.user_pembuat_mabar.name}</strong>
+
+                            <!-- Tampilkan ikon orang jika user sudah bergabung -->
+                            ${isUserJoined ? 
+                                `<i class="bi bi-person-circle" style="position: absolute; top: 10px; right: 10px; font-size: 24px; color: green;"></i>` 
+                                : ''}
                         </div>
                         <h5 class="card-title">${mabar.nama_mabar}</h5>
 
                         <p class="mb-1">
                             <i class="bi bi-calendar-event"></i> ${tanggalFormatted} * ${jamMulai} - ${jamSelesai}
                         </p>
-
-                        <p class="mb-1">Lapangan ${jadwal[0]?.lapangan || '-'}</p>
                         <p class="mb-1"><i class="bi bi-cash-coin"></i> Rp ${mabar.biaya}/orang</p>
                         <p class="mb-1"><i class="bi bi-people"></i> <span style="color: green; font-weight: bold;">${mabar.kategori}</span></p>
 
                         <p style="color: red;">${mabar.totalJoined}/${mabar.slot_peserta} Peserta</p>
 
-   <div class="d-flex justify-content-end">
-    <a href="#" class="btn btn-outline-dark btn-sm" onclick='lihatDetailMabar(${JSON.stringify(mabar)})'>Lihat Detail</a>
-
-
-
-</div>
-
+                        <div class="d-flex justify-content-end">
+                            <a href="#" class="btn btn-outline-dark btn-sm" onclick='lihatDetailMabar(${JSON.stringify(mabar)})'>Lihat Detail</a>
+                        </div>
                     </div>
                 </div>
             </div>

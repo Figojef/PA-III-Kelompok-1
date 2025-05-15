@@ -3,143 +3,107 @@
 @section('content')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
-    /* Styling untuk container utama */
+/* Styling untuk container utama */
+.mabar-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Kolom kiri (detail mabar) */
+.mabar-details {
+    width: 100%;
+    max-width: 65%;
+    padding-right: 20px;
+}
+
+
+
+/* Kolom kanan (biaya dan level) */
+.card-wrapper-right {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Styling untuk card */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 20px; /* Uniform padding for all cards */
+}
+
+.card-penyelenggara {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+
+/* Styling untuk header card */
+.card-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+/* Styling untuk item dalam card */
+.card-body p {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #34495e;
+}
+
+/* Styling untuk biaya dan kategori */
+.card-body p:nth-child(4) {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e67e22;
+}
+
+/* Styling untuk tombol gabung */
+.join-button {
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect pada tombol gabung */
+.join-button:hover {
+    background-color: #2980b9;
+}
+
+/* Responsive style untuk layar kecil */
+@media (max-width: 767px) {
     .mabar-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-top: 40px;
-        padding: 0 10%;
+        padding: 0 5%;
+        flex-direction: column;
     }
 
-    /* Bagian untuk detail mabar (80%) */
     .mabar-details {
-        width: 80%;
-        padding-right: 20px; /* Spasi antara detail dan tombol */
-    }
-
-    /* Styling untuk card */
-    .card {
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        background-color: #fff;
-    }
-
-    /* Card body */
-    .card-body {
-        width: 750px;
-        height: 35  0px;
-        font-family: 'Arial', sans-serif;
-        line-height: 1.6;
-    }
-
-    /* Judul mabar */
-    .card-title {
-        font-size: 24px;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-
-    /* Info Pembuat Mabar */
-    .d-flex {
-        display: flex;
-        align-items: center;
-        font-size: 18px;
-        color: #34495e;
-    }
-
-    .d-flex i {
-        color: #2980b9;
-    }
-
-    .d-flex strong {
-        margin-left: 8px;
-    }
-
-    /* Styling untuk setiap item informasi */
-    .card-body p {
-        font-size: 16px;
-        margin: 10px 0;
-        color: #34495e;
-    }
-
-    /* Styling untuk icon bi */
-    .card-body i {
-        color: #3498db;
-        margin-right: 10px;
-    }
-
-    /* Styling untuk tanggal dan jam */
-    .card-body p:first-child {
-        font-size: 18px;
-        font-weight: bold;
-        color: #2ecc71;
-    }
-
-    /* Styling untuk biaya */
-    .card-body p:nth-child(4) {
-        font-size: 16px;
-        font-weight: bold;
-        color: #e67e22;
-    }
-
-    /* Styling untuk kategori */
-    .card-body p:nth-child(5) {
-        font-size: 16px;
-        color: #8e44ad;
-    }
-
-    /* Styling untuk peserta */
-    .card-body p:nth-child(6) {
-        font-size: 16px;
-        font-weight: bold;
-        color: red;
-    }
-
-    /* Styling untuk garis pemisah (hr) */
-    hr {
-        border: 1px solid #000000;
-        margin: 10px 0;
-    }
-
-    /* Styling untuk tombol gabung */
-    .join-button {
         width: 100%;
-        background-color: #3498db;
-        color: white;
-        padding: 15px;
-        font-size: 18px;
-        text-align: center;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s ease;
     }
 
-    /* Hover effect pada tombol gabung */
-    .join-button:hover {
-        background-color: #2980b9;
+    .card-wrapper-right {
+        width: 100%;
     }
+}
 
-    /* Responsive style untuk layar kecil */
-    @media (max-width: 767px) {
-        .mabar-container {
-            padding: 0 5%;
-            flex-direction: column; /* Layout kolom pada perangkat kecil */
-        }
-
-        .mabar-details {
-            width: 100%; /* Full width untuk detail mabar */
-            margin-bottom: 20px;
-        }
-
-        .join-button {
-            width: 100%; /* Full width untuk tombol gabung */
-        }
-    }
 </style>
 
 <div class="container mt-4">
@@ -200,6 +164,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const link = document.getElementById('linkLihatPeserta');
+    const selectedMabar = sessionStorage.getItem('selectedMabar');
+    
+    if (!selectedMabar) {
+        link.style.pointerEvents = 'none'; // disable klik
+        link.textContent = 'Data Mabar tidak tersedia';
+        return;
+    }
+    
+    try {
+        const mabarObj = JSON.parse(selectedMabar);
+        const mabarId = mabarObj._id;
+
+        // Buat URL menuju route pemain_mabar dengan query param mabarId
+        const url = "{{ route('mabar.pemainFromRequest') }}" + "?mabarId=" + encodeURIComponent(mabarId);
+        
+        // Set href link
+        link.href = url;
+
+    } catch(e) {
+        console.error('Gagal parsing selectedMabar dari sessionStorage', e);
+        link.style.pointerEvents = 'none';
+        link.textContent = 'Data Mabar tidak valid';
+    }
+});
+
 
 function displayMabarDetail(mabar) {
     const container = document.getElementById('mabar-detail-container');
@@ -233,76 +224,77 @@ function displayMabarDetail(mabar) {
         jamSelesai = (jamList[jamList.length - 1] + 1) + ":00";
     }
 
-    let tombolGabungHTML = `
-<form method="POST" action="/mabar/join">
-    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="mabar_id" value="${mabar._id}">
-    <button type="submit" class="join-button">Gabung Mabar</button>
-</form>`;
+    // Periksa apakah mabar sudah selesai (history)
+    const currentTime = new Date();
+    const mabarEndTime = new Date(`${jadwal[jadwal.length - 1]?.tanggal}T${String(jamSelesai).padStart(2, '0')}:00`);
+    const isMabarEnded = currentTime > mabarEndTime;
 
-// Cek apakah user sudah join
-if (mabar.user_yang_join?.some(u => String(u._id) === String(currentUserId))) {
-    tombolGabungHTML = `
-    <form method="POST" action="{{ route('mabar.keluar') }}">
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="mabar_id" value="${mabar._id}">
-        <button type="submit" class="join-button" style="background-color: #e74c3c;">Keluar Mabar</button>
-    </form>`;
+    let tombolGabungHTML = ``;
+
+    const userJoined = mabar.user_yang_join || [];
+    const isUserJoined = userJoined.some(u => String(u._id) === String(currentUserId));
+
+   if (isMabarEnded) {
+    // Mabar sudah selesai → tombol Penilaian
+    tombolGabungHTML = `<a href="/penilaian/${mabar._id}" class="join-button">Penilaian</a>`;
+} else {
+    if (isUserJoined) {
+        // Mabar belum selesai tapi user sudah join → tombol Keluar
+        tombolGabungHTML = `
+        <form method="POST" action="/mabar/keluar">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="mabar_id" value="${mabar._id}">
+            <button type="submit" class="join-button" style="background-color: #e74c3c;">Keluar Mabar</button>
+        </form>`;
+    } else {
+        // Mabar belum selesai dan user belum join → tombol Gabung
+        tombolGabungHTML = `
+        <form method="POST" action="/mabar/join">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="mabar_id" value="${mabar._id}">
+            <button type="submit" class="join-button">Gabung Mabar</button>
+        </form>`;
+    }
 }
-
 
     // HTML untuk menampilkan detail mabar
     const mabarHTML = `
-<div class="container mt-4">
-    <div class="mabar-container" style="display: flex; flex-direction: column;">
-        <!-- Judul dan HR di atas -->
-        <div style="display: flex; justify-content: space-between;">
-            <h5 class="card-title">${mabar.nama_mabar}</h5>
-        </div>
-        <hr style="margin: 0.5rem 0; width: 100%; border-top: 1px solid #dee2e6;">
-        <div style="margin: 20px; font-size:20px;">
-        <Strong style="font-size: 30px;">GOR Ramos Badminton</Strong><br>
-       Jl. Sitoluama 2, Sigumpar, Laguboti<br>
-        <p style="color: red;">Peserta: ${mabar.totalJoined}/${mabar.slot_peserta}</p>
-        </div>
-        <!-- Isi konten: kiri dan kanan -->
-        
-        <div style="display: flex; gap: 20px;">
-            <!-- Kolom kiri (80%) -->
-            <div style="width: 80%;">
-                <div class="card mb-3">
-                    <div class="card-body" style="margin: 25px;">
+    <div class="container mt-4">
+        <div class="mabar-container">
+            <!-- Kolom kiri (detail mabar) -->
+            <div class="mabar-details">
+                <h4 class="card-title">${mabar.nama_mabar}</h4>
+                <hr>
+                <p><strong>GOR Ramos Badminton</strong><br>Jl. Sitoluama 2, Sigumpar, Laguboti</p>
+                <p style="color: red;">Peserta: ${mabar.totalJoined}/${mabar.slot_peserta}</p>
+                <a href="#" id="linkLihatPeserta">Lihat Peserta</a>
+                <div class="card">
+                    <h5>Lapangan dan Waktu</h5>
+                    <p>${mabar.jadwal && mabar.jadwal[0]?.lapangan?.name ? mabar.jadwal[0].lapangan.name : '-'} * ${jamMulai} - ${jamSelesai}</p>
+                    <p><i class="bi bi-cash-coin"></i> Rp ${mabar.biaya}/orang</p>
+                    <p><i class="bi bi-people"></i> ${mabar.kategori}</p>
+                    <p><strong>Range Umur:</strong> ${mabar.range_umur || 'Tidak Diketahui'}</p>
+                    <p><strong>Level:</strong> ${mabar.level || 'Tidak Diketahui'}</p>
+                    <hr>
+                    <p>${mabar.deskripsi || 'Deskripsi mabar tidak tersedia'}</p>
+                </div>
+                
+            </div>
 
-                        <p><i class="bi bi-calendar-event"></i> ${tanggalFormatted} * ${jamMulai} - ${jamSelesai}</p>
-                        <p>Lapangan ${jadwal[0]?.lapangan || '-'}</p>
-                        <p><i class="bi bi-cash-coin"></i> Rp ${mabar.biaya}/orang</p>
-                        <p><i class="bi bi-people"></i> ${mabar.kategori}</p>
-                        
-                    </div>
+            <!-- Kolom kanan (Penyelenggara dan tombol) -->
+            <div class="penyelenggara">
+                <div class="penyelenggara-info card">
+                    <h5> <i class="bi bi-person-circle fs-5 me-2"></i>${mabar.user_pembuat_mabar.name}</h5>
+                    <p>Penyelenggara</p>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    ${tombolGabungHTML} <!-- Tombol Gabung atau Penilaian -->
                 </div>
             </div>
-                <!-- Kolom kanan (20%) -->
-                <div style="width: 20%; display: flex;">
-                    ${tombolGabungHTML}
-            </div>
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
-@endif
-
         </div>
     </div>
-</div>`;
+    `;
 
-    
-    // Masukkan HTML ke container
     container.innerHTML = mabarHTML;
 }
 

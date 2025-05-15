@@ -34,7 +34,11 @@ const userSchema = new Schema({
         type : String,
         enum : ["admin", "pelanggan"],
         default : "pelanggan"
-    }   
+    },
+    foto : {
+        type : String,
+        default : null
+    }
 });
 
 

@@ -8,7 +8,11 @@ import {    CekJoin,
             HapusMabar, 
             JoinMabar, 
             KeluarMabar, 
-            SelectJadwalMabar } 
+            SelectJadwalMabar,
+            getUpcomingMabar,
+            HistoryMabar,
+        GetPemainByMabarId,
+    } 
         from "../controllers/MabarController.js"
 
 
@@ -22,9 +26,17 @@ router.post('/keluar', KeluarMabar)
 
 router.delete('/hapus/:mabarId', HapusMabar)
 
+router.get('/sebelum', getUpcomingMabar)
+
+router.get('/Userbymabar/:mabarId', GetPemainByMabarId)
+
 router.get('/', getAllMabar)
 
+
+
 router.post('/cek-join', CekJoin)
+
+router.get('/history/:user_id', protectedMiddleware, HistoryMabar);
 
 router.post('/mabar-own', GetMabarOwn)
 

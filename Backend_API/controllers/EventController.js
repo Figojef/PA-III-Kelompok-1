@@ -3,52 +3,70 @@ import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
 import Event from "../models/eventModel.js";
 
-// Controller untuk create event
-export const CreateEvent = asyncHandler(async (req, res) => {
-  let imageUrl = null;
-
-  // Pastikan file ada yang di-upload
-  if (req.file) {
+export const createEvent = asyncHandler(async (req, res) => {
     try {
-      // Gunakan Promise untuk memastikan gambar di-upload sebelum lanjut ke penyimpanan event
-      imageUrl = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "event_images", // Folder di Cloudinary
-            allowed_formats: ["jpg", "png"], // Format gambar yang diizinkan
-          },
-          function (err, result) {
+        // Pastikan gambar dikirim
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Gambar tidak ditemukan dalam request"
+            });
+        }
+
+        // Upload gambar ke Cloudinary
+        const stream = cloudinary.uploader.upload_stream({
+            folder: 'uploads', // Folder di Cloudinary
+            allowed_formats: ['jpg', 'png'],
+        }, async (err, result) => {
             if (err) {
-              console.log("Cloudinary error:", err);
-              reject(err); // Reject jika ada error dalam upload
-            } else {
-              console.log("Cloudinary result:", result);
-              resolve(result.secure_url); // Resolve dengan URL jika berhasil
+                return res.status(500).json({
+                    message: "Gagal upload gambar",
+                    error: err
+                });
             }
-          }
-        );
 
-        // Kirim buffer gambar ke Cloudinary
+            // Ambil data dari body dan gambar URL dari Cloudinary
+            const { judul, deskripsi, tanggal_mulai, tanggal_selesai } = req.body;
+            const gambar = result.secure_url; // Ambil URL gambar
+
+            // Simpan event baru ke database
+            const newEvent = new Event({
+                judul,
+                deskripsi,
+                tanggal_mulai,
+                tanggal_selesai,
+                gambar // Simpan URL gambar
+            });
+
+            // Simpan ke database
+            const savedEvent = await newEvent.save();
+
+            return res.status(201).json({
+                message: "Event berhasil dibuat",
+                event: savedEvent
+            });
+        });
+
+        // Pipe gambar ke Cloudinary
         streamifier.createReadStream(req.file.buffer).pipe(stream);
-      });
+
     } catch (err) {
-      console.error("Gagal upload gambar:", err);
-      return res.status(500).json({
-        message: "Gagal upload gambar",
-        error: err,
-      });
+        console.log(err);
+        res.status(500).json({
+            message: "Terjadi kesalahan server",
+            error: err.message
+        });
     }
-  }
-
-  // Membuat event baru dengan data yang diterima dari body request
-  const newEvent = await Event.create({
-    ...req.body, // Deskripsi, tanggal dari body request
-    gambar: imageUrl, // Simpan URL gambar yang sudah di-upload
-  });
-
-  // Mengirim respons jika event berhasil dibuat
-  res.status(201).json({
-    message: "Berhasil tambah event",
-    data: newEvent,
-  });
 });
+
+
+
+
+export const getAllEvents = async (req, res) => {
+    try {
+        const events = await Event.find(); // Ambil semua event
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Gagal mengambil data event:', error);
+        res.status(500).json({ message: 'Terjadi kesalahan saat mengambil data event' });
+    }
+};

@@ -1,7 +1,9 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken"
 import asyncHandler from "../middleware/asyncHandler.js";
-
+import validator from "validator";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from 'streamifier';
 
 const signToken = id => {
     return jwt.sign({id}, process.env.JWT_SECRET, 
@@ -91,6 +93,76 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     // Kirim token dan response
     createSendResToken(createUser, 201, res);
+});
+
+// Update Profile
+export const updateProfile = asyncHandler(async (req, res) => {
+    const { user_id, name, email, nomor_telepon, url } = req.body;
+
+    // Validasi ID user
+    if (!user_id) {
+        return res.status(400).json({ message: "ID user harus disertakan" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(user_id)) {
+        return res.status(400).json({ message: "ID user tidak valid" });
+    }
+
+    const user = await User.findById(user_id);
+    if (!user) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+    }
+
+    // Validasi email
+    if (email && !validator.isEmail(email)) {
+        return res.status(400).json({ message: "Email tidak valid. Contoh: abc@gmail.com" });
+    }
+
+    // Validasi nomor telepon
+    if (nomor_telepon) {
+        const existingPhone = await User.findOne({ nomor_telepon });
+        if (existingPhone && existingPhone._id.toString() !== user_id) {
+            return res.status(400).json({ message: "Nomor telepon sudah digunakan oleh user lain." });
+        }
+        user.nomor_telepon = nomor_telepon;
+    }
+
+    // Validasi dan update nama
+    if (name) {
+        const existingName = await User.findOne({ name });
+        if (existingName && existingName._id.toString() !== user_id) {
+            return res.status(400).json({ message: "Nama sudah digunakan oleh user lain." });
+        }
+        user.name = name;
+    }
+
+    if (email) {
+        user.email = email;
+    }
+
+    // Validasi dan update foto jika ada
+    if (url) {
+        const imageRegex = /\.(jpg|jpeg|png)$/i;
+        if (!imageRegex.test(url)) {
+            return res.status(400).json({
+                message: 'File harus berupa gambar dengan ekstensi .jpg, .jpeg, atau .png'
+            });
+        }
+        user.foto = url;
+    }
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+        message: "Profil berhasil diperbarui",
+        data: {
+            id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            nomor_telepon: updatedUser.nomor_telepon,
+            foto: updatedUser.foto || null,
+        },
+    });
 });
 
 export const loginUser = asyncHandler(async(req, res) => {
