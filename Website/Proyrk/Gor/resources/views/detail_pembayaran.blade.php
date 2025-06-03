@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Jadwal Bermain</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
@@ -118,7 +118,7 @@
                 <label class="informasi1">Nomor Rekening</label><br>
                 <label class="informasi2" id="rekening">7172 7838 7489234</label> 
                 <!-- Salin icon (path updated to public/icons) -->
-                <img src="{{ asset('icons/icon_Copy.png') }}" alt="Icon" width="20" height="20" id="copyButton" style="cursor: pointer;" onclick="copyToClipboard()"> <br>
+                <img src="{{ asset('images/icon_Copy.png') }}" alt="Icon" width="20" height="20" id="copyButton" style="cursor: pointer;" onclick="copyToClipboard()"> <br>
 
                 <label class="informasi1">Atas Nama</label><br>
                 <label class="informasi2">Yakop Simatupang</label><br>
@@ -134,7 +134,7 @@
                     <label class="informasi1">Bukti Pembayaran</label><br>  
                     <div class="upload-container">
     <label for="upload-input" class="upload-btn">
-        <img src="{{ asset('icons/icon_upload.png') }}" alt="Upload Icon"
+        <img src="{{ asset('images/icon_upload.png') }}" alt="Upload Icon"
              style="width: 20px; vertical-align: middle; margin-right: 8px;">
         Upload
     </label>
@@ -150,7 +150,7 @@
                 <div class="deadline">
                     <div class="deadline-content">
                         <!-- Deadline icon (path updated to public/icons) -->
-                        <img src="{{ asset('icons/icon_Jam.png') }}" alt="Icon" width="30" height="30" class="icon-deadline">
+                        <img src="{{ asset('images/icon_Jam.png') }}" alt="Icon" width="30" height="30" class="icon-deadline">
                         <p>Batas Akhir Pembayaran <br>
                         <strong id="countdown"></strong></p>
                     </div>
@@ -195,14 +195,14 @@
             const rekening = document.getElementById("rekening").innerText;
             const copyButton = document.getElementById("copyButton");
             
-            // Change the icon to 'copied' icon
-            copyButton.src = "{{ asset('icons/icon_Copydone.png') }}"; 
+            // Change the icon to 'copied' iconE
+            copyButton.src = "{{ asset('images/icon_Copydone.png') }}"; 
 
             // Attempt to copy the text to the clipboard
             navigator.clipboard.writeText(rekening).then(() => {
                 // Revert the icon after 2 seconds
                 setTimeout(() => {
-                    copyButton.src = "{{ asset('icons/icon_Copy.png') }}"; // Reset to original icon
+                    copyButton.src = "{{ asset('images/icon_Copy.png') }}"; // Reset to original icon
                 }, 2000);
             }).catch(err => {
             });
@@ -222,36 +222,125 @@ document.getElementById('upload-input').addEventListener('change', function(even
     reader.readAsDataURL(selectedFile);
 });
 
+// async function uploadImage() {
+//   if (!selectedFile) {
+//     Swal.fire({
+//       icon: 'warning',
+//       title: 'Oops...',
+//       text: 'Silakan pilih gambar terlebih dahulu.',
+//     });
+//     return;
+//   }
+
+//   const formData = new FormData();
+//   formData.append('image', selectedFile);
+
+//   try {
+//     const transactionId = '{{ session('transaction_id') }}';
+//     const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+
+//     // Tampilkan loading saat proses upload berlangsung
+//     Swal.fire({
+//       title: 'Sedang mengupload...',
+//       allowOutsideClick: false,
+//       didOpen: () => {
+//         Swal.showLoading();
+//       }
+//     });
+
+//     const response = await fetch(`${baseUrl}/transaksi/${transactionId}/bukti-pembayaran`, {
+//       method: 'POST',
+//       body: formData
+//     });
+
+//     const result = await response.json();
+
+//     Swal.close(); // Tutup loading
+
+//     if (response.ok) {
+//       Swal.fire({
+//         icon: 'success',
+//         title: 'Upload berhasil!',
+//         text: result.message || 'Gambar berhasil diupload.',
+//       });
+//     } else {
+//       Swal.fire({
+//         icon: 'error',
+//         title: 'Upload gagal',
+//         text: result.message || 'Terjadi kesalahan saat upload.',
+//       });
+//     }
+//   } catch (err) {
+//     Swal.close();
+//     console.error('Error:', err);
+//     Swal.fire({
+//       icon: 'error',
+//       title: 'Kesalahan',
+//       text: 'Terjadi kesalahan saat upload.',
+//     });
+//   }
+// }
 async function uploadImage() {
-    if (!selectedFile) {
-        alert('Silakan pilih gambar terlebih dahulu.');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-
- try {
-  const transactionId = '{{ session('transaction_id') }}';
-  const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
-  
-  const response = await fetch(`${baseUrl}/transaksi/${transactionId}/bukti-pembayaran`, {
-    method: 'POST',
-    body: formData
-  });
-
-  const result = await response.json();
-  console.log(result);
-
-  if (response.ok) {
-    alert('Upload berhasil!');
-  } else {
-    alert('Upload gagal: ' + result.message);
+  if (!selectedFile) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Oops...',
+      text: 'Silakan pilih gambar terlebih dahulu.',
+    });
+    return;
   }
-} catch (err) {
-  console.error('Error:', err);
-  alert('Terjadi kesalahan saat upload');
+
+  const formData = new FormData();
+  formData.append('image', selectedFile);
+
+  try {
+    const transactionId = '{{ session('transaction_id') }}';
+    const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
+
+    // Tampilkan loading saat proses upload berlangsung
+    Swal.fire({
+      title: 'Sedang mengupload...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const response = await fetch(`${baseUrl}/transaksi/${transactionId}/bukti-pembayaran`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    Swal.close(); // Tutup loading
+
+    if (response.ok) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Upload berhasil!',
+        text: result.message || 'Gambar berhasil diupload.',
+      }).then(() => {
+        // Arahkan ke halaman profil setelah upload sukses
+        window.location.href = '{{ route('profil') }}';  // Laravel route helper
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Upload gagal',
+        text: result.message || 'Terjadi kesalahan saat upload.',
+      });
+    }
+  } catch (err) {
+    Swal.close();
+    console.error('Error:', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Kesalahan',
+      text: 'Terjadi kesalahan saat upload.',
+    });
+  }
 }
-}
+
     </script>
 @endsection

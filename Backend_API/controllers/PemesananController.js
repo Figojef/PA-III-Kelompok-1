@@ -272,7 +272,10 @@ export const pesananBelumLewatDeadline = asyncHandler(async (req, res) => {
 
     for (const pemesanan of pemesananList) {
         // Ambil transaksi berdasarkan ID pemesanan
-        const transaksi = await Transaksi.findOne({ pemesanan_id: pemesanan._id });
+        const transaksi = await Transaksi.findOne({
+            pemesanan_id: pemesanan._id,
+            status_pembayaran: "menunggu" // tambahkan filter status di query
+        });
 
         if (!transaksi || !transaksi.deadline_pembayaran) {
             continue; // skip jika tidak ada transaksi atau deadline

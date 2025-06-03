@@ -131,7 +131,10 @@
     }
 }
 
+.menunggu {
+    text-decoration: none;
 
+}
 
 </style>
 <div class="container mt-4">
@@ -274,7 +277,7 @@
 
                             {{-- Menunggu - pojok kanan bawah --}}
                             <div class="position-absolute bottom-0 end-0 m-2">
-                                <span class="badge rounded bg-warning text-dark px-4 py-2">Menunggu</span>
+                                <a class="menunggu badge rounded bg-warning text-dark px-4 py-2" href="#" >Menunggu</a>
                             </div>
                         </div>
                     </div>
@@ -321,7 +324,7 @@
         </div>
     </div>
 </div>
-<div style="margin-bottom: 10%; "></div>
+<div style="margin-bottom: 15%; "></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 @endsection

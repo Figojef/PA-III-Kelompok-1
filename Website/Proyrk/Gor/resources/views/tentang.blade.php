@@ -12,7 +12,7 @@
             <div class="container">
                 <div class="row align-items-center mb-5">
                     <div class="col-md-3 col-12 text-center text-md-start">
-                        <img src="assets/picture1.jpeg" alt="Ramos Badminton Center"
+                        <img src="{{ asset('images/lapangan1.jpg') }}" alt="Ramos Badminton Center"
                             class="img-fluid rounded shadow w-100">
                     </div>
                     <div class="col-md-9 col-12 mt-3 mt-md-0">
@@ -58,7 +58,7 @@
                         </p>
                     </div>
                     <div class="col-md-3 col-12 text-center text-md-end order-1 order-md-2">
-                        <img src="assets/picture2.jpg" alt="Lapangan Badminton" class="img-fluid rounded shadow w-100">
+                        <img src="{{ asset('images/lapangan1.jpg') }}" alt="Lapangan Badminton" class="img-fluid rounded shadow w-100">
                     </div>
                 </div>
             </div>
@@ -69,16 +69,16 @@
                 <hr class="mx-auto" style="width: 100px; height: 3px; background-color: black;">
                 <div class="row mt-4">
                     <div class="col-md-4">
-                        <img src="assets/galeri1.png" alt="GOR Ramos" class="img-fluid rounded shadow">
+                        <img src="{{ asset('images/lapangan1.jpg') }}" alt="Ramos Badminton Center" class="img-fluid rounded shadow">
                     </div>
                     <div class="col-md-4">
-                        <img src="assets/galeri2.png" alt="Lapangan Bulu Tangkis" class="img-fluid rounded shadow">
+                        <img src="{{ asset('images/lapangan2.jpg') }}" alt="Ramos Badminton Center" class="img-fluid rounded shadow">
                     </div>
                     <div class="col-md-4">
-                        <img src="assets/galeri3.png" alt="Latihan di Lapangan" class="img-fluid rounded shadow">
+                        <img src="{{ asset('images/lapangan3.jpg') }}" alt="Ramos Badminton Center" class="img-fluid rounded shadow">
                     </div>
                 </div>
-                <div class="row mt-3">
+                <!-- <div class="row mt-3">
                     <div class="col-md-4 d-flex justify-content-center">
                         <img src="assets/galeri4.jpeg" alt="Jadwal Booking" class="img-fluid rounded shadow"
                             style="width: 100%; height: 257px; object-fit: cover;">
@@ -91,7 +91,7 @@
                         <img src="assets/galeri6.jpeg" alt="Papan Jadwal" class="img-fluid rounded shadow"
                             style="width: 100%; height: 257px; object-fit: cover;">
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
