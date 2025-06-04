@@ -104,7 +104,7 @@ public function showProfil()
     if ($response->successful()) {
         $data = $response->json()['data'];
 
-        return view('profil', compact('data')); // ✅ Gunakan ini
+        return view('profil', compact('data')); 
     } else {
         return back()->withErrors('Gagal mengambil data pemesanan.');
     }

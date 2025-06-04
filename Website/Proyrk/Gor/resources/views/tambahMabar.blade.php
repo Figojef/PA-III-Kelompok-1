@@ -448,7 +448,7 @@
                     });
 
 
-                    document.getElementById("kixak").addEventListener("submit", function(event) {
+                    document.getElementById("mabarForm").addEventListener("submit", function(event) {
                         event.preventDefault(); // ⬅️ Hentikan submit otomatis dulu
 
                         const selectedJadwal = JSON.parse(sessionStorage.getItem("selectedJadwal") || "[]");

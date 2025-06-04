@@ -1,6 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
+
+<style>
+.booksekarang {
+    padding: 15px 25px;
+    border: 1px solid #fff;
+    border-radius: 40px;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+}
+.booksekarang:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #111;
+    border-color: rgba(255, 255, 255, 1);
+    transition:  0.5s ease;
+}
+
+</style>
+
 <!-- Carousel -->
 <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
@@ -20,7 +39,10 @@
         <!-- Siapkan Tenaga di atas -->
         <h2 class="text-center text-white fw-bold mb-1">Siapkan Tenaga,</h2> <!-- Mengurangi margin bawah -->
         <h2 class="text-center text-white fs-bold mb-1">Saatnya Smash Terbaikmu!</h2> <!-- Mengurangi margin bawah -->
-        <p class="text-center text-white fs-5">Lapangan Berkualitas Siap untuk Aksimu - Jangan Lewatkan Momen Ini!</p>
+        <p class="text-center text-white fs-5" style=" white-space: nowrap;">Lapangan Berkualitas Siap untuk Aksimu - Jangan Lewatkan Momen Ini!</p>
+        <a href="{{ route('reservasi') }}" class="booksekarang">
+    Booking Sekarang <i class="bi bi-arrow-right"></i>
+</a>
     </div>
 
 

@@ -232,92 +232,182 @@
                             <button type="button" class="btn btn-update-profile">Ubah Profil</button>
                         </form>
                     </div>
-<div class="tab-pane fade" id="v-pills-sedang-berlangsung" role="tabpanel" aria-labelledby="v-pills-sedang-berlangsung-tab">
-    @if(!empty($data) && count($data) > 0)
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-            @foreach($data as $index => $item)
-                @php
-                    $pemesanan = $item['pemesanan'];
-                    $transaksi = $item['transaksi'];
-                    $statusPemesanan = strtolower($pemesanan['status_pemesanan']);
-                    $statusPembayaran = strtolower($transaksi['status_pembayaran']);
-                    $deadline = $transaksi['deadline_pembayaran'] ?? null;
 
-                    $shouldShow = $statusPemesanan === 'sedang dipesan' && $statusPembayaran === 'menunggu';
+                <!-- Sedang berlangsung Tab -->    
+                <div class="tab-pane fade" id="v-pills-sedang-berlangsung" role="tabpanel" aria-labelledby="v-pills-sedang-berlangsung-tab">
+                    @if(!empty($data) && count($data) > 0)
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            @foreach($data as $index => $item)
+                                @php
+                                    $pemesanan = $item['pemesanan'];
+                                    $transaksi = $item['transaksi'];
+                                    $statusPemesanan = strtolower($pemesanan['status_pemesanan']);
+                                    $statusPembayaran = strtolower($transaksi['status_pembayaran']);
+                                    $deadline = $transaksi['deadline_pembayaran'] ?? null;
 
-                    $jadwalList = collect($pemesanan['jadwal_dipesan'])->sortBy('jam');
-                    $jamList = $jadwalList->pluck('jam')->map(fn($j) => (int) $j)->values();
-                    $jamMulai = $jamList->min();
-                    $jamSelesai = $jamList->max() + 1;
-                    $tanggal = $jadwalList->first()['tanggal'];
-                    $lapangan = $jadwalList->first()['lapangan']['name'] ?? '-';
-                    $metode = strtoupper(str_replace('_', ' ', $transaksi['metode_pembayaran']));
-                @endphp
+                                    $shouldShow = $statusPemesanan === 'sedang dipesan' && $statusPembayaran === 'menunggu';
 
-                @if($shouldShow)
-                    <div class="col">
-                        <div class="card shadow-sm p-4 position-relative" style="min-height: 250px; transition: transform 0.3s ease;">
-                            {{-- Countdown - pojok kanan atas --}}
-                            @if($deadline)
-                                <div class="position-absolute top-0 end-0 m-2">
-                                    <span class="badge bg-danger text-white" id="countdown-{{ $index }}">--:--</span>
-                                </div>
-                            @endif
+                                    $jadwalList = collect($pemesanan['jadwal_dipesan'])->sortBy('jam');
+                                    $jamList = $jadwalList->pluck('jam')->map(fn($j) => (int) $j)->values();
+                                    $jamMulai = $jamList->min();
+                                    $jamSelesai = $jamList->max() + 1;
+                                    $tanggal = $jadwalList->first()['tanggal'];
+                                    $lapangan = $jadwalList->first()['lapangan']['name'] ?? '-';
+                                    $metode = strtoupper(str_replace('_', ' ', $transaksi['metode_pembayaran']));
+                                @endphp
 
-                            {{-- Konten utama --}}
-                            <div class="mt-2 mb-3">
-                                <strong>{{ $lapangan }}</strong><br>
-                                {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d M Y') }}<br>
-                                {{ str_pad($jamMulai, 2, '0', STR_PAD_LEFT) }}:00 - {{ str_pad($jamSelesai, 2, '0', STR_PAD_LEFT) }}:00
-                                <div class="mt-3">
-                                    <p class="mb-1">Jumlah Pesanan: {{ count($pemesanan['jadwal_dipesan']) }}</p>
-                                    <p class="mb-0">Metode Pembayaran: {{ $metode }}</p>
-                                </div>
-                            </div>
+                                @if($shouldShow)
+                                    <div class="col">
+                                        <a href="#" class="text-decoration-none">
+                                            <div class="card shadow-sm p-4 position-relative" style="min-height: 250px; transition: transform 0.3s ease;">
+                                                {{-- Countdown - pojok kanan atas --}}
+                                                @if($deadline)
+                                                    <div class="position-absolute top-0 end-0 m-2">
+                                                        <span class="badge bg-danger text-white" id="countdown-{{ $index }}">--:--</span>
+                                                    </div>
+                                                @endif
 
-                            {{-- Menunggu - pojok kanan bawah --}}
-                            <div class="position-absolute bottom-0 end-0 m-2">
-                                <a class="menunggu badge rounded bg-warning text-dark px-4 py-2" href="#" >Menunggu</a>
-                            </div>
+                                                {{-- Konten utama --}}
+                                                <div class="mt-2 mb-3">
+                                                    <strong>{{ $lapangan }}</strong><br>
+                                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d M Y') }}<br>
+                                                    {{ str_pad($jamMulai, 2, '0', STR_PAD_LEFT) }}:00 - {{ str_pad($jamSelesai, 2, '0', STR_PAD_LEFT) }}:00
+                                                    <div class="mt-3">
+                                                        <p class="mb-1">Jumlah Pesanan: {{ count($pemesanan['jadwal_dipesan']) }}</p>
+                                                        <p class="mb-0">Metode Pembayaran: {{ $metode }}</p>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Menunggu - pojok kanan bawah --}}
+                                                <div class="position-absolute bottom-0 end-0 m-2">
+                                                    <span class="badge rounded bg-warning text-dark px-4 py-2">Menunggu</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {{-- JS Countdown --}}
+                                    @if($deadline)
+                                        <script>
+                                            (() => {
+                                                const countdownEl = document.getElementById("countdown-{{ $index }}");
+                                                const deadline = new Date("{{ \Carbon\Carbon::parse($deadline)->toIso8601String() }}").getTime();
+
+                                                function updateCountdown() {
+                                                    const now = new Date().getTime();
+                                                    let timeLeft = Math.floor((deadline - now) / 1000);
+
+                                                    if (timeLeft <= 0) {
+                                                        countdownEl.innerText = "00:00";
+                                                        return;
+                                                    }
+
+                                                    const minutes = Math.floor(timeLeft / 60);
+                                                    const seconds = timeLeft % 60;
+                                                    countdownEl.innerText =
+                                                        ('0' + minutes).slice(-2) + ":" + ('0' + seconds).slice(-2);
+
+                                                    requestAnimationFrame(updateCountdown);
+                                                }
+
+                                                updateCountdown();
+                                            })();
+                                        </script>
+                                    @endif
+                                @endif
+                            @endforeach
                         </div>
-                    </div>
-
-                    {{-- JS Countdown --}}
-                    @if($deadline)
-                        <script>
-                            (() => {
-                                const countdownEl = document.getElementById("countdown-{{ $index }}");
-                                const deadline = new Date("{{ \Carbon\Carbon::parse($deadline)->toIso8601String() }}").getTime();
-
-                                function updateCountdown() {
-                                    const now = new Date().getTime();
-                                    let timeLeft = Math.floor((deadline - now) / 1000);
-
-                                    if (timeLeft <= 0) {
-                                        countdownEl.innerText = "00:00";
-                                        return;
-                                    }
-
-                                    const minutes = Math.floor(timeLeft / 60);
-                                    const seconds = timeLeft % 60;
-                                    countdownEl.innerText =
-                                        ('0' + minutes).slice(-2) + ":" + ('0' + seconds).slice(-2);
-
-                                    requestAnimationFrame(updateCountdown);
-                                }
-
-                                updateCountdown();
-                            })();
-                        </script>
+                    @else
+                        <p>Tidak ada booking yang sedang berlangsung.</p>
                     @endif
-                @endif
-            @endforeach
-        </div>
-    @else
-        <p>Tidak ada booking yang sedang berlangsung.</p>
-    @endif
-</div>
+                </div>
 
+                <!-- Riwayat Selesai Tab -->    
+                <div class="tab-pane fade" id="v-pills-riwayat" role="tabpanel" aria-labelledby="v-pills-riwayat-tab">
+                    @if(!empty($data) && count($data) > 0)
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            @foreach($data as $index => $item)
+                                @php
+                                    $pemesanan = $item['pemesanan'];
+                                    $transaksi = $item['transaksi'];
+                                    $statusPemesanan = strtolower($pemesanan['status_pemesanan']);
+                                    $statusPembayaran = strtolower($transaksi['status_pembayaran']);
+                                    $deadline = $transaksi['deadline_pembayaran'] ?? null;
+
+                                    $shouldShow = $statusPemesanan === 'sedang dipesan' && $statusPembayaran === 'menunggu';
+
+                                    $jadwalList = collect($pemesanan['jadwal_dipesan'])->sortBy('jam');
+                                    $jamList = $jadwalList->pluck('jam')->map(fn($j) => (int) $j)->values();
+                                    $jamMulai = $jamList->min();
+                                    $jamSelesai = $jamList->max() + 1;
+                                    $tanggal = $jadwalList->first()['tanggal'];
+                                    $lapangan = $jadwalList->first()['lapangan']['name'] ?? '-';
+                                    $metode = strtoupper(str_replace('_', ' ', $transaksi['metode_pembayaran']));
+                                @endphp
+
+                                @if($shouldShow)
+                                    <div class="col">
+                                        <a href="#" class="text-decoration-none">
+                                            <div class="card shadow-sm p-4 position-relative" style="min-height: 250px; transition: transform 0.3s ease;">
+                                                {{-- Countdown - pojok kanan atas --}}
+                                                @if($deadline)
+                                                    <div class="position-absolute top-0 end-0 m-2">
+                                                        <span class="badge bg-danger text-white" id="countdown-{{ $index }}">--:--</span>
+                                                    </div>
+                                                @endif
+
+                                                {{-- Konten utama --}}
+                                                <div class="mt-2 mb-3">
+                                                    <strong>{{ $lapangan }}</strong><br>
+                                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d M Y') }}<br>
+                                                    {{ str_pad($jamMulai, 2, '0', STR_PAD_LEFT) }}:00 - {{ str_pad($jamSelesai, 2, '0', STR_PAD_LEFT) }}:00
+                                                    <div class="mt-3">
+                                                        <p class="mb-1">Jumlah Pesanan: {{ count($pemesanan['jadwal_dipesan']) }}</p>
+                                                        <p class="mb-0">Metode Pembayaran: {{ $metode }}</p>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Menunggu - pojok kanan bawah --}}
+                                                <div class="position-absolute bottom-0 end-0 m-2">
+                                                    <span class="badge rounded bg-warning text-dark px-4 py-2">Menunggu</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {{-- JS Countdown --}}
+                                    @if($deadline)
+                                        <script>
+                                            (() => {
+                                                const countdownEl = document.getElementById("countdown-{{ $index }}");
+                                                const deadline = new Date("{{ \Carbon\Carbon::parse($deadline)->toIso8601String() }}").getTime();
+
+                                                function updateCountdown() {
+                                                    const now = new Date().getTime();
+                                                    let timeLeft = Math.floor((deadline - now) / 1000);
+
+                                                    if (timeLeft <= 0) {
+                                                        countdownEl.innerText = "00:00";
+                                                        return;
+                                                    }
+
+                                                    const minutes = Math.floor(timeLeft / 60);
+                                                    const seconds = timeLeft % 60;
+                                                    countdownEl.innerText =
+                                                        ('0' + minutes).slice(-2) + ":" + ('0' + seconds).slice(-2);
+
+                                                    requestAnimationFrame(updateCountdown);
+                                                }
+
+                                                updateCountdown();
+                                            })();
+                                        </script>
+                                    @endif
+                                @endif
+                            @endforeach
+                        </div>
+                    @else
+                        <p>Tidak ada booking yang sedang berlangsung.</p>
+                    @endif
+                </div>
 
                 </div>
             </div>

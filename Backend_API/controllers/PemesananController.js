@@ -253,7 +253,6 @@ export const getPemesananByUserId = asyncHandler(async (req, res) => {
     res.status(200).json(pemesananWithTransaksi);
 });
 
-
 // Pesanan belun lewat
 export const pesananBelumLewatDeadline = asyncHandler(async (req, res) => {
     const userId = req.user._id;
@@ -299,6 +298,54 @@ export const pesananBelumLewatDeadline = asyncHandler(async (req, res) => {
     });
 });
 
+export const riwayatPemesanan = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const now = new Date();
+
+    const pemesananList = await Pemesanan.find({ user_id: userId }).populate({
+        path: "jadwal_dipesan",
+        populate: {
+            path: "lapangan",
+            select: "name"
+        }
+    });
+
+    const hasilRiwayat = [];
+
+    for (const pemesanan of pemesananList) {
+        const transaksi = await Transaksi.findOne({
+            pemesanan_id: pemesanan._id
+        });
+
+        if (!transaksi) continue;
+
+        // Tentukan status frontend
+        let statusFrontend = "";
+
+        if (transaksi.status_pembayaran === "berhasil") {
+            statusFrontend = "berhasil";
+        } else if (transaksi.status_pembayaran === "menunggu") {
+            const deadline = new Date(transaksi.deadline_pembayaran);
+            statusFrontend = (now > deadline) ? "dibatalkan" : "menunggu";
+        } else if (transaksi.status_pembayaran === "gagal") {
+            statusFrontend = "ditolak";
+        } else {
+            statusFrontend = "tidak_diketahui"; // fallback
+        }
+
+        hasilRiwayat.push({
+            pemesanan,
+            transaksi,
+            status: statusFrontend
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        jumlah: hasilRiwayat.length,
+        data: hasilRiwayat
+    });
+});
 
 
 
