@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<script>
+    const routeLihatPesertaTemplate = @json(route('mabar.pemainFromRequest') . '?mabarId=__ID__');
+</script>
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
 /* Styling untuk container utama */
@@ -166,8 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', function() {
     const link = document.getElementById('linkLihatPeserta');
-    const selectedMabar = sessionStorage.getItem('selectedMabar');
-    
+        if (!link) return; // elemen tidak ada jika mabar sudah selesai
+
+        const selectedMabar = sessionStorage.getItem('selectedMabar');
+
+            
     if (!selectedMabar) {
         link.style.pointerEvents = 'none'; // disable klik
         link.textContent = 'Data Mabar tidak tersedia';
@@ -229,33 +236,35 @@ function displayMabarDetail(mabar) {
     const mabarEndTime = new Date(`${jadwal[jadwal.length - 1]?.tanggal}T${String(jamSelesai).padStart(2, '0')}:00`);
     const isMabarEnded = currentTime > mabarEndTime;
 
-    let tombolGabungHTML = ``;
+        let tombolGabungHTML = ``;
 
-    const userJoined = mabar.user_yang_join || [];
-    const isUserJoined = userJoined.some(u => String(u._id) === String(currentUserId));
+        const userJoined = mabar.user_yang_join || [];
+        const isUserJoined = userJoined.some(u => String(u._id) === String(currentUserId));
 
-   if (isMabarEnded) {
-    // Mabar sudah selesai → tombol Penilaian
-    tombolGabungHTML = `<a href="/penilaian/${mabar._id}" class="join-button">Penilaian</a>`;
-} else {
-    if (isUserJoined) {
-        // Mabar belum selesai tapi user sudah join → tombol Keluar
-        tombolGabungHTML = `
-        <form method="POST" action="/mabar/keluar">
-            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="mabar_id" value="${mabar._id}">
-            <button type="submit" class="join-button" style="background-color: #e74c3c;">Keluar Mabar</button>
-        </form>`;
-    } else {
-        // Mabar belum selesai dan user belum join → tombol Gabung
-        tombolGabungHTML = `
-        <form method="POST" action="/mabar/join">
-            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="mabar_id" value="${mabar._id}">
-            <button type="submit" class="join-button">Gabung Mabar</button>
-        </form>`;
-    }
+       if (isMabarEnded) {
+    const lihatPesertaUrl = routeLihatPesertaTemplate.replace('__ID__', mabar._id) + '&mode=penilaian';
+    tombolGabungHTML = `<a href="${lihatPesertaUrl}" class="join-button">Penilaian</a>`;
 }
+ else {
+            if (isUserJoined) {
+                // User sudah join → tombol Keluar
+                tombolGabungHTML = `
+                <form method="POST" action="/mabar/keluar">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="mabar_id" value="${mabar._id}">
+                    <button type="submit" class="join-button" style="background-color: #e74c3c;">Keluar Mabar</button>
+                </form>`;
+            } else {
+                // Belum join → tombol Gabung
+                tombolGabungHTML = `
+                <form method="POST" action="/mabar/join">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="mabar_id" value="${mabar._id}">
+                    <button type="submit" class="join-button">Gabung Mabar</button>
+                </form>`;
+            }
+        }
+
 
     // HTML untuk menampilkan detail mabar
     const mabarHTML = `
@@ -267,7 +276,8 @@ function displayMabarDetail(mabar) {
                 <hr>
                 <p><strong>GOR Ramos Badminton</strong><br>Jl. Sitoluama 2, Sigumpar, Laguboti</p>
                 <p style="color: red;">Peserta: ${mabar.totalJoined}/${mabar.slot_peserta}</p>
-                <a href="#" id="linkLihatPeserta">Lihat Peserta</a>
+${!isMabarEnded ? `<a href="#" id="linkLihatPeserta">Lihat Peserta</a>` : ``}
+
                 <div class="card">
                     <h5>Lapangan dan Waktu</h5>
                     <p>${mabar.jadwal && mabar.jadwal[0]?.lapangan?.name ? mabar.jadwal[0].lapangan.name : '-'} * ${jamMulai} - ${jamSelesai}</p>

@@ -200,12 +200,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-document.getElementById('tab-riwayat-main-bareng').addEventListener('click', function () {
-  setActiveTab(this);
-  fetchRiwayatMabar(); // Panggil fungsi untuk menampilkan riwayat main bareng
-});
-
-
 function setActiveTab(clickedTab) {
   document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
   clickedTab.classList.add('active');
@@ -234,7 +228,8 @@ function fetchMabarList() {
 function fetchRiwayatMabar() {
   const baseUrl = document.getElementById('base-url').textContent.trim().replace(/\/+$/, '');
   const userId = jwtUserId;    // pastikan variabel ini sudah tersedia di scope
-  const jwtToken = jwtToken;   // pastikan token juga tersedia
+  // Tidak perlu deklarasikan ulang jwtToken, cukup gunakan yang sudah dideklarasikan di luar fungsi
+  // const jwtToken = jwtToken; // Hapus baris ini
 
   fetch(`${baseUrl}/mabar/history/${userId}`, {
     headers: {
@@ -254,6 +249,7 @@ function fetchRiwayatMabar() {
     document.getElementById("mabar-list").innerHTML = "<p>Terjadi kesalahan saat mengambil data.</p>";
   });
 }
+
 
 
 

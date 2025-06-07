@@ -308,7 +308,7 @@ export const HistoryMabar = asyncHandler(async (req, res) => {
     ];
 
     hasil.push({
-      id_mabar: mabar._id,
+      _id: mabar._id,
       user_pembuat_mabar: {
         id_user: mabar.user_pembuat_mabar._id,
         name: mabar.user_pembuat_mabar.name,

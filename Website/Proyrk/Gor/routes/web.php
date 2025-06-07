@@ -60,7 +60,7 @@ Route::get('/mabar/detail/{id}', function ($id) {
 })->name('mabar.detail');
 
 // mabar yang sudah lewat
-Route::get('/api/v1/mabar/history', [MabarController::class, 'getHistoryMabar']);
+Route::get('/api/v1/mabar/history/{userId}', [MabarController::class, 'getHistoryMabar']);
 
 // web.php
 Route::get('/mabar/pemain', [MabarController::class, 'showPemainFromRequest'])->name('mabar.pemainFromRequest');
@@ -77,6 +77,8 @@ Route::get('/mabar/pemain/{mabarId}', [MabarController::class, 'showPemain'])->n
 // Menampilkan Rating User
 Route::get('/informasi-pemain/{userId}', [RatingController::class, 'showInformasiPemain'])->name('informasi.pemain');
 
+// Halaman detail rating untuk satu mabar tertentu
+Route::get('/rating/mabar/{mabarId}', [RatingController::class, 'showRatingDetail'])->name('informasi.rating.detail');
 
 
 //Menampilkan Event
@@ -108,6 +110,11 @@ Route::get('/informasi_pemain', function () {
     return view('informasi_pemain');
 });
 
+Route::get('/informasi_ratingpemain', function () {
+    return view('informasi_ratingpemain');
+});
+
+
 Route::get('/register', function () {
     return view('auth/register');
 });
@@ -120,6 +127,10 @@ Route::get('/register', function () {
 
 Route::get('/detail_pesanan', function () {
     return view('detail_pesanan');
+});
+
+Route::get('/memberi-rating', function () {
+    return view('memberi_rating');
 });
 
 Route::get('/mabar', function () {

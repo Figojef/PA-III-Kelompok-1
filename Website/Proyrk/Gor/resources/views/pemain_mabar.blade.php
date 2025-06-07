@@ -69,37 +69,68 @@ h2 {
 
     <!-- Gunakan Flexbox untuk susun pembuat dan peserta -->
 <div class="row">
-    <!-- Pembuat Mabar -->
-    <div class="card mb-3" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="bi bi-person" style="font-size: 2.5rem;"></i>
-            <div>
-                <p style="margin: 0; font-weight: bold;">{{ $pembuat['name'] ?? '-' }}</p>
-                <p style="margin: 0;">{{ $pembuat['nomor_telepon'] ?? '-' }}</p>
-                <a style="color: green; text-decoration: underline;">Penyelenggara</a>
-            </div>
+<!-- Pembuat Mabar -->
+<div class="card mb-3" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); justify-content: space-between;" data-user-id="{{ $user['_id'] ?? '' }}" ...>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="bi bi-person" style="font-size: 2.5rem;"></i>
+        <div>
+            <p style="margin: 0; font-weight: bold;">{{ $pembuat['name'] ?? '-' }}</p>
+            <p style="margin: 0;">{{ $pembuat['nomor_telepon'] ?? '-' }}</p>
+            <a style="color: green; text-decoration: underline;">Penyelenggara</a>
         </div>
-        <a href="{{ route('informasi.pemain', ['userId' => $pembuat['_id'] ?? '']) }}" class="btn btn-primary btn-sm">Informasi</a>
-        
     </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+        <a href="{{ route('informasi.pemain', ['userId' => $pembuat['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
 
-    <!-- Peserta Join -->
-    @foreach($peserta as $user)
-        <div class="card mb-3" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="bi bi-person" style="font-size: 1.5rem;"></i>
-                <div>
-                    <p style="margin: 0; font-weight: bold;">{{ $user['name'] ?? '-' }}</p>
-                    <p style="margin: 0;">{{ $user['nomor_telepon'] ?? '-' }}</p>
-                </div>
-            </div>
-            <a href="{{ route('informasi.pemain', ['userId' => $user['_id'] ?? '']) }}" class="btn btn-primary btn-sm">Informasi</a>
-        </div>
-    @endforeach
+        @if(request()->get('mode') === 'penilaian' && ($pembuat['_id'] ?? '') !== session('user_id'))
+            <a href="/memberi-rating?userId={{ $pembuat['_id'] }}&mabarId={{ request()->get('mabarId') }}"
+   class="btn btn-success btn-sm btn-ulasan">Beri Ulasan</a>
+
+        @endif
+    </div>
 </div>
 
+    <!-- Peserta Join -->
+@foreach($peserta as $user)
+    <div class="card mb-3" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); justify-content: space-between;" data-user-id="{{ $user['_id'] ?? '' }}" ...>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="bi bi-person" style="font-size: 1.5rem;"></i>
+            <div>
+                <p style="margin: 0; font-weight: bold;">{{ $user['name'] ?? '-' }}</p>
+                <p style="margin: 0;">{{ $user['nomor_telepon'] ?? '-' }}</p>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <a href="{{ route('informasi.pemain', ['userId' => $user['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
 
+            @if(request()->get('mode') === 'penilaian' && ($user['_id'] ?? '') !== session('user_id'))
+               <a href="/memberi-rating?userId={{ $user['_id'] }}&mabarId={{ request()->get('mabarId') }}"
+   class="btn btn-success btn-sm btn-ulasan">Beri Ulasan</a>
+
+            @endif
+        </div>
+    </div>
+@endforeach
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script>
 <script>
+    
+    
+        let jwtToken = "{{ Session::get('jwt') }}";
+    let currentUserId = null;
+
+    if (jwtToken) {
+        try {
+            const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+            currentUserId = payload.id || payload.user_id;
+        } catch (e) {
+            console.error("Invalid JWT", e);
+        }
+    }
+
+    window.currentUserId = currentUserId;
+
     document.addEventListener('DOMContentLoaded', function() {
         const mabarId = sessionStorage.getItem('mabarId');
         if (mabarId) {
@@ -118,6 +149,19 @@ h2 {
         }
     });
 
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.currentUserId) {
+        document.querySelectorAll('.card[data-user-id]').forEach(function (card) {
+            const userId = card.getAttribute('data-user-id');
+            if (userId === window.currentUserId) {
+                const btnUlasan = card.querySelector('.btn-ulasan');
+                if (btnUlasan) {
+                    btnUlasan.style.display = 'none'; // Sembunyikan tombol jika user-nya adalah diri sendiri
+                }
+            }
+        });
+    }
+});
 </script>
 
 @endsection
