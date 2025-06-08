@@ -216,28 +216,37 @@
                     <!-- Edit Profil Tab -->
                     <div class="tab-pane fade" id="v-pills-edit-profile" role="tabpanel" aria-labelledby="v-pills-edit-profile-tab">
                         <h5>Edit Profil</h5>
-                        <form>
+
+                        <form action="{{ route('profil.update') }}" method="POST">
+                            @csrf
+
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nama Lengkap</label>
                                 <input type="text" class="form-control" id="name" name="name" value="{{ Session::get('user_data')['name'] ?? '' }}">
                             </div>
+
                             <div class="mb-3">
                                 <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
                                 <input type="text" class="form-control" id="nomor_telepon" name="nomor_telepon" value="{{ Session::get('user_data')['nomor_telepon'] ?? '' }}">
                             </div>
+
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" value="{{ Session::get('user_data')['email'] ?? '' }}">
                             </div>
-                            <button type="button" class="btn btn-update-profile">Ubah Profil</button>
+
+                            {{-- Optional: Tambahkan field URL jika kamu punya upload/URL foto --}}
+                            {{-- <input type="hidden" name="url" value="https://example.com/gambar.jpg"> --}}
+
+                            <button type="submit" class="btn btn-update-profile">Ubah Profil</button>
                         </form>
                     </div>
 
                 <!-- Sedang berlangsung Tab -->    
                 <div class="tab-pane fade" id="v-pills-sedang-berlangsung" role="tabpanel" aria-labelledby="v-pills-sedang-berlangsung-tab">
-                    @if(!empty($data) && count($data) > 0)
+                    @if(!empty($sedang) && count($sedang) > 0)
                         <div class="row row-cols-1 row-cols-md-2 g-4">
-                            @foreach($data as $index => $item)
+                            @foreach($sedang as $index => $item)
                                 @php
                                     $pemesanan = $item['pemesanan'];
                                     $transaksi = $item['transaksi'];
@@ -258,7 +267,10 @@
 
                                 @if($shouldShow)
                                     <div class="col">
-                                        <a href="#" class="text-decoration-none">
+                                        @php
+                                            $encoded = base64_encode(json_encode($item));
+                                        @endphp
+                                       <a href="{{ route('profil.detailStatus', ['data' => $encoded]) }}" class="text-decoration-none">
                                             <div class="card shadow-sm p-4 position-relative" style="min-height: 250px; transition: transform 0.3s ease;">
                                                 {{-- Countdown - pojok kanan atas --}}
                                                 @if($deadline)
@@ -322,92 +334,73 @@
                 </div>
 
                 <!-- Riwayat Selesai Tab -->    
-                <div class="tab-pane fade" id="v-pills-riwayat" role="tabpanel" aria-labelledby="v-pills-riwayat-tab">
-                    @if(!empty($data) && count($data) > 0)
-                        <div class="row row-cols-1 row-cols-md-2 g-4">
-                            @foreach($data as $index => $item)
-                                @php
-                                    $pemesanan = $item['pemesanan'];
-                                    $transaksi = $item['transaksi'];
-                                    $statusPemesanan = strtolower($pemesanan['status_pemesanan']);
-                                    $statusPembayaran = strtolower($transaksi['status_pembayaran']);
-                                    $deadline = $transaksi['deadline_pembayaran'] ?? null;
+<div class="tab-pane fade" id="v-pills-riwayat" role="tabpanel" aria-labelledby="v-pills-riwayat-tab">
+    @if(!empty($riwayat) && count($riwayat) > 0)
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach($riwayat as $item)
+                @php
+                    $pemesanan = $item['pemesanan'];
+                    $transaksi = $item['transaksi'];
+                    $status = strtolower($item['status']);
 
-                                    $shouldShow = $statusPemesanan === 'sedang dipesan' && $statusPembayaran === 'menunggu';
+                    if (!in_array($status, ['berhasil', 'ditolak', 'dibatalkan'])) continue;
 
-                                    $jadwalList = collect($pemesanan['jadwal_dipesan'])->sortBy('jam');
-                                    $jamList = $jadwalList->pluck('jam')->map(fn($j) => (int) $j)->values();
-                                    $jamMulai = $jamList->min();
-                                    $jamSelesai = $jamList->max() + 1;
-                                    $tanggal = $jadwalList->first()['tanggal'];
-                                    $lapangan = $jadwalList->first()['lapangan']['name'] ?? '-';
-                                    $metode = strtoupper(str_replace('_', ' ', $transaksi['metode_pembayaran']));
-                                @endphp
+                    $jadwalList = collect($pemesanan['jadwal_dipesan'])->sortBy('jam');
+                    $jamList = $jadwalList->pluck('jam')->map(fn($j) => (int) $j)->values();
+                    $jamMulai = $jamList->min();
+                    $jamSelesai = $jamList->max() + 1;
+                    $tanggal = $jadwalList->first()['tanggal'];
+                    $lapangan = $jadwalList->first()['lapangan']['name'] ?? '-';
+                    $metode = strtoupper(str_replace('_', ' ', $transaksi['metode_pembayaran']));
 
-                                @if($shouldShow)
-                                    <div class="col">
-                                        <a href="#" class="text-decoration-none">
-                                            <div class="card shadow-sm p-4 position-relative" style="min-height: 250px; transition: transform 0.3s ease;">
-                                                {{-- Countdown - pojok kanan atas --}}
-                                                @if($deadline)
-                                                    <div class="position-absolute top-0 end-0 m-2">
-                                                        <span class="badge bg-danger text-white" id="countdown-{{ $index }}">--:--</span>
-                                                    </div>
-                                                @endif
+                    // Badge warna
+                    $badgeClass = match($status) {
+                        'berhasil' => 'bg-success text-white',
+                        'ditolak' => 'bg-danger text-white',
+                        'dibatalkan' => 'bg-secondary text-white',
+                        default => 'bg-dark text-white'
+                    };
+                @endphp
 
-                                                {{-- Konten utama --}}
-                                                <div class="mt-2 mb-3">
-                                                    <strong>{{ $lapangan }}</strong><br>
-                                                    {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d M Y') }}<br>
-                                                    {{ str_pad($jamMulai, 2, '0', STR_PAD_LEFT) }}:00 - {{ str_pad($jamSelesai, 2, '0', STR_PAD_LEFT) }}:00
-                                                    <div class="mt-3">
-                                                        <p class="mb-1">Jumlah Pesanan: {{ count($pemesanan['jadwal_dipesan']) }}</p>
-                                                        <p class="mb-0">Metode Pembayaran: {{ $metode }}</p>
-                                                    </div>
-                                                </div>
+                <div class="col riwayat-item">
+                     @php
+                                            $encoded = base64_encode(json_encode($item));
+                                        @endphp
+                                       <a href="{{ route('profil.detailStatus', ['data' => $encoded]) }}" class="text-decoration-none">
+                        <div class="card shadow-sm p-4 position-relative" style="min-height: 250px;">
+                            {{-- Info --}}
+                            <div class="mt-2 mb-3">
+                                <strong>{{ $lapangan }}</strong><br>
+                                {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('l, d M Y') }}<br>
+                                {{ str_pad($jamMulai, 2, '0', STR_PAD_LEFT) }}:00 - {{ str_pad($jamSelesai, 2, '0', STR_PAD_LEFT) }}:00
+                                <div class="mt-3">
+                                    <p class="mb-1">Jumlah Pesanan: {{ count($pemesanan['jadwal_dipesan']) }}</p>
+                                    <p class="mb-0">Metode Pembayaran: {{ $metode }}</p>
+                                </div>
+                            </div>
 
-                                                {{-- Menunggu - pojok kanan bawah --}}
-                                                <div class="position-absolute bottom-0 end-0 m-2">
-                                                    <span class="badge rounded bg-warning text-dark px-4 py-2">Menunggu</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                    {{-- JS Countdown --}}
-                                    @if($deadline)
-                                        <script>
-                                            (() => {
-                                                const countdownEl = document.getElementById("countdown-{{ $index }}");
-                                                const deadline = new Date("{{ \Carbon\Carbon::parse($deadline)->toIso8601String() }}").getTime();
-
-                                                function updateCountdown() {
-                                                    const now = new Date().getTime();
-                                                    let timeLeft = Math.floor((deadline - now) / 1000);
-
-                                                    if (timeLeft <= 0) {
-                                                        countdownEl.innerText = "00:00";
-                                                        return;
-                                                    }
-
-                                                    const minutes = Math.floor(timeLeft / 60);
-                                                    const seconds = timeLeft % 60;
-                                                    countdownEl.innerText =
-                                                        ('0' + minutes).slice(-2) + ":" + ('0' + seconds).slice(-2);
-
-                                                    requestAnimationFrame(updateCountdown);
-                                                }
-
-                                                updateCountdown();
-                                            })();
-                                        </script>
-                                    @endif
-                                @endif
-                            @endforeach
+                            {{-- Status Badge --}}
+                            <div class="position-absolute bottom-0 end-0 m-2">
+                                <span class="badge rounded {{ $badgeClass }} px-4 py-2 text-capitalize">{{ $status }}</span>
+                            </div>
                         </div>
-                    @else
-                        <p>Tidak ada booking yang sedang berlangsung.</p>
-                    @endif
+                    </a>
                 </div>
+            @endforeach
+        </div>
+        
+        {{-- Pagination controls --}}
+        @if(count($riwayat) > 4)
+            <nav aria-label="Page navigation riwayat">
+                <ul class="pagination justify-content-center" id="pagination-riwayat">
+                    <!-- JS yg generate tombol pagination -->
+                </ul>
+            </nav>
+        @endif
+    @else
+        <p>Tidak ada riwayat pemesanan.</p>
+    @endif
+</div>
 
                 </div>
             </div>
@@ -416,5 +409,56 @@
 </div>
 <div style="margin-bottom: 15%; "></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const itemsPerPage = 4;
+
+    function setupPagination(itemsSelector, paginationId) {
+        const items = document.querySelectorAll(itemsSelector);
+        const pageCount = Math.ceil(items.length / itemsPerPage);
+        const pagination = document.getElementById(paginationId);
+
+        if (pageCount <= 1) {
+            // Kalau cuma 1 halaman atau kurang, sembunyikan pagination
+            if (pagination) pagination.style.display = 'none';
+            return;
+        }
+
+        // Hapus isi pagination sebelumnya kalau ada
+        pagination.innerHTML = '';
+
+        function showPage(page) {
+            items.forEach((item, index) => {
+                item.style.display = (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) ? 'block' : 'none';
+            });
+            [...pagination.children].forEach(li => li.classList.remove('active'));
+            pagination.children[page - 1].classList.add('active');
+        }
+
+        // Buat tombol halaman
+        for(let i = 1; i <= pageCount; i++) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (i === 1 ? ' active' : '');
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.innerText = i;
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPage(i);
+            });
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+
+        showPage(1);
+    }
+
+    // Panggil pagination untuk Sedang Berlangsung dan Riwayat
+    setupPagination('#v-pills-sedang-berlangsung .sedang-item', 'pagination-sedang');
+    setupPagination('#v-pills-riwayat .riwayat-item', 'pagination-riwayat');
+});
+</script>
 
 @endsection

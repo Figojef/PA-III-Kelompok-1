@@ -82,11 +82,15 @@ h2 {
     <div style="display: flex; flex-direction: column; align-items: flex-end;">
         <a href="{{ route('informasi.pemain', ['userId' => $pembuat['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
 
-        @if(request()->get('mode') === 'penilaian' && ($pembuat['_id'] ?? '') !== session('user_id'))
-            <a href="/memberi-rating?userId={{ $pembuat['_id'] }}&mabarId={{ request()->get('mabarId') }}"
-   class="btn btn-success btn-sm btn-ulasan">Beri Ulasan</a>
+                @php
+                    $currentUserId = session('user_id');
+                @endphp
 
-        @endif
+                @if(request()->get('mode') === 'penilaian' && ($pembuat['_id'] ?? '') !== $currentUserId)
+                    <a href="/memberi-rating?userId={{ $pembuat['_id'] }}&mabarId={{ request()->get('mabarId') }}"
+                    class="btn btn-success btn-sm btn-ulasan">Beri Ulasan</a>
+                @endif
+
     </div>
 </div>
 
@@ -163,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
 </script>
 
 @endsection

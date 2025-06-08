@@ -105,6 +105,50 @@ class AuthController extends Controller
 
     }
 
+  public function updateProfile(Request $request)
+{
+    // Ambil data user & token dari session
+    $userData = Session::get('user_data');
+    $jwtToken = Session::get('jwt');
+
+    if (!$userData || !isset($userData['_id']) || !$jwtToken) {
+        return back()->withErrors(['error' => 'User tidak ditemukan di sesi atau token tidak ada.']);
+    }
+
+    $user_id = $userData['_id'];
+
+    // Data yang dikirim ke API
+    $payload = array_filter([
+        'user_id' => $user_id,
+        'name' => $request->name,
+        'email' => $request->email,
+        'nomor_telepon' => $request->nomor_telepon,
+        'url' => $request->url
+    ]);
+
+    // Kirim PATCH pakai Authorization header
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . $jwtToken,
+        'Content-Type'  => 'application/json',
+    ])->patch($this->authUrl . '/updateProfile', $payload);
+
+    // Tangani response
+    if ($response->successful()) {
+        $data = $response->json();
+
+        if (isset($data['data'])) {
+            Session::put('user_data', $data['data']);
+        }
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    $errorMessage = $response->json()['message'] ?? 'Gagal memperbarui profil.';
+    return back()->withErrors(['error' => $errorMessage]);
+}
+
+
+
 
     // public function test1(){
     //     Session::put('oke', 111);

@@ -30,6 +30,9 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/profil', [PemesananController::class, 'showProfil'])->name('profil')->middleware('auth');
 
+//Update Profil
+Route::post('/profil/update', [AuthController::class, 'updateProfile'])->name('profil.update');
+
 
 // Admin
 Route::middleware(['admin'])->group(function () {
@@ -42,9 +45,6 @@ Route::middleware(['admin'])->group(function () {
 
 // Membuat Pemesanan
 Route::post('/pemesanan', [PemesananController::class, 'store'])->name('pemesanan.store');
-
-Route::get('/pembayaran/{id}', [PembayaranController::class, 'showPaymentDetail'])->name('pembayaran.detail');
-
 // Mabar
 //Menampilkan Mabar
 
@@ -145,21 +145,22 @@ Route::get('/mabar', function () {
     return view('mabar');
 })->name('mabar');
 
+Route::get('/detail_status', function () {
+    return view('detail_status');
+})->name('detail_status');
+
+
 Route::get('/detail_mabar', function () {
     return view('detail_mabar');
 })->name('detail_mabar');
-
-
 
 Route::get('/tambahMabar', function () {
     return view('tambahMabar');
 })->name('tambahMabar');
 
-Route::get('/detail_pembayaran', function () {
-    return view('detail_pembayaran');
-})->name('detail_pembayaran');
-
 Route::get('/upload-bukti/{id}', [TransaksiController::class, 'showUploadForm']);
+
+Route::get('/detail_pembayaran', [TransaksiController::class, 'detailPembayaran'])->name('detail.pembayaran');
 
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -268,3 +269,4 @@ Route::middleware(['pelanggan'])->group(function () {
 });
 
 
+Route::get('/detail-status', [PemesananController::class, 'showDetailStatus'])->name('profil.detailStatus');

@@ -255,48 +255,61 @@ export const getPemesananByUserId = asyncHandler(async (req, res) => {
 
 // Pesanan belun lewat
 export const pesananBelumLewatDeadline = asyncHandler(async (req, res) => {
-    const userId = req.user._id;
+  const userId = req.user._id;
 
-    // Ambil semua pemesanan user beserta jadwal dan lapangan
-    const pemesananList = await Pemesanan.find({ user_id: userId }).populate({
-        path: "jadwal_dipesan",
-        populate: {
-            path: "lapangan",
-            select: "name"
-        }
+  // Ambil semua pemesanan user beserta jadwal dan lapangan
+  const pemesananList = await Pemesanan.find({ user_id: userId }).populate({
+    path: "jadwal_dipesan",
+    populate: {
+      path: "lapangan",
+      select: "name"
+    }
+  });
+
+  const now = new Date();
+  const hasilPemesanan = [];
+
+  for (const pemesanan of pemesananList) {
+    // Ambil transaksi berdasarkan ID pemesanan tanpa filter status dulu
+    const transaksi = await Transaksi.findOne({
+      pemesanan_id: pemesanan._id
     });
 
-    const now = new Date();
-    const hasilPemesanan = [];
-
-    for (const pemesanan of pemesananList) {
-        // Ambil transaksi berdasarkan ID pemesanan
-        const transaksi = await Transaksi.findOne({
-            pemesanan_id: pemesanan._id,
-            status_pembayaran: "menunggu" // tambahkan filter status di query
-        });
-
-        if (!transaksi || !transaksi.deadline_pembayaran) {
-            continue; // skip jika tidak ada transaksi atau deadline
-        }
-
-        const deadline = new Date(transaksi.deadline_pembayaran);
-
-        // Cek apakah sekarang masih sebelum deadline
-        if (now < deadline) {
-            hasilPemesanan.push({
-                pemesanan,
-                transaksi
-            });
-        }
+    if (!transaksi || !transaksi.deadline_pembayaran) {
+      continue; // skip jika tidak ada transaksi atau deadline
     }
 
-    res.status(200).json({
-        success: true,
-        jumlah: hasilPemesanan.length,
-        data: hasilPemesanan
+    const deadline = new Date(transaksi.deadline_pembayaran);
+
+    // Tentukan status frontend berdasarkan status_pembayaran dan deadline
+    let statusFrontend = "";
+
+    if (transaksi.status_pembayaran === "menunggu") {
+      if (now < deadline) {
+        statusFrontend = "menunggu";
+      } else {
+        // Sudah lewat deadline, jangan masukkan ke hasil
+        continue;
+      }
+    } else {
+      // Kalau bukan status menunggu, skip
+      continue;
+    }
+
+    hasilPemesanan.push({
+      pemesanan,
+      transaksi,
+      status: statusFrontend
     });
+  }
+
+  res.status(200).json({
+    success: true,
+    jumlah: hasilPemesanan.length,
+    data: hasilPemesanan
+  });
 });
+
 
 export const riwayatPemesanan = asyncHandler(async (req, res) => {
     const userId = req.user._id;
@@ -320,18 +333,25 @@ export const riwayatPemesanan = asyncHandler(async (req, res) => {
         if (!transaksi) continue;
 
         // Tentukan status frontend
-        let statusFrontend = "";
+            let statusFrontend = "";
 
-        if (transaksi.status_pembayaran === "berhasil") {
-            statusFrontend = "berhasil";
-        } else if (transaksi.status_pembayaran === "menunggu") {
-            const deadline = new Date(transaksi.deadline_pembayaran);
-            statusFrontend = (now > deadline) ? "dibatalkan" : "menunggu";
-        } else if (transaksi.status_pembayaran === "gagal") {
-            statusFrontend = "ditolak";
-        } else {
-            statusFrontend = "tidak_diketahui"; // fallback
-        }
+            if (transaksi.status_pembayaran === "berhasil") {
+                statusFrontend = "berhasil";
+            } else if (transaksi.status_pembayaran === "menunggu") {
+                const deadline = new Date(transaksi.deadline_pembayaran);
+                // Jika sudah lewat deadline, berarti dibatalkan
+                if (now > deadline) {
+                    statusFrontend = "dibatalkan";
+                } else {
+                    // Skip transaksi yang belum lewat deadline (status menunggu diabaikan)
+                    continue;
+                }
+            } else if (transaksi.status_pembayaran === "gagal") {
+                statusFrontend = "ditolak";
+            } else {
+                statusFrontend = "tidak_diketahui"; // opsional, atau bisa skip
+            }
+
 
         hasilRiwayat.push({
             pemesanan,
@@ -340,11 +360,21 @@ export const riwayatPemesanan = asyncHandler(async (req, res) => {
         });
     }
 
+    hasilRiwayat.sort((a, b) => {
+    const tanggalA = new Date(a.pemesanan.jadwal_dipesan[0].tanggal);
+    const tanggalB = new Date(b.pemesanan.jadwal_dipesan[0].tanggal);
+    return tanggalB - tanggalA; // terbaru ke terlama
+});
+
+
     res.status(200).json({
         success: true,
         jumlah: hasilRiwayat.length,
         data: hasilRiwayat
     });
+
+
+
 });
 
 

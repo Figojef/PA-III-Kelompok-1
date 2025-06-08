@@ -36,6 +36,18 @@ class TransaksiController extends Controller
       return view('upload', ['transactionId' => $id]);
   }
 
+public function detailPembayaran()
+{
+    $response = Http::get('http://localhost:3000/api/v1/infoKontakGor');
+
+    if ($response->successful()) {
+        $kontak = $response->json()[0]; // ambil elemen pertama dari array
+
+        return view('detail_pembayaran', compact('kontak'));
+    } else {
+        return back()->withErrors(['Gagal mengambil data kontak GOR dari API.']);
+    }
+}
 }
 
 

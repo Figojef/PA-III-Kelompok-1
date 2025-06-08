@@ -116,15 +116,25 @@
             <!-- Left Section: Payment Details -->
             <div class="left-section">
                 <label class="informasi1">Nomor Rekening</label><br>
-                <label class="informasi2" id="rekening">7172 7838 7489234</label> 
+                             <label class="informasi2" id="rekening">
+                  {{ $kontak['nomor_rekening'] ?? 'Tidak tersedia' }}
+                </label>
+
                 <!-- Salin icon (path updated to public/icons) -->
                 <img src="{{ asset('images/icon_Copy.png') }}" alt="Icon" width="20" height="20" id="copyButton" style="cursor: pointer;" onclick="copyToClipboard()"> <br>
 
                 <label class="informasi1">Atas Nama</label><br>
-                <label class="informasi2">Yakop Simatupang</label><br>
+                <label class="informasi2">
+                    {{ $kontak['atas_nama'] ?? 'Tidak tersedia' }}
+                </label><br>
 
                 <label class="informasi1">Nominal Transfer</label><br>  
-                <label class="informasi2">Rp. 60.000</label><br>
+                @php
+    $totalHarga = session('total_harga', 0);
+@endphp
+
+<label class="informasi2">Rp. {{ number_format($totalHarga, 0, ',', '.') }}</label><br>
+
 
                 <form action="/upload_bukti" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="_token" value="YOUR_CSRF_TOKEN_HERE">
