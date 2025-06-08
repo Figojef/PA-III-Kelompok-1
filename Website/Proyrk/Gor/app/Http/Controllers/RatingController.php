@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
+
 
 class RatingController extends Controller
 {
@@ -60,6 +62,86 @@ public function showRatingDetail($mabarId, Request $request)
     // Kirim data ke view
     return view('informasi_ratingpemain', compact('mabarDetail'));
 }
+
+public function showPenilaianForm(Request $request)
+{
+    $userId = $request->get('userId');
+    $mabarId = $request->get('mabarId');
+    $jwt = Session::get('jwt');
+
+    if (!$jwt) {
+        return redirect()->route('login')->with('error', 'Anda harus login untuk memberikan rating.');
+    }
+
+    // Decode JWT untuk ambil ID user login
+    $decodedJwt = json_decode(base64_decode(explode('.', $jwt)[1]), true);
+    $currentUserId = $decodedJwt['id'] ?? null;
+
+    if (!$currentUserId) {
+        return response('User login tidak valid.', 400);
+    }
+
+    $url = "http://localhost:3000/api/v1/rating/penilaian/$userId/$mabarId";
+
+    try {
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get($url);
+        $data = json_decode($response->getBody(), true);
+
+        // ✅ Cek apakah user login sudah memberikan rating
+        $sudahMemberiRating = collect($data['penilaian'] ?? [])->contains(function ($rating) use ($currentUserId) {
+            return isset($rating['dari_userId']) && $rating['dari_userId'] === $currentUserId;
+        });
+
+        return view('memberi_rating', [
+            'data' => $data,
+            'userId' => $userId,
+            'mabarId' => $mabarId,
+            'sudahMemberiRating' => $sudahMemberiRating,
+        ]);
+
+    } catch (\Exception $e) {
+        return response('Gagal mengambil data dari API: ' . $e->getMessage(), 500);
+    }
+}
+
+public function kirim(Request $request)
+{
+    $validated = $request->validate([
+        'untuk_user' => 'required|string',
+        'mabar_id' => 'required|string',
+        'rating' => 'required|integer|min:1|max:5',
+        'komentar' => 'nullable|string',
+    ]);
+
+    $token = $request->cookie('jwt') ?? session('jwt');
+
+    if (!$token) {
+        return redirect()->back()->with('error', 'Token tidak ditemukan.');
+    }
+
+    $response = Http::withToken($token)
+        ->post('http://localhost:3000/api/v1/rating/', [
+            'untuk_user' => $validated['untuk_user'],
+            'mabar_id' => $validated['mabar_id'],
+            'rating' => $validated['rating'],
+            'komentar' => $validated['komentar'],
+        ]);
+
+    if ($response->successful()) {
+        // ✅ Redirect ke route yang menampilkan peserta berdasarkan mabarId
+        return redirect()->route('mabar.pemainFromRequest', [
+    'mabarId' => $validated['mabar_id'],
+    'mode' => 'penilaian' // ⬅ Tambahkan ini
+])->with('success', 'Rating berhasil dikirim.');
+
+    } else {
+        return redirect()->back()->with('error', $response->json()['message'] ?? 'Gagal mengirim rating.');
+    }
+}
+
+
+
 
 }
 

@@ -169,6 +169,33 @@ public function showPemainFromRequest(Request $request)
     }
 }
 
+// MabarController.php
+public function showPeserta(Request $request)
+{
+    $mabarId = $request->get('mabarId');
+    $mode = $request->get('mode'); // untuk tombol ulasan
+    $jwt = session('jwt');
+
+    // Simulasikan ambil data dari backend API
+    $response = Http::withToken($jwt)->get("http://localhost:3000/api/v1/mabar/$mabarId");
+
+    if (!$response->successful()) {
+        return redirect()->back()->with('error', 'Data Mabar tidak ditemukan');
+    }
+
+    $data = $response->json();
+
+    return view('pemain_mabar', [
+        'jumlahPeserta' => count($data['user_yang_join']) + 1,
+        'kapasitas' => $data['kapasitas'],
+        'pembuat' => $data['user_pembuat_mabar'],
+        'peserta' => $data['user_yang_join'],
+        'user' => ['_id' => session('user_id')],
+        'mode' => $mode, // bisa dipakai untuk view
+    ]);
+}
+
+
 
 public function joinMabar(Request $request)
 {

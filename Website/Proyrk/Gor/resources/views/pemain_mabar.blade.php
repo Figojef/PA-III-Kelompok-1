@@ -104,8 +104,9 @@ h2 {
             <a href="{{ route('informasi.pemain', ['userId' => $user['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
 
             @if(request()->get('mode') === 'penilaian' && ($user['_id'] ?? '') !== session('user_id'))
-               <a href="/memberi-rating?userId={{ $user['_id'] }}&mabarId={{ request()->get('mabarId') }}"
+<a href="{{ route('rating.form', ['userId' => $user['_id'], 'mabarId' => request()->get('mabarId')]) }}"
    class="btn btn-success btn-sm btn-ulasan">Beri Ulasan</a>
+
 
             @endif
         </div>

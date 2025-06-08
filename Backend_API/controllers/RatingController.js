@@ -223,6 +223,7 @@ export const ReferensiPenilaianMabar = asyncHandler(async (req, res) => {
   }).populate("dari_user", "name");
 
   const hasilPenilaian = ratingList.map((item) => ({
+    dari_userId: item.dari_user._id,
     dari_user: item.dari_user.name,
     rating: item.rating,
     komentar: item.komentar || "",
