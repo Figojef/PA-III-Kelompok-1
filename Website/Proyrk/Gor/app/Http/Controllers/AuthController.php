@@ -23,41 +23,72 @@ class AuthController extends Controller
     {
         // Validasi input
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'nomor_whatsapp' => 'required|string'
+            'name' => 'required|string|min:3|max:50',
+            'email' => 'required|email',
+            'nomor_telepon' => 'required|string|min:10|max:15',
+            'password' => 'required|string|min:6',
+            'password_confirmation' => 'required|same:password'
+        ], [
+            'name.required' => 'Nama harus diisi',
+            'name.min' => 'Nama minimal 3 karakter',
+            'name.max' => 'Nama maksimal 50 karakter',
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'nomor_telepon.required' => 'Nomor telepon harus diisi',
+            'nomor_telepon.min' => 'Nomor telepon minimal 10 digit',
+            'nomor_telepon.max' => 'Nomor telepon maksimal 15 digit',
+            'password.required' => 'Password harus diisi',
+            'password.min' => 'Password minimal 6 karakter',
+            'password_confirmation.required' => 'Konfirmasi password harus diisi',
+            'password_confirmation.same' => 'Konfirmasi password tidak cocok'
         ]);
 
-        // Kirim data ke backend untuk register
-        $response = Http::post($this->authUrl . "/register", [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-            'nomor_whatsapp' => $request->nomor_whatsapp,
-        ]);
+        try {
+            // Kirim data ke backend untuk register
+            $response = Http::post($this->authUrl . "/register", [
+                'name' => $request->name,
+                'email' => $request->email,
+                'nomor_telepon' => $request->nomor_telepon,
+                'password' => $request->password,
+            ]);
 
-
-        // Cek jika response sukses
-        if ($response->successful()) {
-            $data = $response->json();
-            // dd($data['data']['role']);
-            // Pastikan key 'jwt' ada di dalam data
-            if (isset($data['jwt'])) {
-                Session::put('jwt', $data['jwt']); // Token JWT yang dikirimkan
-                Session::put('user_data', $data['data']);
-                if($data['data']['role'] == 'admin'){
-                    return redirect()->route('admin'); // Arahkan ke dashboard atau halaman setelah login
-                }else{
-                    return redirect()->route('dashboard'); // Arahkan ke dashboard atau halaman setelah login
+            // Cek jika response sukses
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                // Pastikan key 'jwt' ada di dalam data
+                if (isset($data['jwt'])) {
+                    Session::put('jwt', $data['jwt']);
+                    Session::put('user_data', $data['data']);
+                    
+                    // Set session flash untuk success message (auto login setelah register)
+                    if($data['data']['role'] == 'admin'){
+                        Session::flash('register_success', [
+                            'type' => 'admin',
+                            'name' => $data['data']['name']
+                        ]);
+                        return Redirect::route('admin');
+                    } else {
+                        Session::flash('register_success', [
+                            'type' => 'pelanggan', 
+                            'name' => $data['data']['name']
+                        ]);
+                        return Redirect::route('dashboard');
+                    }
+                } else {
+                    return back()->withErrors(['register' => 'Token JWT tidak ditemukan dari server']);
                 }
             } else {
-                return back()->withErrors(['error' => 'Token JWT tidak ditemukan.']);
+                // Handle error response dari backend
+                $errorData = $response->json();
+                $errorMessage = isset($errorData['message']) ? $errorData['message'] : 'Pendaftaran gagal';
+                
+                return back()->withErrors(['register' => $errorMessage])->withInput($request->except('password', 'password_confirmation'));
             }
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['register' => 'Tidak dapat terhubung ke server. Silakan coba lagi.'])->withInput($request->except('password', 'password_confirmation'));
         }
-
-        // Jika ada error
-        return back()->withErrors(['error' => 'Gagal melakukan registrasi.']);
     }
 
 
@@ -66,43 +97,67 @@ class AuthController extends Controller
     }
 
 
-    // Fungsi Login
-    public function login(Request $request)
+public function login(Request $request)
     {
-        // dd('ok');
         // Validasi input
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:6',
+        ], [
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'password.required' => 'Password harus diisi',
+            'password.min' => 'Password minimal 6 karakter'
         ]);
 
-        // Kirim data ke backend untuk login
-        $response = Http::post($this->authUrl . "/login", [
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        try {
+            // Kirim data ke backend untuk login
+            $response = Http::post($this->authUrl . "/login", [
+                'email' => $request->email,
+                'password' => $request->password,
+            ]);
 
-        // Cek jika response sukses
-        if ($response->successful()) {
-            $data = $response->json();
-            // dd($data['data']['role']);
-            // Pastikan key 'jwt' ada di dalam data
-            if (isset($data['jwt'])) {
-                Session::put('jwt', $data['jwt']); // Token JWT yang dikirimkan
-                Session::put('user_data', $data['data']);
-                if($data['data']['role'] == 'admin'){
-                    return Redirect::route(route: 'admin'); // Arahkan ke dashboard atau halaman setelah login
-                }else{
-                    return Redirect::route(route: 'dashboard'); // Arahkan ke dashboard atau halaman setelah login
+            // Cek jika response sukses
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                // Pastikan key 'jwt' ada di dalam data
+                if (isset($data['jwt'])) {
+                    Session::put('jwt', $data['jwt']);
+                    Session::put('user_data', $data['data']);
+                    
+                    // Set session flash untuk success message
+                    if($data['data']['role'] == 'admin'){
+                        Session::flash('login_success', [
+                            'type' => 'admin',
+                            'name' => $data['data']['name']
+                        ]);
+                        return Redirect::route('admin');
+                    } else {
+                        Session::flash('login_success', [
+                            'type' => 'pelanggan', 
+                            'name' => $data['data']['name']
+                        ]);
+                        return Redirect::route('dashboard');
+                    }
+                } else {
+                    return back()->withErrors(['login' => 'Token JWT tidak ditemukan dari server']);
                 }
             } else {
-                // return back()->withErrors(['error' => 'Token JWT tidak ditemukan.']);
-                return  Redirect::route(route: 'login');
+                // Handle error response dari backend
+                $errorData = $response->json();
+                $errorMessage = isset($errorData['message']) ? $errorData['message'] : 'Login gagal';
+                
+                return back()->withErrors(['login' => $errorMessage])->withInput($request->except('password'));
             }
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['login' => 'Tidak dapat terhubung ke server. Silakan coba lagi.'])->withInput($request->except('password'));
         }
+    }
 
-        return Redirect::route(route: 'login');
-
+    public function showRegister(){
+        return view('auth.register');
     }
 
   public function updateProfile(Request $request)

@@ -5,7 +5,8 @@ import {
     createRating,
     GetMabarAndRatingsByUser,
     GetMabarDetailWithRating,
-    ReferensiPenilaianMabar
+    ReferensiPenilaianMabar,
+    ProfilRating
  } from "../controllers/RatingController.js";
 
 
@@ -15,11 +16,13 @@ import {
 router.post("/", protectedMiddleware, createRating);
 
 // melihat rating mabar berdasarkan user
-router.get('/user/:userId/mabar-ratings', GetMabarAndRatingsByUser);
+
 
 // melihat rating user berdasarkan mabar
 router.get('/:mabarId/detail-with-rating', GetMabarDetailWithRating);
 
 router.get('/penilaian/:user_target_id/:mabar_id', ReferensiPenilaianMabar);
+
+router.get('/profil-rating/:user_target_id', ProfilRating);
 
 export default router;

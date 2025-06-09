@@ -63,20 +63,44 @@
     @endif
 
 
-                {{-- Tombol --}}
-                {{-- Tombol --}}
-                <div class="d-flex gap-3 mt-3">
-                    <button class="btn btn-outline-dark">Batalkan</button>
+                
+                {{-- Ambil badge class dari status --}}
+                @php
+                    $status = $data['status']; // ini dari API
+                    $badgeClass = match($status) {
+                        'berhasil' => 'bg-success text-white',
+                        'ditolak' => 'bg-danger text-white',
+                        'dibatalkan' => 'bg-danger text-white',
+                        'terlambat' => 'bg-secondary text-white',
+                        default => 'bg-dark text-white'
+                    };
+                @endphp
 
-                    @php
-                        $isBayarLangsung = $data['transaksi']['metode_pembayaran'] === 'bayar_langsung';
-                        $sudahUpload = !empty($data['transaksi']['bukti_pembayaran']);
-                    @endphp
+                    @if ($status === 'menunggu')
+                        <div class="d-flex gap-3 mt-3">
 
-                    @if(! $sudahUpload)
-                        <button class="btn btn-dark">Bayar</button>
+                            {{-- Form Batalkan --}}
+                                <form action="{{ route('pemesanan.batalkan', $data['pemesanan']['_id']) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pemesanan ini?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-outline-dark">Batalkan</button>
+                                </form>
+
+
+                            {{-- Tombol Bayar disembunyikan / belum digunakan --}}
+                            {{-- 
+                            @php
+                                $sudahUpload = !empty($data['transaksi']['bukti_pembayaran']);
+                            @endphp
+
+                            @if (! $sudahUpload)
+                                <a href="#" class="btn btn-dark disabled">Bayar</a>
+                            @endif
+                            --}}
+                        </div>
                     @endif
-                </div>
+
+
             </div>
 
             {{-- Kanan: Countdown --}}

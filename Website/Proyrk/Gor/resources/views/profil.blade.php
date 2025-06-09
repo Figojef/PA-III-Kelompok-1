@@ -343,7 +343,7 @@
                     $transaksi = $item['transaksi'];
                     $status = strtolower($item['status']);
 
-                    if (!in_array($status, ['berhasil', 'ditolak', 'dibatalkan'])) continue;
+                    if (!in_array($status, ['berhasil', 'ditolak', 'dibatalkan','terlambat'])) continue;
 
                     $jadwalList = collect($pemesanan['jadwal_dipesan'])->sortBy('jam');
                     $jamList = $jadwalList->pluck('jam')->map(fn($j) => (int) $j)->values();
@@ -357,7 +357,8 @@
                     $badgeClass = match($status) {
                         'berhasil' => 'bg-success text-white',
                         'ditolak' => 'bg-danger text-white',
-                        'dibatalkan' => 'bg-secondary text-white',
+                        'dibatalkan' => 'bg-danger text-white',
+                        'terlambat' => 'bg-secondary text-white',
                         default => 'bg-dark text-white'
                     };
                 @endphp

@@ -2,6 +2,9 @@
 
 @section('content')
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 <style>
 .booksekarang {
     padding: 15px 25px;
@@ -204,4 +207,62 @@
 </button>
 
 
+<script>
+    // SweetAlert for Login Success
+    @if(Session::has('login_success'))
+        @php
+            $loginData = Session::get('login_success');
+        @endphp
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Login Berhasil!',
+                text: 'Selamat datang ! Nikmati layanan pemesanan lapangan badminton kami.',
+                icon: 'success',
+                confirmButtonText: 'Mulai Bermain',
+                confirmButtonColor: '#222F37',
+                timer: 4000,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                allowOutsideClick: false
+            });
+        });
+        
+        @php
+            Session::forget('login_success');
+        @endphp
+    @elseif(Session::has('register_success'))
+        @php
+            $loginData = Session::get('register_successs');
+        @endphp
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Berhasil Mendaftarkan Akun!',
+                text: 'Selamat datang ! Nikmati layanan pemesanan lapangan badminton kami.',
+                icon: 'success',
+                confirmButtonText: 'Mulai Bermain',
+                confirmButtonColor: '#222F37',
+                timer: 4000,
+                timerProgressBar: true,
+                showConfirmButton: true,
+                allowOutsideClick: false
+            });
+        });
+        
+        @php
+            Session::forget('login_success');
+        @endphp
+    @endif
+</script>
+
+<script>
+    // Cek URL: kalau ada logout=true, hapus sessionStorage
+    if (window.location.search.includes("logout=true")) {
+        sessionStorage.removeItem('selectedSlots');
+        console.log("selectedSlots dihapus karena logout");
+    }
+</script>
+
 @endsection
+

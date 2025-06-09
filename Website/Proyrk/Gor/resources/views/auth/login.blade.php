@@ -91,7 +91,7 @@
             </div>
             <div class="text-center mt-3">
                 <span style="font-size: 16px;">Belum punya akun?
-                    <a href="{{ url('/') }}" class="text-decoration-none fw-bold">Daftar yuk!</a>
+                    <a href="{{ url('/register') }}" class="text-decoration-none fw-bold">Daftar yuk!</a>
                 </span>
             </div>
         </form>

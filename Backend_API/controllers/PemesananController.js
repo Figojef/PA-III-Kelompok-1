@@ -333,25 +333,27 @@ export const riwayatPemesanan = asyncHandler(async (req, res) => {
         if (!transaksi) continue;
 
         // Tentukan status frontend
-            let statusFrontend = "";
+        let statusFrontend = "";
 
-            if (transaksi.status_pembayaran === "berhasil") {
-                statusFrontend = "berhasil";
-            } else if (transaksi.status_pembayaran === "menunggu") {
-                const deadline = new Date(transaksi.deadline_pembayaran);
-                // Jika sudah lewat deadline, berarti dibatalkan
-                if (now > deadline) {
-                    statusFrontend = "dibatalkan";
-                } else {
-                    // Skip transaksi yang belum lewat deadline (status menunggu diabaikan)
-                    continue;
-                }
-            } else if (transaksi.status_pembayaran === "gagal") {
-                statusFrontend = "ditolak";
+        if (transaksi.status_pembayaran === "berhasil") {
+            statusFrontend = "berhasil";
+        } else if (transaksi.status_pembayaran === "menunggu") {
+            const deadline = new Date(transaksi.deadline_pembayaran);
+            if (now > deadline) {
+                statusFrontend = "terlambat";
             } else {
-                statusFrontend = "tidak_diketahui"; // opsional, atau bisa skip
+                // Skip transaksi yang belum lewat deadline (status menunggu diabaikan)
+                continue;
             }
-
+        } else if (transaksi.status_pembayaran === "gagal") {
+            if (pemesanan.status_pemesanan === "Dibatalkan") {
+                statusFrontend = "dibatalkan";
+            } else {
+                statusFrontend = "ditolak";
+            }
+        } else {
+            statusFrontend = "tidak_diketahui"; // opsional, atau bisa skip
+        }
 
         hasilRiwayat.push({
             pemesanan,
@@ -360,23 +362,67 @@ export const riwayatPemesanan = asyncHandler(async (req, res) => {
         });
     }
 
+    // Urutkan berdasarkan tanggal jadwal_dipesan
     hasilRiwayat.sort((a, b) => {
-    const tanggalA = new Date(a.pemesanan.jadwal_dipesan[0].tanggal);
-    const tanggalB = new Date(b.pemesanan.jadwal_dipesan[0].tanggal);
-    return tanggalB - tanggalA; // terbaru ke terlama
-});
-
+        const tanggalA = new Date(a.pemesanan.jadwal_dipesan[0].tanggal);
+        const tanggalB = new Date(b.pemesanan.jadwal_dipesan[0].tanggal);
+        return tanggalB - tanggalA; // terbaru ke terlama
+    });
 
     res.status(200).json({
         success: true,
         jumlah: hasilRiwayat.length,
         data: hasilRiwayat
     });
-
-
-
 });
 
+export const batalkanPemesanan = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { pemesananId } = req.params;
+
+    const pemesanan = await Pemesanan.findOne({
+        _id: pemesananId,
+        user_id: userId
+    });
+
+    if (!pemesanan) {
+        return res.status(404).json({ success: false, message: "Pemesanan tidak ditemukan." });
+    }
+
+    const transaksi = await Transaksi.findOne({ pemesanan_id: pemesanan._id });
+
+    if (!transaksi) {
+        return res.status(404).json({ success: false, message: "Transaksi tidak ditemukan." });
+    }
+
+    // Validasi status
+    if (transaksi.status_pembayaran !== "menunggu") {
+        return res.status(400).json({ success: false, message: "Pemesanan tidak dapat dibatalkan karena bukan status menunggu." });
+    }
+
+    const now = new Date();
+    const deadline = new Date(transaksi.deadline_pembayaran);
+
+    if (now > deadline) {
+        return res.status(400).json({ success: false, message: "Pemesanan tidak dapat dibatalkan karena sudah melewati deadline." });
+    }
+
+    // Update status pemesanan dan transaksi
+    pemesanan.status_pemesanan = "Dibatalkan";
+    await pemesanan.save();
+
+    transaksi.status_pembayaran = "gagal";
+    await transaksi.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Pemesanan berhasil dibatalkan.",
+        data: {
+            pemesanan,
+            transaksi
+        }
+    });
+});
 
 
 

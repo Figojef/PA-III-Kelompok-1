@@ -32,6 +32,27 @@ public function showInformasiPemain($userId)
     return view('informasi_pemain', compact('ratings', 'user'));
 }
 
+public function show($id)
+{
+    $response = Http::get("http://localhost:3000/api/v1/rating/profil-rating/{$id}");
+
+    if ($response->failed()) {
+        abort(404, "Data tidak ditemukan");
+    }
+
+    $data = $response->json()['data'];
+
+    return view('informasi_pemain', [
+        'user' => [
+            'name' => $data['nama'],
+            'email' => $data['email'],
+            'nomor_telepon' => $data['nomor_telepon'],
+        ],
+        'ratings' => collect($data['penilaian_history_mabar']),
+        'rataRataKeseluruhan' => $data['rata_rata_keseluruhan_rating'],
+    ]);
+}
+
 
 
 public function showRatingDetail($mabarId, Request $request)

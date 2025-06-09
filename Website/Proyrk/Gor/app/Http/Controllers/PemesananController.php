@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class PemesananController extends Controller
 {
@@ -203,5 +204,28 @@ public function showDetailStatus(Request $request)
 
     return view('detail_status', ['data' => $decodedData]);
 }
+
+public function batalkan($id)
+{
+    $token = Session::get('jwt'); // Ambil token JWT dari session
+
+    $response = Http::withOptions([
+        'base_uri' => rtrim(env('API_BASE_URL'), '/') . '/',
+    ])
+    ->withCookies([
+        'jwt' => $token // Kirim token sebagai cookie ke backend Express
+    ], env('DOMAIN')) // Sesuaikan dengan domain backend
+    ->patch("pemesanan/batalkan/{$id}");
+
+    if ($response->failed()) {
+        return redirect()->back()->withErrors([
+            'error' => $response->json('message') ?? 'Gagal membatalkan pemesanan.'
+        ]);
+    }
+
+    return redirect()->route('profil')->with('success', 'Pemesanan berhasil dibatalkan.');
+}
+
+
 
 }

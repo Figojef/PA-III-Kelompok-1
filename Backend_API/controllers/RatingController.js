@@ -4,6 +4,8 @@ import Jadwal from "../models/jadwalModel.js";
 import User from "../models/userModel.js";
 import mongoose from "mongoose";
 import asyncHandler from "../middleware/asyncHandler.js";
+import dayjs from "dayjs";
+dayjs.locale("id");
 
 
 export const createRating = async (req, res) => {
@@ -236,5 +238,129 @@ export const ReferensiPenilaianMabar = asyncHandler(async (req, res) => {
       email: userTarget.email,
     },
     penilaian: hasilPenilaian,
+  });
+
+  
+});
+
+export const ProfilRating = asyncHandler(async (req, res) => {
+  const { user_target_id } = req.params;
+  const now = new Date();
+
+  // Validasi ObjectId
+  if (!mongoose.Types.ObjectId.isValid(user_target_id)) {
+    return res.status(400).json({
+      success: false,
+      message: "ID user tidak valid.",
+    });
+  }
+
+  // Ambil semua mabar yang dibuat oleh user atau diikuti olehnya
+  const mabars = await Mabar.find({
+    $or: [
+      { user_pembuat_mabar: user_target_id },
+      { user_yang_join: user_target_id },
+    ],
+  })
+    .populate({
+      path: "jadwal",
+      populate: {
+        path: "lapangan",
+        model: "Lapangan",
+      },
+    })
+    .populate("user_pembuat_mabar", "name")
+    .lean();
+
+  const penilaianHistoryMabar = [];
+  let totalRating = 0;
+  let jumlahMabar = 0;
+
+  for (const mabar of mabars) {
+    if (!mabar.jadwal || mabar.jadwal.length === 0) continue;
+
+    const sortedJadwal = mabar.jadwal.sort((a, b) => {
+      const dateA = new Date(`${a.tanggal}T${a.jam.padStart(2, "0")}:00:00`);
+const dateB = new Date(`${b.tanggal}T${b.jam.padStart(2, "0")}:00:00`);
+      return dateA - dateB;
+    });
+
+    const jadwalTerakhir = sortedJadwal[sortedJadwal.length - 1];
+    const jamTerakhirPlus1 = parseInt(jadwalTerakhir.jam) + 1;
+    const waktuAkhir = new Date(`${jadwalTerakhir.tanggal}T${String(jamTerakhirPlus1).padStart(2, "0")}:00:00`);
+
+    if (waktuAkhir < now) {
+     const ratings = await Rating.aggregate([
+  {
+    $match: {
+      mabar: mabar._id,
+    },
+  },
+        {
+          $group: {
+            _id: null,
+            totalRating: { $sum: "$rating" },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const ratingRataRata = ratings.length
+        ? ratings[0].totalRating / ratings[0].count
+        : 0;
+
+      const tanggalJadwal = dayjs(jadwalTerakhir.tanggal).format("dddd, DD MMMM YYYY");
+      const jamMulai = sortedJadwal[0].jam.padStart(2, "0") + ":00";
+      const jamAkhir = String(jamTerakhirPlus1).padStart(2, "0") + ":00";
+      const waktu = `${tanggalJadwal} * ${jamMulai} - ${jamAkhir}`;
+
+      const lapanganUnik = [
+        ...new Map(
+          sortedJadwal.map((j) => [
+            j.lapangan._id.toString(),
+            { nama: j.lapangan.name },
+          ])
+        ).values(),
+      ];
+
+      penilaianHistoryMabar.push({
+        mabar_id: mabar._id,
+        nama_mabar: mabar.nama_mabar,
+        jumlah_peserta: 1 + (mabar.user_yang_join?.length || 0),
+        slot_peserta: mabar.slot_peserta,
+        kategori: mabar.kategori,
+        level: mabar.level,
+        range_umur: mabar.range_umur,
+        rating_rata_rata: ratingRataRata,
+        tanggal_mulai: waktu,
+      });
+
+      totalRating += ratingRataRata;
+      jumlahMabar++;
+    }
+  }
+
+  const rataRataKeseluruhanRating =
+    jumlahMabar > 0 ? totalRating / jumlahMabar : 0;
+
+  // Ambil data user
+  const user = await User.findById(user_target_id).select("name email nomor_telepon");
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User tidak ditemukan.",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      nama: user.name,
+      email: user.email,
+      nomor_telepon: user.nomor_telepon,
+      penilaian_history_mabar: penilaianHistoryMabar,
+      rata_rata_keseluruhan_rating: rataRataKeseluruhanRating,
+    },
   });
 });

@@ -80,7 +80,7 @@ h2 {
         </div>
     </div>
     <div style="display: flex; flex-direction: column; align-items: flex-end;">
-        <a href="{{ route('informasi.pemain', ['userId' => $pembuat['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
+        <a href="{{ route('informasi.pemain', ['id' => $pembuat['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
 
                 @php
                     $currentUserId = session('user_id');
@@ -105,10 +105,10 @@ h2 {
             </div>
         </div>
         <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <a href="{{ route('informasi.pemain', ['userId' => $user['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
+            <a href="{{ route('informasi.pemain', ['id' => $user['_id'] ?? '']) }}" class="btn btn-primary btn-sm mb-2">Informasi</a>
 
             @if(request()->get('mode') === 'penilaian' && ($user['_id'] ?? '') !== session('user_id'))
-<a href="{{ route('rating.form', ['userId' => $user['_id'], 'mabarId' => request()->get('mabarId')]) }}"
+<a href="{{ route('rating.form', ['userId' => $user['_id'], 'mabarId' => request()->get('mabarId')]) }}">
    class="btn btn-success btn-sm btn-ulasan">Beri Ulasan</a>
 
 
@@ -117,6 +117,7 @@ h2 {
     </div>
 @endforeach
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.5/base64.min.js"></script>
 <script>
