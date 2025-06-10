@@ -21,93 +21,83 @@ function renderStars($rating) {
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 <div class="container mt-4">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>
-            <i class="bi bi-people" style="font-size: 2rem;"></i>
-            Detail Profil Peserta
-        </h2>
+    <div class="row justify-content-between align-items-center">
+        <div class="col-md-8">
+            <h2>
+                <i class="bi bi-people" style="font-size: 2rem;"></i>
+                Detail Profil Peserta
+            </h2>
+        </div>
 
         <!-- Rating rata-rata keseluruhan di kanan atas -->
-        <div>
+        <div class="col-md-4 text-md-right">
             {!! renderStars($rataRataKeseluruhan ?? 0) !!}
         </div>
     </div>
 
     <hr>
 
-
-    <div style="display: flex; align-items: flex-start; margin-top: 5%;">
-        <i class="bi bi-person-circle" style="font-size: 5rem; margin-right: 25px;"></i>
-        <div style="font-size: 1.2rem;">
-
-            <!-- Nama Peserta -->
-            <div style="display: flex; margin-bottom: 12px;">
-                <div style="width: 160px; text-align: right; font-weight: bold; padding-right: 10px;">
-                    Nama :
+    <div class="row align-items-center mt-5">
+        <div class="col-md-3 text-center text-md-left">
+            <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex flex-column" style="font-size: 1.2rem;">
+                <!-- Nama Peserta -->
+                <div class="d-flex mb-2">
+                    <div class="col-4 text-md-right font-weight-bold pr-3">Nama:</div>
+                    <div class="col-8">{{ $user['name'] }}</div>
                 </div>
-                <div style="margin-left: 10px;">{{ $user['name'] }}</div>
-            </div>
 
-            <!-- No. Telepon -->
-            <div style="display: flex; margin-bottom: 12px;">
-                <div style="width: 160px; text-align: right; font-weight: bold; padding-right: 10px;">
-                    No. Telepon :
+                <!-- No. Telepon -->
+                <div class="d-flex mb-2">
+                    <div class="col-4 text-md-right font-weight-bold pr-3">No. Telepon:</div>
+                    <div class="col-8">{{ $user['nomor_telepon'] }}</div>
                 </div>
-                <div style="margin-left: 10px;">{{ $user['nomor_telepon'] }}</div>
-            </div>
 
-            <!-- Email -->
-            <div style="display: flex; margin-bottom: 12px;">
-                <div style="width: 160px; text-align: right; font-weight: bold; padding-right: 10px;">
-                    Email :
+                <!-- Email -->
+                <div class="d-flex mb-2">
+                    <div class="col-4 text-md-right font-weight-bold pr-3">Email:</div>
+                    <div class="col-8">{{ $user['email'] }}</div>
                 </div>
-                <div style="margin-left: 10px;">{{ $user['email'] }}</div>
             </div>
         </div>
     </div>
 
     <!-- Penilaian -->
-<!-- Penilaian -->
-<div style="margin-top: 40px;">
-    <h3>Penilaian Mabar yang Pernah Diikuti</h3>
-    <div style="display: flex; flex-direction: column; margin-top: 40px;">
-@forelse ($ratings as $item)
-    <div 
-        style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; border-radius: 8px;">
-        
-        <strong>{{ $item['nama_mabar'] }}</strong><br>
-        Kapasitas: {{ $item['jumlah_peserta'] }}/{{ $item['slot_peserta'] }} peserta<br>
-        
-        <div>
-            Nilai Rata-rata:
-            @php
-                $nilai = round($item['rating_rata_rata']);
-                $maxBintang = 5;
-            @endphp
-            @for ($i = 1; $i <= $maxBintang; $i++)
-                @if ($i <= $nilai)
-                    <span style="color: gold; font-size: 1.2rem;">&#9733;</span>
-                @else
-                    <span style="color: #ccc; font-size: 1.2rem;">&#9734;</span>
-                @endif
-            @endfor
+    <div style="margin-top: 40px;">
+        <h3>Penilaian Mabar yang Pernah Diikuti</h3>
+        <div class="row flex-column mt-4">
+            @forelse ($ratings as $item)
+            <div class="col-12 mb-4">
+                <div class="border p-3 rounded">
+                    <strong>{{ $item['nama_mabar'] }}</strong><br>
+                    Kapasitas: {{ $item['jumlah_peserta'] }}/{{ $item['slot_peserta'] }} peserta<br>
+
+                    <div>
+                        Nilai Rata-rata:
+                        @php
+                            $nilai = round($item['rating_rata_rata']);
+                            $maxBintang = 5;
+                        @endphp
+                        @for ($i = 1; $i <= $maxBintang; $i++)
+                            @if ($i <= $nilai)
+                                <span style="color: gold; font-size: 1.2rem;">&#9733;</span>
+                            @else
+                                <span style="color: #ccc; font-size: 1.2rem;">&#9734;</span>
+                            @endif
+                        @endfor
+                    </div>
+
+                    Kategori: {{ $item['kategori'] }}<br>
+                    Range Umur: {{ $item['range_umur'] }} Tahun<br>
+                    Waktu: {{ $item['tanggal_mulai'] }}
+                </div>
+            </div>
+            @empty
+                <p>Tidak ada data penilaian.</p>
+            @endforelse
         </div>
-
-        Kategori: {{ $item['kategori'] }}<br>
-        Range Umur: {{ $item['range_umur'] }} Tahun<br>
-        Waktu: {{ $item['tanggal_mulai'] }}
-    </div>
-@empty
-    <p>Tidak ada data penilaian.</p>
-@endforelse
-
     </div>
 </div>
-
-
-
-
-    </div>
-</div>
-
 @endsection

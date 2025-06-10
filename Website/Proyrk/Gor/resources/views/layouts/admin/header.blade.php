@@ -1,11 +1,14 @@
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<!-- Sidebar -->
+        <ul class="navbar-nav sidebar sidebar-dark accordion" style="background-color: #002f53" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
-                </div>
+<div class="sidebar-brand-icon">
+    {{-- <i class="fas fa-table-tennis"></i> <!-- mirip raket tenis --> --}}
+    <i class="fas fa-user"></i>
+    {{-- <i class="fas fa-badminton"></i> --}}
+</div>
+
                 <div class="sidebar-brand-text mx-3">GOR Ramos <sup>Badminton</sup></div>
             </a>
 
@@ -67,7 +70,7 @@
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Kelola
+                
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
@@ -92,24 +95,56 @@
             </li> --}}
 
             <!-- Nav Item - Charts -->
+            <li class="nav-item {{ Request::is(patterns: 'admin/daftar-pelanggan') ? 'active' : '' }}">
+                <a class="nav-link " href="{{route('admin.daftar-pelanggan')}}">
+                <i class="fas fa-receipt" style="color: gray;"></i> <!-- Oranye -->
+                    <span>Catatan Transaksi</span></a>
+            </li>
+
+            <!-- Nav Item - Charts -->
             <li class="nav-item {{ Request::is(patterns: 'admin/lapangan') ? 'active' : '' }}">
-                <a class="nav-link " href="{{route('admin.lapangan')}}">
-                    <i class="fas fa-fw fa-chart-area"></i>
+                <a class="nav-link " href="{{route('admin.lapangan.index')}}">
+                    <i class="fas fa-futbol text-gray"></i>
                     <span>Lapangan</span></a>
             </li>
 
             <!-- Nav Item - Tables -->
             <li class="nav-item {{ Request::is(patterns: 'admin/jadwal') ? 'active' : '' }}">
                 <a class="nav-link" href="{{route('admin.jadwal')}}">
-                    <i class="fas fa-fw fa-table"></i>
+                    <i class="fas fa-calendar-alt text-gray"></i>
                     <span>Jadwal</span></a>
             </li>
 
             <!-- Nav Item - Tables -->
-            <li class="nav-item {{ Request::is(patterns: 'admin/pemesanan') ? 'active' : '' }}">
-                <a class="nav-link" href="{{route('admin.pemesanan')}}">
-                    <i class="fas fa-fw fa-table"></i>
+            <li class="nav-item {{ Request::is(patterns: 'admin/jadwal-rutin-harian') ? 'active' : '' }}">
+                <a class="nav-link" href="{{route('admin.jadwal-rutin-harian.index')}}">
+                    <i class="fas fa-clock text-gray"></i>
+                    <span>Jadwal Rutin Harian</span></a>
+            </li>
+
+            <!-- Nav Item - Tables -->
+            <li class="nav-item {{ Request::is(patterns: 'admin/kelola/pemesanan/index') ? 'active' : '' }}">
+                <a class="nav-link" href="{{route('admin.kelola.pemesanan.index')}}">
+                    <i class="fas fa-shopping-cart text-gray"></i>
                     <span>Pemesanan</span></a>
+            </li>
+
+            <li class="nav-item {{ Request::is(patterns: 'admin/events') ? 'active' : '' }}">
+                <a class="nav-link" href="{{route('admin.events')}}">
+                    <i class="fas fa-calendar-check text-gray"></i>
+                    <span>Events</span></a>
+            </li>
+
+            <li class="nav-item {{ Request::is(patterns: 'admin/tentang') ? 'active' : '' }}">
+                <a class="nav-link" href="/admin/tentang">
+                    <i class="fas fa-info-circle text-gray"></i>
+                    <span>Tentang</span></a>
+            </li>
+
+            <li class="nav-item {{ Request::is(patterns: 'admin/info-kontak') ? 'active' : '' }}">
+                <a class="nav-link" href="{{route('admin.info-kontak.index')}}">
+                    <i class="fas fa-phone-alt text-gray"></i>
+                    <span>Info Kontak</span></a>
             </li>
 
             <!-- Divider -->
@@ -129,9 +164,3 @@
 
         </ul>
         <!-- End of Sidebar -->
-
-
-
-
-    
-    

@@ -38,7 +38,8 @@ class TransaksiController extends Controller
 
 public function detailPembayaran()
 {
-    $response = Http::get('http://localhost:3000/api/v1/infoKontakGor');
+    $baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+    $response = Http::get("{$baseUrl}/InfoKontakGor");
 
     if ($response->successful()) {
         $kontak = $response->json()[0]; // ambil elemen pertama dari array
@@ -48,6 +49,7 @@ public function detailPembayaran()
         return back()->withErrors(['Gagal mengambil data kontak GOR dari API.']);
     }
 }
+
 }
 
 

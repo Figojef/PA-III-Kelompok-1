@@ -107,6 +107,49 @@
             color: #999 ;
         }
 
+        @media (max-width: 768px) {
+    .jadwal-table {
+        font-size: 0.85rem;
+    }
+
+    .lapangan-header {
+        flex-direction: column;
+        text-align: left;
+    }
+
+    .lapangan-header h3,
+    .lapangan-header small,
+    .lapangan-header span {
+        width: 100%;
+    }
+
+    .lapangan-header div {
+        text-align: left !important;
+    }
+
+    .legend {
+        flex-direction: column;
+    }
+
+    .legend-item {
+        font-size: 0.9rem;
+    }
+
+    .jadwal-table {
+        width: 100% !important;
+    }
+
+    .lapangan-container {
+        margin-bottom: 20px;
+    }
+
+    .time-slot {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+
     </style>
 
     <div class="container mt-5">
@@ -194,6 +237,7 @@ function renderjadwal(jadwalData, selectedDate = new Date().toISOString().split(
         columnsContainer.style.marginTop = "10px";
         columnsContainer.style.justifyContent = "space-between";
 
+        
         function createJadwalTable(dataSubset) {
             const table = document.createElement("table");
             table.classList.add("jadwal-table");

@@ -101,8 +101,16 @@
         }
 
         .lanjutkan {
-            margin-top: 50px;
-            padding: 15px 180px;
+            padding: 15px;
+            background-color: #222F37;
+            color: #ffffff;
+            border-radius: 7px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .reset-btn {
+            padding: 15px;
             background-color: #222F37;
             color: #ffffff;
             border-radius: 7px;
@@ -112,11 +120,60 @@
 
         .jadwal-slot.expired {
             opacity: 0.3;
-            /* Mengurangi kecerahan untuk menunjukkan slot sudah lewat */
             pointer-events: none;
-            /* Nonaktifkan interaksi, agar tidak bisa diklik */
             background-color: #f5f5f5;
-            /* Warna latar belakang lebih terang untuk slot expired */
+        }
+
+        /* --- Responsif CSS --- */
+        @media (max-width: 768px) {
+            .lanjutkan, .reset-btn {
+                font-size: 16px;
+                padding: 15px;
+            }
+
+            .slot-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .jadwal-slot {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .lanjutkan, .reset-btn {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .slot-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .jadwal-slot {
+                padding: 15px;
+                font-size: 14px;
+            }
+
+            .legend {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .jadwal-slot {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .legend {
+                font-size: 12px;
+            }
+
+            .lanjutkan, .reset-btn {
+                font-size: 12px;
+                padding: 10px;
+            }
         }
     </style>
 
@@ -143,17 +200,21 @@
             <div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
         </div>
 
-        <div class="d-flex gap-2 mt-3">
-            <form action="/detail_pesanan" method="GET" onsubmit="return cekSebelumSubmit()">
-                <input type="submit" class="lanjutkan btn btn-primary" value="Lanjutkan">
-            </form>
-            <button id="resetBtn" type="button" class="lanjutkan btn btn-secondary" onclick="resetPilihan()">Reset
-                Pilihan</button>
+        <div class="row mt-3">
+            <!-- Tombol Lanjutkan dan Reset di sebelah-sebelahan di desktop -->
+            <div class="col-12 col-md-6">
+                <form action="/detail_pesanan" method="GET" onsubmit="return cekSebelumSubmit()">
+                    <input type="submit" class="lanjutkan btn btn-primary w-100" value="Lanjutkan">
+                </form>
+            </div>
+            <div class="col-12 col-md-6">
+                <button id="resetBtn" type="button" class="reset-btn btn btn-secondary w-100" onclick="resetPilihan()">Reset Pilihan</button>
+            </div>
         </div>
 
     </div>
 
-    <script>
+   <script>
         function formatJam(jam) {
             const jamInt = parseInt(jam, 10); // konversi ke integer
             const jamAwal = jamInt.toString().padStart(2, '0') + ":00";

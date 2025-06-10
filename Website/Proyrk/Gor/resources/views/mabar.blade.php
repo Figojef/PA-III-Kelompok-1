@@ -14,10 +14,11 @@
         font-size: 18px;
         margin-left: auto;
         display: block;
+        margin-bottom: 20px;
     }
 
     .nama {
-      font-weight: 700;
+        font-weight: 700;
     }
 
     .card {
@@ -29,7 +30,7 @@
     }
 
     .card-body {
-        padding: 10px; /* Reduced padding */
+        padding: 10px;
     }
 
     .card-title {
@@ -67,36 +68,44 @@
     }
 
     .mabar-list-container {
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;  /* Gap between cards */
-}
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
 
-.card-wrapper {
-    flex: 0 0 calc(33.333% - 20px);
-    max-width: calc(33.333% - 20px);
-    box-sizing: border-box;
-    margin-bottom: 20px;
-}
+    .card-wrapper {
+        flex: 0 0 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
 
-.card-wrapper:last-child {
-    margin-right: 0;
-}
+    .card .card-body p {
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+    }
 
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
+    @media (min-width: 576px) {
+        .card-wrapper {
+            flex: 0 0 calc(50% - 20px);
+            max-width: calc(50% - 20px);
+        }
+    }
 
-.card .card-body p {
-    margin-bottom: 5px;
-    font-size: 0.95rem;
-}
-
+    @media (min-width: 992px) {
+        .card-wrapper {
+            flex: 0 0 calc(33.333% - 20px);
+            max-width: calc(33.333% - 20px);
+        }
+    }
 </style>
+
 
 <title>Jadwal Bermain</title>
 

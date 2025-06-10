@@ -34,22 +34,31 @@ public function showInformasiPemain($userId)
 
 public function show($id)
 {
-    $response = Http::get("http://localhost:3000/api/v1/rating/profil-rating/{$id}");
+    // URL endpoint backend kamu
+    $baseUrl = rtrim(env('API_BASE_URL'), '/'); // Contoh: http://localhost:3000/api/v1
+    $apiUrl = "{$baseUrl}/rating/profil-rating/{$id}";
 
+    // Panggil endpoint backend
+    $response = Http::get($apiUrl);
+
+    // Jika gagal ambil data, tampilkan error
     if ($response->failed()) {
-        abort(404, "Data tidak ditemukan");
+        abort(404, 'Data tidak ditemukan');
     }
 
-    $data = $response->json()['data'];
+    // Ambil data dari response JSON
+    $data = $response->json();
+    $profilData = $data['data'] ?? [];
 
+    // Kirim data ke view
     return view('informasi_pemain', [
         'user' => [
-            'name' => $data['nama'],
-            'email' => $data['email'],
-            'nomor_telepon' => $data['nomor_telepon'],
+            'name' => $profilData['nama'],
+            'email' => $profilData['email'],
+            'nomor_telepon' => $profilData['nomor_telepon'],
         ],
-        'ratings' => collect($data['penilaian_history_mabar']),
-        'rataRataKeseluruhan' => $data['rata_rata_keseluruhan_rating'],
+        'ratings' => collect($profilData['penilaian_history_mabar'] ?? []),
+        'rataRataKeseluruhan' => $profilData['rata_rata_keseluruhan_rating'] ?? null,
     ]);
 }
 
@@ -88,28 +97,36 @@ public function showPenilaianForm(Request $request)
 {
     $userId = $request->get('userId');
     $mabarId = $request->get('mabarId');
-    $jwt = Session::get('jwt');
+    $jwt = session('jwt');
 
     if (!$jwt) {
         return redirect()->route('login')->with('error', 'Anda harus login untuk memberikan rating.');
     }
 
-    // Decode JWT untuk ambil ID user login
-    $decodedJwt = json_decode(base64_decode(explode('.', $jwt)[1]), true);
-    $currentUserId = $decodedJwt['id'] ?? null;
+    // Decode JWT payload dengan aman (tanpa library eksternal, cukup cek dasar)
+    try {
+        $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], explode('.', $jwt)[1])), true);
+        $currentUserId = $payload['id'] ?? null;
+    } catch (\Exception $e) {
+        return response('User login tidak valid.', 400);
+    }
 
     if (!$currentUserId) {
         return response('User login tidak valid.', 400);
     }
 
-    $url = "http://localhost:3000/api/v1/rating/penilaian/$userId/$mabarId";
+    $baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+    $url = "$baseUrl/rating/penilaian/$userId/$mabarId";
 
     try {
-        $client = new \GuzzleHttp\Client();
-        $response = $client->get($url);
-        $data = json_decode($response->getBody(), true);
+        $response = Http::withToken($jwt)->get($url);
 
-        // ✅ Cek apakah user login sudah memberikan rating
+        if (!$response->successful()) {
+            return response('Gagal mengambil data dari API.', $response->status());
+        }
+
+        $data = $response->json();
+
         $sudahMemberiRating = collect($data['penilaian'] ?? [])->contains(function ($rating) use ($currentUserId) {
             return isset($rating['dari_userId']) && $rating['dari_userId'] === $currentUserId;
         });
@@ -126,6 +143,7 @@ public function showPenilaianForm(Request $request)
     }
 }
 
+
 public function kirim(Request $request)
 {
     $validated = $request->validate([
@@ -141,13 +159,15 @@ public function kirim(Request $request)
         return redirect()->back()->with('error', 'Token tidak ditemukan.');
     }
 
-    $response = Http::withToken($token)
-        ->post('http://localhost:3000/api/v1/rating/', [
-            'untuk_user' => $validated['untuk_user'],
-            'mabar_id' => $validated['mabar_id'],
-            'rating' => $validated['rating'],
-            'komentar' => $validated['komentar'],
-        ]);
+$baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+
+$response = Http::withToken($token)
+    ->post("{$baseUrl}/api/v1/rating/", [
+        'untuk_user' => $validated['untuk_user'],
+        'mabar_id' => $validated['mabar_id'],
+        'rating' => $validated['rating'],
+        'komentar' => $validated['komentar'] ?? '',
+    ]);
 
     if ($response->successful()) {
         // ✅ Redirect ke route yang menampilkan peserta berdasarkan mabarId

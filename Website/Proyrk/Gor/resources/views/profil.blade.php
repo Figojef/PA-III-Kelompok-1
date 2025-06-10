@@ -47,7 +47,7 @@
     .booking {
         font-weight: 600;
         text-decoration: none;
-        color:; 
+        color: #000;
     }
 
     
@@ -124,12 +124,49 @@
 }
 
 /* Contoh untuk mengubah ukuran gambar secara responsif jika diperlukan */
+/* Tambahkan media query untuk layar kecil */
 @media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-4, .col-md-8 {
+        flex: 100%;
+        max-width: 100%;
+    }
+
     .border-foto {
-        width: 100px; /* Ukuran lebih kecil pada layar kecil */
-        height: 100px;
+        width: 100%; 
+        height: auto; 
+        max-height: 250px;
+    }
+
+    .nav-link {
+        font-size: 14px;
+    }
+
+    .large-icon {
+        font-size: 1.2rem;
+    }
+
+    .profile-sidebar h4 {
+        font-size: 18px;
+    }
+
+    .profile-info p {
+        font-size: 14px;
+    }
+
+    .tab-content h3, .tab-content h5 {
+        font-size: 18px;
+    }
+
+    .card {
+        padding: 1rem !important;
+        font-size: 14px;
     }
 }
+
 
 .menunggu {
     text-decoration: none;
@@ -207,8 +244,7 @@
                             </div>
                             <!-- Foto Profil (kanan) -->
                             <div class="col-md-4 text-center">
-                                <img src="https://via.placeholder.com/120" alt="Foto Profil" class="img-fluid border-foto">
-
+                                <img src="{{ Session::get('user_data')['foto'] ?? 'https://via.placeholder.com/120' }}" alt="Foto Profil" class="img-fluid border-foto">
                             </div>
                         </div>
                     </div>
@@ -409,7 +445,6 @@
     </div>
 </div>
 <div style="margin-bottom: 15%; "></div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

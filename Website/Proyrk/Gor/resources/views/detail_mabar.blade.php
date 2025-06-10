@@ -7,50 +7,37 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
-/* Styling untuk container utama */
 .mabar-container {
     display: flex;
+    flex-wrap: wrap; /* Penting untuk responsif */
     justify-content: space-between;
     gap: 20px;
     margin-top: 20px;
 }
 
-/* Kolom kiri (detail mabar) */
+/* Kolom kiri */
 .mabar-details {
-    width: 100%;
-    max-width: 65%;
-    padding-right: 20px;
+    flex: 1 1 60%; /* Bisa menyusut di layar kecil */
+    min-width: 280px;
 }
 
-
-
-/* Kolom kanan (biaya dan level) */
-.card-wrapper-right {
-    width: 30%;
+/* Kolom kanan */
+.penyelenggara {
+    flex: 1 1 35%;
+    min-width: 250px;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    align-items: flex-start;
 }
 
-/* Styling untuk card */
-.card {
+.card, .card-penyelenggara {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
     background-color: #fff;
-    padding: 20px; /* Uniform padding for all cards */
+    padding: 20px;
 }
 
-.card-penyelenggara {
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    background-color: #fff;
-}
-
-
-/* Styling untuk header card */
+/* Header dan teks dalam card */
 .card-title {
     font-size: 24px;
     font-weight: bold;
@@ -58,53 +45,58 @@
     margin-bottom: 15px;
 }
 
-/* Styling untuk item dalam card */
 .card-body p {
     font-size: 16px;
     margin: 10px 0;
     color: #34495e;
 }
 
-/* Styling untuk biaya dan kategori */
+/* Biaya */
 .card-body p:nth-child(4) {
     font-size: 16px;
     font-weight: bold;
     color: #e67e22;
 }
 
-/* Styling untuk tombol gabung */
+/* Tombol */
 .join-button {
     background-color: #3498db;
     color: white;
-    padding: 15px;
-    font-size: 18px;
+    padding: 12px 16px;
+    font-size: 16px;
     text-align: center;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     width: 100%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
 }
 
-/* Hover effect pada tombol gabung */
 .join-button:hover {
     background-color: #2980b9;
 }
 
-/* Responsive style untuk layar kecil */
-@media (max-width: 767px) {
+/* Responsif untuk tablet dan HP */
+@media (max-width: 992px) {
     .mabar-container {
-        padding: 0 5%;
         flex-direction: column;
     }
 
-    .mabar-details {
+    .mabar-details, .penyelenggara {
         width: 100%;
     }
 
-    .card-wrapper-right {
-        width: 100%;
+    .join-button {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .card-title {
+        font-size: 20px;
+    }
+
+    .card-body p {
+        font-size: 14px;
     }
 }
 
@@ -279,6 +271,7 @@ function displayMabarDetail(mabar) {
 ${!isMabarEnded ? `<a href="#" id="linkLihatPeserta">Lihat Peserta</a>` : ``}
 
                 <div class="card">
+                    <div class="card-body">
                     <h5>Lapangan dan Waktu</h5>
                     <p>${mabar.jadwal && mabar.jadwal[0]?.lapangan?.name ? mabar.jadwal[0].lapangan.name : '-'} * ${jamMulai} - ${jamSelesai}</p>
                     <p><i class="bi bi-cash-coin"></i> Rp ${mabar.biaya}/orang</p>
@@ -287,6 +280,7 @@ ${!isMabarEnded ? `<a href="#" id="linkLihatPeserta">Lihat Peserta</a>` : ``}
                     <p><strong>Level:</strong> ${mabar.level || 'Tidak Diketahui'}</p>
                     <hr>
                     <p>${mabar.deskripsi || 'Deskripsi mabar tidak tersedia'}</p>
+                </div>
                 </div>
                 
             </div>

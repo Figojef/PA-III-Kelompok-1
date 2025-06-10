@@ -11,8 +11,10 @@ import pemesananRouter from './routes/pemesananRouter.js'
 import transaksiRouter from './routes/transaksiRouter.js'
 import mabarRouter from './routes/mabarRouter.js'
 import eventRouter from './routes/eventRouter.js'
+import jadwalRutinHarianRouter from './routes/jadwalRutinHarianRouter.js'
 import ratingRouter from './routes/ratingRouter.js'
 import infokontakgorRouter from './routes/infokontakgorRouter.js'
+import dashboardAdminRouter from './routes/dashboardAdminRouter.js'
 
 
 import dotenv from "dotenv"
@@ -56,18 +58,20 @@ app.use(express.static('./public'))
 
 dotenv.config()
 
-
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/lapangan', lapanganRouter)
 app.use('/api/v1/order', orderRouter) 
 app.use('/api/v1/jadwal', jadwalRouter)
+
 app.use('/api/v1/pemesanan', pemesananRouter)
 app.use('/api/v1/transaksi', transaksiRouter)
 app.use('/api/v1/event', eventRouter)
 app.use('/api/v1/mabar', mabarRouter)
 app.use('/api/v1/rating', ratingRouter)
 app.use('/api/v1/InfoKontakGor', infokontakgorRouter)
+app.use('/api/v1/dashboardAdmin', dashboardAdminRouter)
+app.use('/api/v1/jadwalRutinHarian', jadwalRutinHarianRouter)
 
 app.use((req, res, next) => {
   console.log(`[${req.method}] ${req.originalUrl}`);

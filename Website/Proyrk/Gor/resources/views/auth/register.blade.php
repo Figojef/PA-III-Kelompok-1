@@ -217,7 +217,7 @@
                         <!-- Phone Number Input -->
                         <div style="position: relative;">
                             <input type="tel" name="nomor_telepon" id="nomor_telepon" 
-                                   placeholder="Nomor WhatsApp" 
+                                   placeholder="Nomor telepon" 
                                    class="Register {{ $errors->has('nomor_telepon') ? 'input-error' : '' }}" 
                                    style="background-color: rgba(255, 255, 255, 0.5); padding-left: 20px;" 
                                    value="{{ old('nomor_telepon') }}" required>
@@ -238,7 +238,7 @@
                         </div>
                         
                         <!-- Password Confirmation Input -->
-                        <div style="position: relative;">
+                        <!-- <div style="position: relative;">
                             <input type="password" name="password_confirmation" id="password_confirmation" 
                                    placeholder="Konfirmasi Kata Sandi" 
                                    class="Register {{ $errors->has('password_confirmation') ? 'input-error' : '' }}" 
@@ -246,7 +246,7 @@
                             @if($errors->has('password_confirmation'))
                                 <div class="error-message">{{ $errors->first('password_confirmation') }}</div>
                             @endif
-                        </div>
+                        </div> -->
                         
                         <button type="submit" class="btn-register">Daftar</button><br>
                         
@@ -311,27 +311,27 @@
     });
 
     // Password confirmation validation
-    document.getElementById('password_confirmation').addEventListener('blur', function() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = this.value;
+    // document.getElementById('password_confirmation').addEventListener('blur', function() {
+    //     const password = document.getElementById('password').value;
+    //     const confirmPassword = this.value;
         
-        if (confirmPassword && password !== confirmPassword) {
-            this.classList.add('input-error');
-            let errorDiv = this.parentNode.querySelector('.error-message');
-            if (!errorDiv) {
-                errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                this.parentNode.appendChild(errorDiv);
-            }
-            errorDiv.textContent = 'Konfirmasi password tidak cocok';
-        } else {
-            this.classList.remove('input-error');
-            const errorDiv = this.parentNode.querySelector('.error-message');
-            if (errorDiv && !errorDiv.textContent.includes('harus diisi')) {
-                errorDiv.remove();
-            }
-        }
-    });
+    //     if (confirmPassword && password !== confirmPassword) {
+    //         this.classList.add('input-error');
+    //         let errorDiv = this.parentNode.querySelector('.error-message');
+    //         if (!errorDiv) {
+    //             errorDiv = document.createElement('div');
+    //             errorDiv.className = 'error-message';
+    //             this.parentNode.appendChild(errorDiv);
+    //         }
+    //         errorDiv.textContent = 'Konfirmasi password tidak cocok';
+    //     } else {
+    //         this.classList.remove('input-error');
+    //         const errorDiv = this.parentNode.querySelector('.error-message');
+    //         if (errorDiv && !errorDiv.textContent.includes('harus diisi')) {
+    //             errorDiv.remove();
+    //         }
+    //     }
+    // });
 
     // Real-time validation removal when user starts typing
     ['name', 'email', 'nomor_telepon', 'password', 'password_confirmation'].forEach(function(fieldId) {

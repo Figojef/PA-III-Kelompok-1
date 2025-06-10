@@ -27,7 +27,7 @@ class AuthController extends Controller
             'email' => 'required|email',
             'nomor_telepon' => 'required|string|min:10|max:15',
             'password' => 'required|string|min:6',
-            'password_confirmation' => 'required|same:password'
+            // 'password_confirmation' => 'required|same:password'
         ], [
             'name.required' => 'Nama harus diisi',
             'name.min' => 'Nama minimal 3 karakter',
@@ -39,8 +39,8 @@ class AuthController extends Controller
             'nomor_telepon.max' => 'Nomor telepon maksimal 15 digit',
             'password.required' => 'Password harus diisi',
             'password.min' => 'Password minimal 6 karakter',
-            'password_confirmation.required' => 'Konfirmasi password harus diisi',
-            'password_confirmation.same' => 'Konfirmasi password tidak cocok'
+            // 'password_confirmation.required' => 'Konfirmasi password harus diisi',
+            // 'password_confirmation.same' => 'Konfirmasi password tidak cocok'
         ]);
 
         try {

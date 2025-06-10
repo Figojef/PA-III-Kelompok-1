@@ -176,13 +176,14 @@ public function showPeserta(Request $request)
     $mode = $request->get('mode'); // untuk tombol ulasan
     $jwt = session('jwt');
 
-    // Simulasikan ambil data dari backend API
-    $response = Http::withToken($jwt)->get("http://localhost:3000/api/v1/mabar/$mabarId");
+    $baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+    $apiUrl = "{$baseUrl}/api/v1/mabar/{$mabarId}";
+
+    $response = Http::withToken($jwt)->get($apiUrl);
 
     if (!$response->successful()) {
         return redirect()->back()->with('error', 'Data Mabar tidak ditemukan');
     }
-
     $data = $response->json();
 
     return view('pemain_mabar', [

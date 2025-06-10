@@ -92,39 +92,33 @@ public function store(Request $request)
     
 public function showProfil()
 {
-    $token = Session::get('jwt'); 
+    $token = session('jwt'); 
 
     if (!$token) {
         return back()->withErrors('Token tidak ditemukan. Pastikan kamu sudah login.');
     }
 
+    $baseUrl = rtrim(env('API_BASE_URL', 'http://localhost:3000'), '/');
+
     $client = Http::withOptions([
-        'base_uri' => 'http://localhost:3000',
-    ])->withCookies([
-        'jwt' => $token,
-    ], 'localhost');
+        'base_uri' => $baseUrl,
+    ])->withToken($token); // pakai bearer token lebih standar daripada withCookies buat JWT
 
     // Ambil yang masih berlangsung (menunggu & belum lewat deadline)
-    $sedangResponse = $client->get('/api/v1/pemesanan/user/pesananBelumLewatDeadline');
+    $sedangResponse = $client->get('/v1/pemesanan/user/pesananBelumLewatDeadline');
 
     // Ambil riwayat yang sudah final (berhasil, dibatalkan, ditolak)
-    $riwayatResponse = $client->get('/api/v1/pemesanan/user/riwayatPemesanan');
+    $riwayatResponse = $client->get('/v1/pemesanan/user/riwayatPemesanan');
 
     if ($sedangResponse->successful() && $riwayatResponse->successful()) {
-        $sedang = $sedangResponse->json()['data'];
-        $riwayat = $riwayatResponse->json()['data'];
+        $sedang = $sedangResponse->json('data');
+        $riwayat = $riwayatResponse->json('data');
 
         return view('profil', compact('sedang', 'riwayat'));
     } else {
         return back()->withErrors('Gagal mengambil data pemesanan.');
     }
 }
-
-
-
-
-
-    
     // Fungsi untuk mengambil data pemesanan berdasarkan ID transaksi
     private function getPemesananData($transactionId)
     {

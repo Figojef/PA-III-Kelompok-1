@@ -2,6 +2,7 @@
 
     @section('content')
         <meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="api-base-url" content="{{ env('API_BASE_URL', 'http://localhost:3000') }}">
 
         <title>Tambah Mabar</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -306,7 +307,9 @@
                                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute(
                                     'content');
 
-                                const response = await fetch("http://localhost:3000/api/v1/mabar/select_jadwal", {
+                                const baseUrl = document.querySelector('meta[name="api-base-url"]').getAttribute('content');
+                                const response = await fetch(`${baseUrl}mabar/select_jadwal`, {
+
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
