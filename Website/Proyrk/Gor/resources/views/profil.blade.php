@@ -253,9 +253,9 @@
                     <div class="tab-pane fade" id="v-pills-edit-profile" role="tabpanel" aria-labelledby="v-pills-edit-profile-tab">
                         <h5>Edit Profil</h5>
 
-                        <form action="{{ route('profil.update') }}" method="POST">
-                            @csrf
+                        <form id="updateProfileForm" action="{{ route('profil.update') }}" method="POST">
 
+                            @csrf
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nama Lengkap</label>
                                 <input type="text" class="form-control" id="name" name="name" value="{{ Session::get('user_data')['name'] ?? '' }}">
@@ -446,7 +446,35 @@
 </div>
 <div style="margin-bottom: 15%; "></div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.all.min.js"></script>
+
 <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('updateProfileForm');
+
+        // Event listener untuk form submit
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Menghentikan pengiriman form secara langsung
+
+            // Menampilkan SweetAlert untuk konfirmasi
+            Swal.fire({
+                title: 'Apakah Anda yakin ingin mengganti profil?',
+                text: "Periksa kembali data Anda sebelum mengubah profil.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Ganti Profil!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Jika pengguna memilih 'Ya, Ganti Profil!'
+                    form.submit(); // Kirim form setelah konfirmasi
+                }
+            });
+        });
+    });
+
 document.addEventListener('DOMContentLoaded', function () {
     const itemsPerPage = 4;
 

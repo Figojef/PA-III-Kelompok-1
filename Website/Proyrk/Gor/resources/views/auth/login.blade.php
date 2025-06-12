@@ -20,7 +20,6 @@
             width: 100%;
             max-width: 500px;
             margin: auto;
-            /* Pusatkan secara horizontal */
         }
 
         .login-input {
@@ -55,6 +54,7 @@
 </head>
 
 <body>
+    
     <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh; padding: 15px;">
         <form id="loginForm" action="{{ route('login.submit') }}" method="POST" class="card p-4 shadow-sm w-100">
             @csrf
@@ -86,8 +86,7 @@
                 <button type="submit" class="btn btn-primary login-btn">Masuk</button>
             </div>
             <div class="text-center">
-                <a href="#" class="text-decoration-none fw-bold" style="color: #222F37;">Lupa Kata
-                    Sandi?</a>
+                <a href="#" class="text-decoration-none fw-bold" style="color: #222F37;">Lupa Kata Sandi?</a>
             </div>
             <div class="text-center mt-3">
                 <span style="font-size: 16px;">Belum punya akun?
@@ -97,35 +96,5 @@
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
-{{-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Login</title>
-</head>
-<body>
-    <form action="{{ route('login') }}" method="POST">
-        @csrf
-        <label for="email">Email:</label>
-        <input type="email" name="email" required><br>
-
-        <label for="password">Password:</label>
-        <input type="password" name="password" required><br>
-
-        <button type="submit">Login</button>
-    </form>
-
-    @if ($errors->any())
-        <div>
-            @foreach ($errors->all() as $error)
-                <p>{{ $error }}</p>
-            @endforeach
-        </div>
-    @endif
-</body>
-</html> --}}

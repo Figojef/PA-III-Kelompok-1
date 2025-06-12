@@ -33,14 +33,19 @@ Route::middleware(['inout'])->group(function () {
 
 
 Route::middleware(['auth'])->group(function () {
+    //Update Profil
+Route::post('/profil/update', [AuthController::class, 'updateProfile'])->name('profil.update');
+
     // Routes for authenticated users
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+// Rute logout setelah update profil
+Route::get('/logout-update', [AuthController::class, 'logoutAfterUpdate'])->name('logout.update');
+
 });
 
 Route::get('/profil', [PemesananController::class, 'showProfil'])->name('profil')->middleware('auth');
 
-//Update Profil
-Route::post('/profil/update', [AuthController::class, 'updateProfile'])->name('profil.update');
+
 
 
 // Admin

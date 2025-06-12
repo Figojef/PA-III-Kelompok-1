@@ -163,8 +163,10 @@ public function login(Request $request)
         return view('auth.register');
     }
 
-  public function updateProfile(Request $request)
+ public function updateProfile(Request $request)
 {
+
+
     // Ambil data user & token dari session
     $userData = Session::get('user_data');
     $jwtToken = Session::get('jwt');
@@ -172,7 +174,7 @@ public function login(Request $request)
     if (!$userData || !isset($userData['_id']) || !$jwtToken) {
         return back()->withErrors(['error' => 'User tidak ditemukan di sesi atau token tidak ada.']);
     }
-
+    
     $user_id = $userData['_id'];
 
     // Data yang dikirim ke API
@@ -183,6 +185,9 @@ public function login(Request $request)
         'nomor_telepon' => $request->nomor_telepon,
         'url' => $request->url
     ]);
+
+    // Debugging data payload sebelum dikirim ke API
+    // Menampilkan data yang akan dikirim ke API
 
     // Kirim PATCH pakai Authorization header
     $response = Http::withHeaders([
@@ -198,12 +203,14 @@ public function login(Request $request)
             Session::put('user_data', $data['data']);
         }
 
-        return back()->with('success', 'Profil berhasil diperbarui.');
+        // Jika profil berhasil diperbarui, arahkan ke route logout
+        return redirect()->route('logout.update')->with('success', 'Profil berhasil diperbarui.');
     }
 
     $errorMessage = $response->json()['message'] ?? 'Gagal memperbarui profil.';
     return back()->withErrors(['error' => $errorMessage]);
 }
+
 
 
 
@@ -229,4 +236,14 @@ public function login(Request $request)
         return redirect()->route('dashboard', ['logout' => 'true']);
     }
     
+        public function logoutAfterUpdate()
+    {
+        // Hapus session jwt dan user data
+        Session::forget('jwt');
+        Session::forget('user_data');
+        
+        // Redirect ke halaman login dengan parameter logout.update
+        return redirect()->route('login', ['logout.update' => 'true']);
+    }
 }
+

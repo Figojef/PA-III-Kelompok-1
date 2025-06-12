@@ -209,7 +209,7 @@ public function joinMabar(Request $request)
     $token = Session::get('jwt'); // Ambil token dari session
 
     if (!$token) {
-        return response()->json(['message' => 'Token tidak ditemukan. Silakan login.'], 401);
+        return redirect()->route('mabar')->with('error', 'Login terlebih dahulu.');
     }
 
     try {
