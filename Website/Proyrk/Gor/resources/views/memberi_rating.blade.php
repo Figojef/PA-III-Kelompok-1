@@ -12,23 +12,41 @@
     </div>
 
     <!-- ✅ Dynamic Reviews -->
-    <h5 class="mt-5 mb-3">Reviews</h5>
-    <div class="row">
-        @forelse ($data['penilaian'] as $review)
-            <div class="col-md-6 mb-3">
-                <div class="p-3 border rounded bg-light">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-person-circle me-2"></i>
-                        <strong>{{ $review['dari_user'] }}</strong>
-                    </div>
-                    <p class="mb-1">Rating: {{ $review['rating'] }} / 5</p>
-                    <p class="mb-0">{{ $review['komentar'] }}</p>
+     <div class="mb-4">
+    <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
+<h5 class="mt-5 mb-3">Reviews</h5>
+<div class="row">
+    @forelse ($data['penilaian'] as $review)
+        <div class="col-md-6 mb-3">
+            <div class="p-3 border rounded bg-light">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <strong>{{ $review['dari_user'] }}</strong>
                 </div>
+                
+                {{-- ⭐ Bintang rating --}}
+                <div class="mb-1" style="color: orange;">
+                    @for ($i = 1; $i <= 5; $i++)
+                        @if ($i <= $review['rating'])
+                            <i class="bi bi-star-fill"></i>
+                        @else
+                            <i class="bi bi-star"></i>
+                        @endif
+                    @endfor
+                </div>
+
+                <p class="mb-0">{{ $review['komentar'] }}</p>
             </div>
-        @empty
-            <p class="text-muted">Belum ada penilaian.</p>
-        @endforelse
-    </div>
+        </div>
+    @empty
+        <p class="text-muted">Belum ada penilaian.</p>
+    @endforelse
+</div>
+
 
     <!-- Form Penilaian -->
 @if (!Session::has('jwt'))

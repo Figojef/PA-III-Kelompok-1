@@ -210,7 +210,7 @@ public function batalkan($id)
         'jwt' => $token // Kirim token sebagai cookie ke backend Express
     ], env('DOMAIN')) // Sesuaikan dengan domain backend
     ->patch("pemesanan/batalkan/{$id}");
-
+    
     if ($response->failed()) {
         return redirect()->back()->withErrors([
             'error' => $response->json('message') ?? 'Gagal membatalkan pemesanan.'

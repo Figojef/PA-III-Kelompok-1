@@ -102,6 +102,36 @@
     border-radius: 6px;
     object-fit: cover;
 }
+
+@media (max-width: 768px) {
+    .container-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .right-section {
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .upload-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .upload-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+
     </style>
 
 <body>
@@ -170,7 +200,7 @@
 
         <!-- Second <hr> line -->
         <hr style="border: 2px solid #000000; margin: 20px 0;">
-        <button type="button" onclick="uploadImage()" class="tombol">Konfirmasi Pembayaran</button>
+        <button type="button" onclick="uploadImage()" class="tombol mt-3">Konfirmasi Pembayaran</button>
     </div>
 <div id="base-url" style="display:none">{{ env('API_BASE_URL') }}</div>
     <script>

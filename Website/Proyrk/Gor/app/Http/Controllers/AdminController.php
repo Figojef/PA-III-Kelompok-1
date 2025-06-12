@@ -16,13 +16,10 @@ class AdminController extends Controller
             // dd($token);
             $response = Http::withOptions([
                 'base_uri' => rtrim(env('API_BASE_URL'), '/') . '/'
-            ])->withCookies([
-                'jwt' => $token
-            ], env('DOMAIN'))->get('dashboardAdmin');
-            // dd($response);
+            ])->withToken($token)->get('dashboardAdmin');
+            //dd($response);
             if ($response->successful()) {
                 $data = $response->json();
-
                 return view('admin.index', [
                     'totalLapangan' => $data['totalLapangan'],
                     'totalPelanggan' => $data['totalPelanggan'],

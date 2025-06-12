@@ -156,6 +156,9 @@ public function login(Request $request)
         }
     }
 
+
+
+    
     public function showRegister(){
         return view('auth.register');
     }

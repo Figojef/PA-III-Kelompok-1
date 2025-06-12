@@ -236,11 +236,13 @@ public function joinMabar(Request $request)
                 'userId' => $userId
             ]);
 
-        if ($response->successful()) {
-            return redirect()->back()->with('success', 'Berhasil join mabar.');
-        }
+            if ($response->successful()) {
+                return redirect()->route('mabar')->with('success', 'Berhasil join mabar.');
+            }
 
-        return redirect()->back()->with('error', 'Gagal join mabar: ' . json_encode($response->json()));
+
+        return redirect()->route('mabar')->with('error', '' . $response->json()['message']);
+
         
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -275,11 +277,9 @@ public function keluarMabar(Request $request)
                 'userId' => $userId
             ]);
 
-        if ($response->successful()) {
-            return redirect()->back()->with('success', $response->json()['message'] ?? 'Berhasil keluar dari mabar.');
-        }
-
-        
+            if ($response->successful()) {
+                return redirect()->route('mabar')->with('success', $response->json()['message'] ?? 'Berhasil keluar dari mabar.');
+            }
         return redirect()->back()->with('error', 'Gagal keluar dari mabar: ' . json_encode($response->json()));
 
     } catch (\Exception $e) {

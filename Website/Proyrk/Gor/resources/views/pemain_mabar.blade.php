@@ -59,6 +59,7 @@ h2 {
 </style>
 
 <div class="container mt-4">
+    
     <div class="section-padding">
         <h2>
             <i class="bi bi-people"></i>
@@ -70,7 +71,7 @@ h2 {
     <!-- Gunakan Flexbox untuk susun pembuat dan peserta -->
 <div class="row">
 <!-- Pembuat Mabar -->
-<div class="card mb-3" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); justify-content: space-between;" data-user-id="{{ $user['_id'] ?? '' }}" ...>
+<div class="card mb-3" style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); justify-content: space-between;" data-user-id="{{ $pembuat['_id'] ?? '' }}" ...>
     <div style="display: flex; align-items: center; gap: 10px;">
         <i class="bi bi-person" style="font-size: 2.5rem;"></i>
         <div>

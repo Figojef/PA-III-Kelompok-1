@@ -2,6 +2,8 @@
 
 @section('content')
     <title>Jadwal Bermain</title>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         .jadwal-header {
@@ -156,7 +158,7 @@
         <h4>Jadwal bermain</h4>
         <div class="mb-3">
             <label for="tanggal" class="form-label">Pilih Tanggal</label>
-            <input type="date" id="tanggal" class="form-control">
+            <input type="text" id="tanggal" class="form-control">
         </div>
 
         <div class="row" id="jadwalContainer">
@@ -348,6 +350,12 @@ function renderjadwal(jadwalData, selectedDate = new Date().toISOString().split(
 
         document.getElementById('tanggal').addEventListener('change', function() {
             fetchJadwalByTanggal(this.value);
+        });
+
+                flatpickr("#tanggal", {
+            dateFormat: "Y-m-d", // Format tanggal
+            minDate: "today", // Membatasi tanggal hanya hari ini atau setelahnya
+            maxDate: new Date().fp_incr(30), // Maksimal 30 hari ke depan
         });
     </script>
 @endsection

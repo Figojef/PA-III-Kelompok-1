@@ -5,6 +5,7 @@
     const routeLihatPesertaTemplate = @json(route('mabar.pemainFromRequest') . '?mabarId=__ID__');
 </script>
 
+
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <style>
 .mabar-container {
@@ -103,6 +104,12 @@
 </style>
 
 <div class="container mt-4">
+    <div class="mb-4">
+    <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
     <!-- Kontainer untuk menampilkan detail Mabar -->
     <div id="mabar-detail-container">
         
@@ -114,19 +121,30 @@
     const currentUserId = @json(Session::get('user_data')['_id'] ?? null);
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 
-    const flashSuccess = @json(session('success'));
-    const flashError = @json(session('error'));
+const flashSuccess = @json(session('success'));
+const flashError = @json(session('error'));
 
-    if (flashSuccess) {
-        alert(flashSuccess);
-    }
+if (flashSuccess) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: flashSuccess,
+        confirmButtonColor: '#3085d6',
+    });
+}
 
-    if (flashError) {
-        alert(flashError);
-    }
-    
+if (flashError) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: flashError,
+        confirmButtonColor: '#d33',
+    });
+}
+
 const loadTime = Date.now();
 
 document.addEventListener('DOMContentLoaded', function () {

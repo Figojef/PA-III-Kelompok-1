@@ -33,7 +33,7 @@ import cors from 'cors';
 
 // Konfigurasi CORS dengan origin yang tepat
 const corsOptions = {
-  origin: ['http://127.0.0.1:8000', 'http://localhost:8000'], // Ganti dengan domain tempat frontend kamu berjalan
+  origin: ['http://127.0.0.1:8000', 'http://localhost:8000', 'https://ramos.d4trpl-itdel.id'], 
   credentials: true,  // Memungkinkan pengiriman cookies (termasuk JWT)
 };
 

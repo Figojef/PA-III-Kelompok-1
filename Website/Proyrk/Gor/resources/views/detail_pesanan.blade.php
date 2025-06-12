@@ -277,11 +277,12 @@
     </style>
 
     <div class="container mt-4">
-        <div class="mt-4">
-            <a href="{{ route('reservasi') }}" class="btn btn-secondary">
-                ←
-            </a>
-        </div>
+<div class="mb-4">
+    <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+
         <h2 id="judul">Detail Pemesanan</h2>
         <label style="font-size: 25px; text-decoration: underline; font-weight: bold; margin-bottom: 25px;">Informasi
             Pelanggan</label>
