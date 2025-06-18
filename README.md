@@ -25,7 +25,7 @@ Manual scheduling and paper-based booking systems at GOR Sigumpar led to frequen
 
 ```bash
 git clone https://github.com/Figojef/PA-III-Kelompok-1.git
-cd gor-booking-system
+cd Website/Proyrk/Gor
 ```
 
 ### 2. Setup Laravel Backend
