@@ -24,7 +24,7 @@ Manual scheduling and paper-based booking systems at GOR Sigumpar led to frequen
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/gor-booking-system.git
+git clone https://github.com/Figojef/PA-III-Kelompok-1.git
 cd gor-booking-system
 ```
 
