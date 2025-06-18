@@ -1,4 +1,4 @@
-# 🏸 Development of a Badminton Court Booking System for GOR Sigumpar
+# 🏸 Development of Badminton Court Booking System for GOR Sigumpar
 
 A simple online court reservation system for GOR Sigumpar, built to help users book badminton courts easily via web and Android app. It also helps admins manage schedules and payments more efficiently.
 
